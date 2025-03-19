@@ -108,7 +108,7 @@ const RecentNewUsers = () => {
   };
 
   const handleViewClick = (id: string) => {
-    router.push(`/invoice/${id}`);
+    router.push(`/admin/company-lists/company-detail/${id}`);
   };
 
   return (
@@ -118,8 +118,8 @@ const RecentNewUsers = () => {
           <h2 className="text-white text-[20px] md:text-2xl font-bold mb-3">
             Company Lists
           </h2>
-          <Button className="px-3 !py-0 h-8 !bg-[#1a3f70] rounded inline-flex justify-center items-center text-white text-sm !font-normal !leading-tight !tracking-tight"
-          onClick={() => router.push('/admin/add-company')}
+          <Button className="px-3 !py-0 h-8 !bg-[#1a3f70] rounded inline-flex justify-center items-center hover:cursor-pointer text-white text-sm !font-normal !leading-tight !tracking-tight"
+          onClick={() => router.push('/admin/company-lists/add-new-company')}
           >
             + Add New Company
           </Button>
