@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 
 const PageTitle = () => {
   const pathname = usePathname();
+  console.log('pathname:', pathname);
   
   // Get the last part of the URL
   const lastSegment = pathname.split("/").filter(Boolean).pop() || "Home";
@@ -20,6 +21,14 @@ const PageTitle = () => {
   const blockedUserPattern = /^\/admin\/blocked-users\/user-detail\/\d+$/;
   if (blockedUserPattern.test(pathname)) {
     pageTitle = "Blocked User Detail";
+  }
+  const allcollectionPattern = /^\/admin\/all-collections$/;
+  if (allcollectionPattern.test(pathname)) {
+    pageTitle = "Meditation Library";
+  }
+  const addNewCollectionPattern = /^\/admin\/all-collections\/add-new-collection$/;
+  if (addNewCollectionPattern.test(pathname)) {
+    pageTitle = "Audio Library";
   }
   return (
         <h1 className="text-2xl font-bold hidden md:block">{pageTitle}</h1>

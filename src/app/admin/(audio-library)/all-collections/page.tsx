@@ -33,11 +33,11 @@ const AllCollection: React.FC = () => {
             + Add New Collection
           </Button>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg ">
+        <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 justify-center gap-4 i ">
           {categories.map((category, index) => (
             <Card
               key={index}
-              className="bg-transparent border-none overflow-hidden hover:cursor-pointer duration-300 shadow-none"
+              className="bg-transparent border-none overflow-hidden items-center hover:cursor-pointer duration-300 shadow-none"
 
             >
               <CardContent className="p-0">
@@ -49,7 +49,7 @@ const AllCollection: React.FC = () => {
                   className="w-60 h-48  object-cover rounded-xl"
                 />
               </CardContent>
-              <div className="text-white bg-transparent p-2 text-center text-sm font-medium">
+              <div className="text-white text-center bg-transparent p-2  text-sm font-medium">
                 {category.title}
               </div>
             </Card>

@@ -34,7 +34,7 @@ const data = {
       icon: SecurityIcon,
       items: [
         { title: "All Collections", url: "/admin/all-collections" },
-        { title: "User Lists", url: "/admin/audio-files" },
+        { title: "Audio Files", url: "/admin/audio-files" },
       ],
     },
     {
