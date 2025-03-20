@@ -31,7 +31,12 @@ const Page = () => {
   return (
     <div className=" text-white py-6 w-full h-screen">
   
-        <h1 className="text-xl font-medium mb-6">Soylent Corp User</h1>
+        <div className='mb-6'>
+        <h2 className=" text-white text-xl font-medium ">
+      Alexa Rawles
+      </h2>
+      <p className='opacity-80'>alexarawles@gmail.com</p>
+      </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6">
           <div>

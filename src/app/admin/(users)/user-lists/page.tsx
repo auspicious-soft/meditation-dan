@@ -16,18 +16,17 @@ interface Invoice {
     CompanyName: string;
     NameCustomer: string;
     gender: string;
-    Action: string;
     email: string;
 }
 
 const invoices: Invoice[] = [
-    { Id: "1", NameCustomer: "Rakesh Choudhary",  CompanyName: "Acme Corporation", email:"rakeshchoudhary123@gmail.com", gender: "male", Action: "View" },
-    { Id: "2", NameCustomer: "Rakesh Choudhary", CompanyName: "Acme Corporation", email:"rakeshchoudhary123@gmail.com", gender: "male", Action: "View" },
-    { Id: "3", NameCustomer: "Rakesh Choudhary", CompanyName: "Acme Corporation", email:"rakeshchoudhary123@gmail.com", gender: "male", Action: "View" },
-    { Id: "4", NameCustomer: "Rakesh Choudhary", CompanyName: "Acme Corporation", email:"rakeshchoudhary123@gmail.com", gender: "male", Action: "View" },
-    { Id: "5", NameCustomer: "Rakesh Choudhary", CompanyName: "Beta Ltd.", email:"rakeshchoudhary123@gmail.com", gender: "male", Action: "View" },
-    { Id: "6", NameCustomer: "Rakesh Choudhary", CompanyName: "Gamma Inc.", email:"rakeshchoudhary123@gmail.com", gender: "male", Action: "View" },
-    { Id: "7", NameCustomer: "Rakesh Choudhary", CompanyName: "Delta LLC", email:"rakeshchoudhary123@gmail.com", gender: "male", Action: "View" },
+    { Id: "1", NameCustomer: "Rakesh Choudhary",  CompanyName: "Acme Corporation", email:"rakeshchoudhary123@gmail.com", gender: "male"  },
+    { Id: "2", NameCustomer: "Rakesh Choudhary", CompanyName: "Acme Corporation", email:"rakeshchoudhary123@gmail.com", gender: "male"  },
+    { Id: "3", NameCustomer: "Rakesh Choudhary", CompanyName: "Acme Corporation", email:"rakeshchoudhary123@gmail.com", gender: "male"  },
+    { Id: "4", NameCustomer: "Rakesh Choudhary", CompanyName: "Acme Corporation", email:"rakeshchoudhary123@gmail.com", gender: "male",  },
+    { Id: "5", NameCustomer: "Rakesh Choudhary", CompanyName: "Beta Ltd.", email:"rakeshchoudhary123@gmail.com", gender: "male"  },
+    { Id: "6", NameCustomer: "Rakesh Choudhary", CompanyName: "Gamma Inc.", email:"rakeshchoudhary123@gmail.com", gender: "male"  },
+    { Id: "7", NameCustomer: "Rakesh Choudhary", CompanyName: "Delta LLC", email:"rakeshchoudhary123@gmail.com", gender: "male"  },
 ];
 
 const PAGE_SIZE = 20;
@@ -82,7 +81,7 @@ const Page = () => {
                                         className="px-3 !py-0 w-16 h-6 !bg-[#1a3f70] rounded inline-flex justify-center items-center text-white text-sm !font-normal !leading-tight !tracking-tight"
                                         onClick={() => handleViewClick(invoice.Id)}
                                     >
-                                        {invoice.Action}
+                                        View
                                     </Button>
                                 </TableCell>
                             </TableRow>

@@ -4,7 +4,6 @@ import { usePathname } from "next/navigation";
 
 const PageTitle = () => {
   const pathname = usePathname();
-  console.log('pathname:', pathname);
   
   // Get the last part of the URL
   const lastSegment = pathname.split("/").filter(Boolean).pop() || "Home";
@@ -17,6 +16,10 @@ const PageTitle = () => {
   const userprofileEditPattern = /^\/admin\/user-lists\/user-profile-edit\/\d+$/;
   if (userprofileEditPattern.test(pathname)) {
     pageTitle = "User Profile Edit";
+  }
+  const blockedUserPattern = /^\/admin\/blocked-users\/user-detail\/\d+$/;
+  if (blockedUserPattern.test(pathname)) {
+    pageTitle = "Blocked User Detail";
   }
   return (
         <h1 className="text-2xl font-bold hidden md:block">{pageTitle}</h1>
