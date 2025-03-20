@@ -16,7 +16,7 @@ const categories = [
   { title: "Relax", image: "/images/sleep-4.jpg" },
 ];
 
-const AllCollection = () => {
+const AllCollection: React.FC = () => {
   const router = useRouter();
 
   return (
@@ -28,16 +28,17 @@ const AllCollection = () => {
           </h2>
           <Button
             className="w-44 h-8 px-12 py-2 !bg-[#1a3f70] rounded inline-flex justify-center items-center hover:cursor-pointer text-white text-sm !font-normal !leading-tight !tracking-tight"
-            onClick={() => router.push("/admin/company-lists/add-new-company")}
+            onClick={() => router.push("/admin/all-collections/add-new-collection")}
           >
-            + Add New Company
+            + Add New Collection
           </Button>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg ">
           {categories.map((category, index) => (
             <Card
               key={index}
-              className="bg-transparent border-none overflow-hidden duration-300 shadow-none"
+              className="bg-transparent border-none overflow-hidden hover:cursor-pointer duration-300 shadow-none"
+
             >
               <CardContent className="p-0">
                 <Image
@@ -45,7 +46,7 @@ const AllCollection = () => {
                   alt={category.title}
                   width={200}
                   height={200}
-                  className="w-full h-[150px] object-cover rounded-xl"
+                  className="w-60 h-48  object-cover rounded-xl"
                 />
               </CardContent>
               <div className="text-white bg-transparent p-2 text-center text-sm font-medium">
