@@ -16,10 +16,8 @@ const AudioList = () => {
     { id: 6, name: "Gentle Rain", duration: "25 min", collection: "Deep Sleep", image: "/audio-thumbnail.jpg" },
   ]);
 
+  console.log(setAudios);
   // Handle delete
-  const handleDelete = (id: number) => {
-    setAudios(audios.filter((audio) => audio.id !== id));
-  };
 
   return (
     <div className="p-6 bg-[#1B2236] text-white rounded-lg shadow-md">
