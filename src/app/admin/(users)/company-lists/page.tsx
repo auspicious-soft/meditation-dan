@@ -118,7 +118,7 @@ const RecentNewUsers = () => {
           <h2 className="text-white text-[20px] md:text-2xl font-bold mb-3">
             Company Lists
           </h2>
-          <Button className="px-3 !py-0 h-8 !bg-[#1a3f70] rounded inline-flex justify-center items-center hover:cursor-pointer text-white text-sm !font-normal !leading-tight !tracking-tight"
+          <Button className="w-44 h-8 px-12 py-2 !bg-[#1a3f70] rounded inline-flex justify-center items-center hover:cursor-pointer text-white text-sm !font-normal !leading-tight !tracking-tight"
           onClick={() => router.push('/admin/company-lists/add-new-company')}
           >
             + Add New Company
@@ -151,7 +151,7 @@ const RecentNewUsers = () => {
                 <TableCell className="py-4">{invoice.expirydate}</TableCell>
                 <TableCell className="text-right py-4">
                   <Button
-                    className="px-3 !py-0 h-6 !bg-[#1a3f70] rounded inline-flex justify-center items-center text-white text-sm !font-normal !leading-tight !tracking-tight"
+                    className="px-3 !py-0 w-16 h-6 !bg-[#1a3f70] rounded inline-flex justify-center items-center text-white text-sm !font-normal !leading-tight !tracking-tight"
                     onClick={() => handleViewClick(invoice.Id)}
                   >
                     view

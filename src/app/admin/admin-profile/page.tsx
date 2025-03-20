@@ -50,7 +50,7 @@ const Page = () => {
             <label htmlFor="profileImageUpload">
               <Button
                 variant="outline"                
-                className=" bg-slate-900 border-[#D7D7D7] h-8 dm-sans text-zinc-300 text-sm hover:bg-slate-800"
+                className=" bg-slate-900 border-[#D7D7D7] h-8 dm-sans text-zinc-300 hover:text-zinc-300 text-sm hover:bg-slate-800"
               >
                 Change image
               </Button>

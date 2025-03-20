@@ -14,6 +14,10 @@ const PageTitle = () => {
   if (companyDetailPattern.test(pathname)) {
     pageTitle = "Company Detail";
   }
+  const userprofileEditPattern = /^\/admin\/user-lists\/user-profile-edit\/\d+$/;
+  if (userprofileEditPattern.test(pathname)) {
+    pageTitle = "User Profile Edit";
+  }
   return (
         <h1 className="text-2xl font-bold hidden md:block">{pageTitle}</h1>
   );

@@ -15,19 +15,19 @@ interface Invoice {
     Id: string;
     CompanyName: string;
     NameCustomer: string;
-    DueDate: string;
+    gender: string;
     Action: string;
     email: string;
 }
 
 const invoices: Invoice[] = [
-    { Id: "#0032", NameCustomer: "Rakesh Choudhary",  CompanyName: "Acme Corporation", email:"rakeshchoudhary123@gmail.com", DueDate: "08/01/2025", Action: "View" },
-    { Id: "#0033", NameCustomer: "Rakesh Choudhary", CompanyName: "Acme Corporation", email:"rakeshchoudhary123@gmail.com", DueDate: "08/01/2025", Action: "View" },
-    { Id: "#0034", NameCustomer: "Rakesh Choudhary", CompanyName: "Acme Corporation", email:"rakeshchoudhary123@gmail.com", DueDate: "08/01/2025", Action: "View" },
-    { Id: "#0035", NameCustomer: "Rakesh Choudhary", CompanyName: "Acme Corporation", email:"rakeshchoudhary123@gmail.com", DueDate: "08/01/2025", Action: "View" },
-    { Id: "#0036", NameCustomer: "Rakesh Choudhary", CompanyName: "Beta Ltd.", email:"rakeshchoudhary123@gmail.com", DueDate: "09/01/2025", Action: "View" },
-    { Id: "#0037", NameCustomer: "Rakesh Choudhary", CompanyName: "Gamma Inc.", email:"rakeshchoudhary123@gmail.com", DueDate: "10/01/2025", Action: "View" },
-    { Id: "#0038", NameCustomer: "Rakesh Choudhary", CompanyName: "Delta LLC", email:"rakeshchoudhary123@gmail.com", DueDate: "11/01/2025", Action: "View" },
+    { Id: "1", NameCustomer: "Rakesh Choudhary",  CompanyName: "Acme Corporation", email:"rakeshchoudhary123@gmail.com", gender: "male", Action: "View" },
+    { Id: "2", NameCustomer: "Rakesh Choudhary", CompanyName: "Acme Corporation", email:"rakeshchoudhary123@gmail.com", gender: "male", Action: "View" },
+    { Id: "3", NameCustomer: "Rakesh Choudhary", CompanyName: "Acme Corporation", email:"rakeshchoudhary123@gmail.com", gender: "male", Action: "View" },
+    { Id: "4", NameCustomer: "Rakesh Choudhary", CompanyName: "Acme Corporation", email:"rakeshchoudhary123@gmail.com", gender: "male", Action: "View" },
+    { Id: "5", NameCustomer: "Rakesh Choudhary", CompanyName: "Beta Ltd.", email:"rakeshchoudhary123@gmail.com", gender: "male", Action: "View" },
+    { Id: "6", NameCustomer: "Rakesh Choudhary", CompanyName: "Gamma Inc.", email:"rakeshchoudhary123@gmail.com", gender: "male", Action: "View" },
+    { Id: "7", NameCustomer: "Rakesh Choudhary", CompanyName: "Delta LLC", email:"rakeshchoudhary123@gmail.com", gender: "male", Action: "View" },
 ];
 
 const PAGE_SIZE = 20;
@@ -64,7 +64,7 @@ const Page = () => {
                             <TableHead className="w-[100px] py-4">Id</TableHead>
                             <TableHead className="py-4">Name of Customer</TableHead>
                             <TableHead className="py-4">Company Name</TableHead>
-                            <TableHead className="py-4">Register Date</TableHead>
+                            <TableHead className="py-4">Gender</TableHead>
                             <TableHead className="py-4">Emai Id</TableHead>
                             <TableHead className="text-right py-4">Action</TableHead>
                         </TableRow>
@@ -74,13 +74,12 @@ const Page = () => {
                             <TableRow key={invoice.Id} className="border-0 text-sm font-normal hover:bg-transparent">
                                 <TableCell className="py-4">{invoice.Id}</TableCell>
                                 <TableCell className="py-4">{invoice.NameCustomer}</TableCell>
-                                <TableCell className="py-4">{invoice.email}</TableCell>
                                 <TableCell className="py-4">{invoice.CompanyName}</TableCell>
-                    
-                                <TableCell className="py-4">{invoice.DueDate}</TableCell>
+                                <TableCell className="py-4">{invoice.gender}</TableCell>
+                                <TableCell className="py-4">{invoice.email}</TableCell>                    
                                 <TableCell className="text-right py-4">
                                     <Button 
-                                        className="px-3 !py-0 h-6 !bg-[#1a3f70] rounded inline-flex justify-center items-center text-white text-sm !font-normal !leading-tight !tracking-tight"
+                                        className="px-3 !py-0 w-16 h-6 !bg-[#1a3f70] rounded inline-flex justify-center items-center text-white text-sm !font-normal !leading-tight !tracking-tight"
                                         onClick={() => handleViewClick(invoice.Id)}
                                     >
                                         {invoice.Action}

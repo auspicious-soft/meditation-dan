@@ -21,12 +21,12 @@ const Page = () => {
   return (
     <div className="grid grid-cols-12 gap-4 h-screen w-full">
     <div className="col-span-12  space-y-6 bg-[#1b2236] rounded-[12px] md:rounded-[20px] py-4 px-4 md:py-8 md:px-9">
-      <h2 className="text-white text-[20px] md:text-2xl font-bold mb-3">
+      <h2 className="text-white text-[20px] md:text-2xl font-bold mb-6">
       Add New Company
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="firstName" className="text-white dm-sans text-base font-normal">First Name</Label>
+                <Label htmlFor="firstName" className="text-white dm-sans text-base font-normal">Company Name</Label>
                 <Input
                   id="company"
                   type='text'
@@ -37,7 +37,7 @@ const Page = () => {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="lastName" className="text-white dm-sans text-base font-normal">Last Name</Label>
+                <Label htmlFor="lastName" className="text-white dm-sans text-base font-normal">Email Address</Label>
                 <Input
                   id="email"
                   type='text'
@@ -50,7 +50,7 @@ const Page = () => {
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-white dm-sans text-base font-normal">Email Address</Label>
+                <Label htmlFor="email" className="text-white dm-sans text-base font-normal">Login Password</Label>
                 <Input
                   id="password"
                   type='password'
