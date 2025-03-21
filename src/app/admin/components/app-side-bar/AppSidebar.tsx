@@ -63,7 +63,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <LogoCard />
       </SidebarHeader>
       <hr className="opacity-[0.30] mb-5 md:my-6"></hr>
-      <SidebarContent className="px-4 py-0 md:p-0">
+      <SidebarContent className="px-0 py-0 md:p-0">
         <NavMain items={data.navMain} />
       </SidebarContent>
       <div className="flex gap-2 items-center mt-6 text-white text-base font-normal px-4 py-0 md:p-0">

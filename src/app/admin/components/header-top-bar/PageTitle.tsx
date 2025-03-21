@@ -26,6 +26,14 @@ const PageTitle = () => {
   if (allcollectionPattern.test(pathname)) {
     pageTitle = "Meditation Library";
   }
+  const audioFilesPattern = /^\/admin\/audio-files$/;
+  if (audioFilesPattern.test(pathname)) {
+    pageTitle = "Audio Library";
+  }
+  const addNewAudioPattern = /^\/admin\/audio-files\/add-new-audio$/;
+  if (addNewAudioPattern.test(pathname)) {
+    pageTitle = "Audio Library";
+  }
   const addNewCollectionPattern = /^\/admin\/all-collections\/add-new-collection$/;
   if (addNewCollectionPattern.test(pathname)) {
     pageTitle = "Audio Library";

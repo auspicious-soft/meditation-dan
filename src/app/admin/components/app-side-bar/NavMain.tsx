@@ -49,7 +49,7 @@ export function NavMain({
               defaultOpen={isActive}
               className="group/collapsible"
             >
-              <SidebarMenuItem className={isActive ? "" : ""}>
+              <SidebarMenuItem >
                 <CollapsibleTrigger asChild>
                   <SidebarMenuButton tooltip={item.title} className={`cursor-pointer px-[12px] py-[10px] dm-sans h-auto ${isActive ? "bg-[#1a3f70]" : "font-normal"}`}>
                   {item.icon && React.createElement(item.icon, { className: "!h-5 !w-5" })}
@@ -58,8 +58,8 @@ export function NavMain({
 
                   </SidebarMenuButton>
                 </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <SidebarMenuSub className="border-0">
+                <CollapsibleContent className="m-0">
+                  <SidebarMenuSub className="border-0 p-0 mx-1 mt-2">
                     {item.items.map((subItem) => {
                       const isSubActive = pathname === subItem.url
                       return (

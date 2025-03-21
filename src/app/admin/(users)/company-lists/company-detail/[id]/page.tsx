@@ -87,7 +87,7 @@ const Page = () => {
     <DialogHeader className="text-center">
       <DialogTitle className="text-lg font-semibold text-center">Delete Account</DialogTitle>
       <DialogDescription className="text-sm text-gray-400 text-center">
-        Are you sure you want to delete your account?
+        Are you sure you want to delete account?
       </DialogDescription>
     </DialogHeader>
     <DialogFooter className="flex justify-center gap-4 mt-4">

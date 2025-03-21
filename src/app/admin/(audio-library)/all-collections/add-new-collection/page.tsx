@@ -181,7 +181,7 @@ const AddCollectionForm = () => {
       </p>
 
       {/* Submit Button */}
-      <Button className="bg-[#1A3F70] hover:bg-[#1A3F70] max-w-52">Upload</Button>
+      <Button className="bg-[#1A3F70] w-52 hover:bg-[#1A3F70] ">Upload</Button>
     </div>
   );
 };

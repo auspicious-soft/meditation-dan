@@ -151,10 +151,10 @@ const RecentNewUsers = () => {
                 <TableCell className="py-4">{invoice.expirydate}</TableCell>
                 <TableCell className="text-right py-4">
                   <Button
-                    className="px-3 !py-0 w-16 h-6 !bg-[#1a3f70] rounded inline-flex justify-center items-center text-white text-sm !font-normal !leading-tight !tracking-tight"
+                    className="px-3 !py-0 w-16 h-6 hover:cursor-pointer !bg-[#1a3f70] rounded inline-flex justify-center items-center text-white text-sm !font-normal !leading-tight !tracking-tight"
                     onClick={() => handleViewClick(invoice.Id)}
                   >
-                    view
+                    View
                   </Button>
                 </TableCell>
               </TableRow>
