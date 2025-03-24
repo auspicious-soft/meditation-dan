@@ -37,7 +37,7 @@ const AllCollection: React.FC = () => {
           {categories.map((category, index) => (
             <Card
               key={index}
-              className="bg-transparent border-none overflow-hidden items-center hover:cursor-pointer duration-300 shadow-none"
+              className="bg-transparent border-none p-0 overflow-hidden items-center hover:cursor-pointer duration-300 shadow-none"
 
             >
               <CardContent className="p-0">
