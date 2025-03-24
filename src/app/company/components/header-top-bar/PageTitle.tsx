@@ -6,7 +6,7 @@ const PageTitle = () => {
   const pathname = usePathname();
   
   const lastSegment = pathname.split("/").filter(Boolean).pop() || "Home";
-  let pageTitle = lastSegment.replace(/-/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
+  const pageTitle = lastSegment.replace(/-/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
   
   // const Userpattern = /^\/company\/users\/add-user$/;
   // if(Userpattern.test(pathname)){

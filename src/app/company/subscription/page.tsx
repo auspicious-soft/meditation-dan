@@ -36,7 +36,7 @@ const invoices = [
 
 
 
-export const Page = () => {
+ const Page = () => {
  
  return (
   <>

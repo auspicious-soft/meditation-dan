@@ -63,7 +63,7 @@ const RecentNewUsers = () => {
 
  const totalPages = Math.ceil(invoices.length / PAGE_SIZE);
 
- const handleViewClick = (id: string) => {
+ const handleViewClick = () => {
   // router.push(`/invoice/${id}`);
   router.push(`/company/users/details`);
  };
@@ -135,7 +135,7 @@ const RecentNewUsers = () => {
               <TableCell className="py-4">{invoice.email}</TableCell>
               <TableCell className="py-4">{invoice.DueDate}</TableCell>
               <TableCell className="text-right py-4">
-                <Button className="px-3 !py-0 h-6 !bg-[#1a3f70] rounded inline-flex justify-center items-center text-white text-sm !font-normal !leading-tight !tracking-tight" onClick={() => handleViewClick(invoice.Id)}>
+                <Button className="px-3 !py-0 h-6 !bg-[#1a3f70] rounded inline-flex justify-center items-center text-white text-sm !font-normal !leading-tight !tracking-tight" onClick={() => handleViewClick()}>
                   {invoice.Action}
                 </Button>
               </TableCell>
