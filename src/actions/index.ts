@@ -90,6 +90,22 @@ export const generateSignedUrlForAudioImage = async (collectionName:string,songN
     throw error;
   }
 };
+export const generateSignedUrlForCollectionImage = async (collectionName:string,songName:string, fileName: string, fileType: string) => {
+  const uploadParams = {
+    Bucket: process.env.AWS_BUCKET_NAME,
+    Key: `${collectionName}/${songName}/image/${fileName}`,
+    ContentType: fileType,
+    acl: "public-read",
+  };
+  try {
+    const command = new PutObjectCommand(uploadParams);
+    const signedUrl = await getSignedUrl(await createS3Client(), command);
+    return { signedUrl, key: uploadParams.Key };
+  } catch (error) {
+    console.error("Error generating signed URL:", error);
+    throw error;
+  }
+};
 
 
 
