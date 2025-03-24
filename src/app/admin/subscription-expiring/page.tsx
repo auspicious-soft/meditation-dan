@@ -40,7 +40,7 @@ const SubscriptionReminder = () => {
               <TableHead className="w-[100px] py-4">Id</TableHead>
               <TableHead className="py-4">Company Name</TableHead>
               <TableHead className="py-4">Register Date</TableHead>
-              <TableHead className="text-right py-4">Expire Date</TableHead>
+              <TableHead className="py-4">Expire Date</TableHead>
               <TableHead className="text-right py-4">Action</TableHead>
             </TableRow>
           </TableHeader>
@@ -56,7 +56,7 @@ const SubscriptionReminder = () => {
                 <TableCell className="py-4">{invoice.registerdate}</TableCell>
                 <TableCell className="py-4">{invoice.expireDate}</TableCell>
                 <TableCell className="text-right py-4">
-                  <Button className=" !bg-[#1a3f70] hover:cursor-pointer rounded inline-flex justify-center items-center text-white text-sm !font-normal !leading-tight !tracking-tight"
+                  <Button className=" !bg-[#1a3f70] hover:cursor-pointer h-6 w-20 rounded inline-flex justify-center items-center text-white text-sm !font-normal !leading-tight !tracking-tight"
                   onClick={() => router.push("/admin/subscription-expiring/user-detail")}
                   >
                     View
