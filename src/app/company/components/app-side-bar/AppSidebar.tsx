@@ -8,49 +8,41 @@ import {
 } from "@/components/ui/sidebar";
 import LogoCard from "./LogoCard";
 import { NavMain } from "./NavMain";
-import { AudioTagesIcon, BellNotifactionIcon, CompassIcon, SecurityIcon, SubscriptionIcon, UsersIcon } from "@/lib/svg";
+import {  BellNotifactionIcon, CompassIcon, SubscriptionIcon, UsersIcon } from "@/lib/svg";
 
 // Sample data for the sidebar menu
 const data = {
   navMain: [
     {
       title: "Overview",
-      url: "/admin/dashboard",
+      url: "/company/dashboard",
       icon: CompassIcon 
     },
     {
       title: "Users",
-      url: "#",
+      url: "/company/users",
       icon: UsersIcon,
       items: [
-        { title: "Company Lists", url: "/admin/company-lists" },
-        { title: "User Lists", url: "/admin/user-lists" },
-        { title: "Blocked Users", url: "/admin/blocked-users" },
+        { title: "Add Users", url: "/company/users/add-user" },
+        { title: "User Lists", url: "/company/users/details" },
       ],
-    },
-    {
-      title: "Audio Library",
-      url: "#",
-      icon: SecurityIcon,
-      items: [
-        { title: "All Collections", url: "/admin/all-collections" },
-        { title: "User Lists", url: "/admin/audio-files" },
-      ],
-    },
-    {
-      title: "Audio Tags",
-      url: "/admin/audio-tags",
-      icon: AudioTagesIcon,
     },
     {
       title: "Subscription",
-      url: "/admin/subscription",
+      url: "/company/subscription",
       icon: SubscriptionIcon,
     },
     {
-      title: "Analytics",
-      url: "/admin/analytics",
-      icon: SubscriptionIcon,
+      title: "Join Requests",
+      url: "/company/join-request",
+      icon: BellNotifactionIcon,
+   
+    },
+
+     {
+      title: "",
+      url: "/company/company-profile",
+   
     },
     
   ],
