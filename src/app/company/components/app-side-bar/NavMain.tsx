@@ -59,7 +59,7 @@ export function NavMain({
                   </SidebarMenuButton>
                 </CollapsibleTrigger>
                 <CollapsibleContent>
-                  <SidebarMenuSub className="border-0">
+                <SidebarMenuSub className="border-0 p-0 mx-1 mt-2">
                     {item.items.map((subItem) => {
                       const isSubActive = pathname === subItem.url
                       return (
