@@ -24,7 +24,9 @@ const data = {
       icon: UsersIcon,
       items: [
         { title: "Add Users", url: "/company/users/add-user" },
-        { title: "User Lists", url: "/company/users/details" },
+        { title: "User Lists", url: "/company/users/user-list" },
+
+       
       ],
     },
     {
