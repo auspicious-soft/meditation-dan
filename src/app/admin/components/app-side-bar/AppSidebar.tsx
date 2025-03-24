@@ -9,7 +9,7 @@ import {
 import LogoCard from "./LogoCard";
 import { NavMain } from "./NavMain";
 import { AudioTagesIcon, BellNotifactionIcon, CompassIcon, SecurityIcon, SubscriptionIcon, UsersIcon } from "@/lib/svg";
-
+import { useRouter } from "next/navigation";
 // Sample data for the sidebar menu
 const data = {
   navMain: [
@@ -56,7 +56,9 @@ const data = {
   ],
 };
 
+
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const router = useRouter()
   return (
     <Sidebar collapsible="icon" {...props} className="bg-[#1B2236] !py-6 !px-4 !border-0 rounded-tr-[20px] rounded-br-[20px]">
       <SidebarHeader className="px-4 pt-1 pb-0 md:p-0">
@@ -66,9 +68,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent className="px-0 py-0 md:p-0">
         <NavMain items={data.navMain} />
       </SidebarContent>
-      <div className="flex gap-2 items-center mt-6 text-white text-base font-normal px-4 py-0 md:p-0">
+      <div className="flex gap-2 items-center hover:cursor-pointer mt-6 text-white text-base font-normal px-4 py-0 md:p-0"
+      onClick={()=> router.push('/admin/subscription-expiring')}>
         <BellNotifactionIcon />
-         Subscriptions Expiring in <br></br>1 Week
+         Subscriptions Expiring Today
       </div>
       <hr className="opacity-[0.30] mt-6"></hr>
     </Sidebar>

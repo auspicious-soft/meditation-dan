@@ -234,7 +234,7 @@ const formatDuration = (seconds: number): string => {
                   </SelectItem>
                 ))
               ) : (
-                <SelectItem value="loading">Loading categories...</SelectItem>
+                <SelectItem value="loading">Loading collection...</SelectItem>
               )}
             </SelectContent>
           </Select>
