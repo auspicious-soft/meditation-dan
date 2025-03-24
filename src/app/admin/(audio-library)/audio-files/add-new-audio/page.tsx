@@ -50,9 +50,7 @@ const schema = yup.object().shape({
 const AddNewAudio = () => {
   const [bestForOptions, setBestForOptions] = useState<string[]>([]);
   const [audioPreview, setAudioPreview] = useState<string | null>(null);
-  console.log('audioPreview:', audioPreview);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  console.log('imagePreview:', imagePreview);
 
   const audioInputRef = useRef<HTMLInputElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
@@ -90,9 +88,7 @@ const formatDuration = (seconds: number): string => {
 };
   // Watch file inputs for preview updates
   const audioFile = watch("audioFile");
-  console.log('audioFile:', audioFile);
   const imageFile = watch("imageFile");
-  console.log('imageFile:', imageFile);
 
   // Set up collection options
   useEffect(() => {
