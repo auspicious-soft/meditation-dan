@@ -1,3 +1,4 @@
+"use client"
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -7,6 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useRouter } from "next/navigation";
 
 const invoices = [
   {
@@ -24,6 +26,7 @@ const invoices = [
 ];
 
 const SubscriptionReminder = () => {
+  const router = useRouter()
   return (
     <div className="col-span-12 space-y-6 bg-[#1b2236] rounded-[12px] md:rounded-[20px] py-4 px-4 md:py-8 md:px-9 ">
     <h2 className="text-white text-[20px] md:text-2xl font-bold mb-3">
@@ -53,7 +56,9 @@ const SubscriptionReminder = () => {
                 <TableCell className="py-4">{invoice.registerdate}</TableCell>
                 <TableCell className="py-4">{invoice.expireDate}</TableCell>
                 <TableCell className="text-right py-4">
-                  <Button className=" !bg-[#1a3f70] rounded inline-flex justify-center items-center text-white text-sm !font-normal !leading-tight !tracking-tight">
+                  <Button className=" !bg-[#1a3f70] hover:cursor-pointer rounded inline-flex justify-center items-center text-white text-sm !font-normal !leading-tight !tracking-tight"
+                  onClick={() => router.push("/admin/subscription-expiring/user-detail")}
+                  >
                     View
                   </Button>
                 </TableCell>

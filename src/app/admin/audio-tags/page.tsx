@@ -128,15 +128,15 @@ const AudioLevelsManager = () => {
                   
                   <div className="flex space-x-2">
                     {editingLevelId === level.id ? (
-                      <Button size="sm" variant="ghost" onClick={saveEdit} className='bg-[#0B132B] hover:bg-[#0B132B] h-12 w-12 rounded-xl'>
+                      <Button size="sm" variant="ghost" onClick={saveEdit} className='bg-[#0B132B] hover:cursor-pointer hover:bg-[#0B132B] h-12 w-12 rounded-xl'>
                         <Save className="h-12 w-12 text-blue-400" />
                       </Button>
                     ) : (
-                      <Button size="sm" variant="ghost" onClick={() => startEditingLevel(level)} className='bg-[#0B132B] hover:bg-[#0B132B] h-12 w-12 rounded-xl'>
+                      <Button size="sm" variant="ghost" onClick={() => startEditingLevel(level)} className='bg-[#0B132B] hover:cursor-pointer hover:bg-[#0B132B] h-12 w-12 rounded-xl'>
                         <SquarePen className="h-12 w-12 text-white" />
                       </Button>
                     )}
-                    <Button size="sm" variant="ghost" onClick={() => deleteLevel(level.id)} className='bg-[#0B132B] hover:bg-[#0B132B] h-12 w-12 rounded-xl'>
+                    <Button size="sm" variant="ghost" onClick={() => deleteLevel(level.id)} className='bg-[#0B132B] hover:cursor-pointer hover:bg-[#0B132B] h-12 w-12 rounded-xl'>
                       <Trash2 className="h-12 w-12 text-[#ef4444]" />
                     </Button>
                   </div>
@@ -179,15 +179,15 @@ const AudioLevelsManager = () => {
                   
                   <div className="flex space-x-2">
                     {editingCategoryId === category.id ? (
-                      <Button size="sm" variant="ghost" onClick={saveEdit} className='bg-[#0B132B] hover:bg-[#0B132B]  h-12 w-12 rounded-xl'>
+                      <Button size="sm" variant="ghost" onClick={saveEdit} className='bg-[#0B132B]  hover:cursor-pointer hover:bg-[#0B132B]  h-12 w-12 rounded-xl'>
                         <Save className="h-4 w-4 text-blue-400" />
                       </Button>
                     ) : (
-                      <Button size="sm" variant="ghost" onClick={() => startEditingCategory(category)} className='bg-[#0B132B] hover:bg-[#0B132B]  h-12 w-12 rounded-xl'>
+                      <Button size="sm" variant="ghost" onClick={() => startEditingCategory(category)} className='hover:cursor-pointer bg-[#0B132B] hover:bg-[#0B132B]  h-12 w-12 rounded-xl'>
                         <SquarePen className="h-4 w-4 text-white" />
                       </Button>
                     )}
-                    <Button size="sm" variant="ghost" onClick={() => deleteCategory(category.id)} className='bg-[#0B132B] hover:bg-[#0B132B]  h-12 w-12 rounded-xl'>
+                    <Button size="sm" variant="ghost" onClick={() => deleteCategory(category.id)} className='bg-[#0B132B] hover:cursor-pointer hover:bg-[#0B132B]  h-12 w-12 rounded-xl'>
                       <Trash2 className="h-4 w-4 text-red-500" />
                     </Button>
                   </div>

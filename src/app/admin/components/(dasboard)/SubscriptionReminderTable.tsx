@@ -45,7 +45,7 @@ const SubscriptionReminderTable = () => {
                 <TableCell className="py-4">{invoice.CompanyName}</TableCell>
                 <TableCell className="py-4">{invoice.DueDate}</TableCell>
                 <TableCell className="text-right py-4">
-                  <Button className="px-3 !py-0 h-6 w-44 !bg-[#1a3f70] rounded inline-flex justify-center items-center text-white text-sm !font-normal !leading-tight !tracking-tight">
+                  <Button className="px-3 !py-0 h-6 w-44 !bg-[#1a3f70] hover:cursor-pointer rounded inline-flex justify-center items-center text-white text-sm !font-normal !leading-tight !tracking-tight">
                     Reminder
                   </Button>
                 </TableCell>
