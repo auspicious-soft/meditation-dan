@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { useEffect, useState, useRef } from "react";
 import { useForm, Controller } from "react-hook-form";
@@ -18,13 +17,17 @@ import {
 } from "@/components/ui/select";
 import { Trash2, Upload } from "lucide-react";
 import Image from "next/image";
-// import { toast } from "@/components/ui/use-toast"; // Assuming a toast library
-import { generateSignedUrlForAudioImage, generateSignedUrlForAudios } from "@/actions";
+import { toast } from "sonner";
+import {
+  generateSignedUrlForAudioImage,
+  generateSignedUrlForAudios,
+} from "@/actions";
+import { uploadAudioStats } from "@/services/admin-services";
 
 // Assuming these functions exist
 
 const addNewAudio = async (endpoint: string, payload: any) => {
-  console.log('payload:', payload);
+  console.log("payload:", payload);
   // Replace with your actual API call
   return { status: 201 };
 };
@@ -43,8 +46,14 @@ const schema = yup.object().shape({
   collectionType: yup.string().required("Collection type is required"),
   songName: yup.string().required("Song name is required"),
   description: yup.string().required("Description is required"),
-  audioFile: yup.mixed<FileList>().nullable().required("Audio file is required"),
-  imageFile: yup.mixed<FileList>().nullable().required("Image file is required"),
+  audioFile: yup
+    .mixed<FileList>()
+    .nullable()
+    .required("Audio file is required"),
+  imageFile: yup
+    .mixed<FileList>()
+    .nullable()
+    .required("Image file is required"),
 });
 
 const AddNewAudio = () => {
@@ -61,7 +70,7 @@ const AddNewAudio = () => {
     control,
     watch,
     setValue,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<FormValues>({
     resolver: yupResolver(schema),
     defaultValues: {
@@ -72,20 +81,21 @@ const AddNewAudio = () => {
   });
 
   const getAudioDuration = async (file: File) => {
-    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const audioContext = new (window.AudioContext ||
+      (window as any).webkitAudioContext)();
     const arrayBuffer = await file.arrayBuffer();
     const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-    return audioBuffer.duration
-};
-const formatDuration = (seconds: number): string => {
-  const hours = Math.floor(seconds / 3600);           // Calculate hours (3600 seconds = 1 hour)
-  const minutes = Math.floor((seconds % 3600) / 60);  // Calculate minutes from remaining seconds
-  const secs = Math.floor(seconds % 60);              // Calculate seconds
-  const formattedHours = String(hours).padStart(2, '0');     // Ensure 2 digits (e.g., "00")
-  const formattedMinutes = String(minutes).padStart(2, '0'); // Ensure 2 digits (e.g., "05")
-  const formattedSeconds = String(secs).padStart(2, '0');    // Ensure 2 digits (e.g., "30")
-  return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`; // Return "HH:MM:SS"
-};
+    return audioBuffer.duration;
+  };
+  const formatDuration = (seconds: number): string => {
+    const hours = Math.floor(seconds / 3600); // Calculate hours (3600 seconds = 1 hour)
+    const minutes = Math.floor((seconds % 3600) / 60); // Calculate minutes from remaining seconds
+    const secs = Math.floor(seconds % 60); // Calculate seconds
+    const formattedHours = String(hours).padStart(2, "0"); // Ensure 2 digits (e.g., "00")
+    const formattedMinutes = String(minutes).padStart(2, "0"); // Ensure 2 digits (e.g., "05")
+    const formattedSeconds = String(secs).padStart(2, "0"); // Ensure 2 digits (e.g., "30")
+    return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`; // Return "HH:MM:SS"
+  };
   // Watch file inputs for preview updates
   const audioFile = watch("audioFile");
   const imageFile = watch("imageFile");
@@ -141,20 +151,25 @@ const formatDuration = (seconds: number): string => {
     try {
       let audioKey = null;
       let imageKey = null;
-      let formattedDuration = null ;
+      let formattedDuration = null;
       // Upload audio to S3
       if (data.audioFile && data.audioFile.length > 0) {
         const audio = data.audioFile[0];
         const duration = await getAudioDuration(audio); // Returns a number, e.g., 330
-        console.log('duration:', duration);
-    
-    // Convert to "HH:MM:SS" format
+        console.log("duration:", duration);
+
+        // Convert to "HH:MM:SS" format
         formattedDuration = formatDuration(duration);
-        console.log('formattedDuration:', formattedDuration);
-        const collectionType = data.collectionType.toLowerCase()
-        const songName = data.songName.toLowerCase()
+        console.log("formattedDuration:", formattedDuration);
+        const collectionType = data.collectionType.toLowerCase();
+        const songName = data.songName.toLowerCase();
         const audioFileName = `${audio.name}`;
-        const { signedUrl, key } = await generateSignedUrlForAudios(collectionType,songName,audioFileName, audio.type);
+        const { signedUrl, key } = await generateSignedUrlForAudios(
+          collectionType,
+          songName,
+          audioFileName,
+          audio.type
+        );
         const audioUploadResponse = await fetch(signedUrl, {
           method: "PUT",
           body: audio,
@@ -170,10 +185,15 @@ const formatDuration = (seconds: number): string => {
       // Upload image to S3
       if (data.imageFile && data.imageFile.length > 0) {
         const image = data.imageFile[0];
-        const collectionType = data.collectionType.toLowerCase()
-        const songName = data.songName.toLowerCase()
+        const collectionType = data.collectionType.toLowerCase();
+        const songName = data.songName.toLowerCase();
         const imageFileName = `${image.name}`;
-        const { signedUrl, key } = await generateSignedUrlForAudioImage(collectionType,songName,imageFileName, image.type);
+        const { signedUrl, key } = await generateSignedUrlForAudioImage(
+          collectionType,
+          songName,
+          imageFileName,
+          image.type
+        );
         const imageUploadResponse = await fetch(signedUrl, {
           method: "PUT",
           body: image,
@@ -186,34 +206,39 @@ const formatDuration = (seconds: number): string => {
         imageKey = key;
       }
 
-      console.log("imageKey:",imageKey);
+      console.log("imageKey:", imageKey);
       // Prepare payload for backend
       const payload = {
         songName: data.songName,
-        collectionType: data.collectionType,
+        collectionType: "67d280b13c17e710f42726c2",
         description: data.description || "",
-        audioUrl:audioKey,
-        imageUrl:imageKey,
-        duration:formattedDuration,
+        audioUrl: audioKey,
+        imageUrl: imageKey,
+        duration: formattedDuration,
       };
 
+      
       // Send to backend
-      const response = await addNewAudio("/admin/audio", payload);
-      // if (response?.status === 201) {
-      //   // toast.success("Audio added successfully");
-      //   window.location.href = "/admin/audio-list";
-      // } else {
-      //   // toast.error("Failed to add audio");
-      // }
-      console.log(response)
+      const response = await uploadAudioStats("/admin/upload-audio",payload);
+
+      if (response?.status === 201) {
+        toast.success("Audio added successfully");
+        window.location.href = "/admin/audio-files";
+      } else {
+        toast.error(response?.data?.message ||"Failed to add audio");
+      }
+      
     } catch (error) {
-      console.log('error:', error);
-      // toast.error("An error occurred while adding audio");
+      console.log("error while uploading audio:", error);
+      toast.error("An error occurred while adding audio");
     }
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="p-6 bg-[#1B2236] text-white rounded-lg shadow-md">
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className="p-6 bg-[#1B2236] text-white rounded-lg shadow-md"
+    >
       <h2 className="text-xl font-semibold mb-4">Add New Audio</h2>
 
       {/* Collection Type */}
@@ -241,7 +266,9 @@ const formatDuration = (seconds: number): string => {
         )}
       />
       {errors.collectionType && (
-        <p className="text-red-500 text-xs mb-4">{errors.collectionType.message}</p>
+        <p className="text-red-500 text-xs mb-4">
+          {errors.collectionType.message}
+        </p>
       )}
 
       {/* Song Name */}
@@ -263,7 +290,9 @@ const formatDuration = (seconds: number): string => {
         className="mb-4 bg-[#0B132B] border-none text-white"
       />
       {errors.description && (
-        <p className="text-red-500 text-xs mb-4">{errors.description.message}</p>
+        <p className="text-red-500 text-xs mb-4">
+          {errors.description.message}
+        </p>
       )}
 
       {/* File Upload Section */}
@@ -275,14 +304,21 @@ const formatDuration = (seconds: number): string => {
             <Card className="w-44 h-44 flex items-center justify-center bg-[#0B132B] border-none rounded-lg relative">
               {audioPreview ? (
                 <>
-                  <audio src={audioPreview} controls className="w-full h-full object-contain" />
+                  <audio
+                    src={audioPreview}
+                    controls
+                    className="w-full h-full object-contain"
+                  />
                   <Button
                     variant="ghost"
                     size="icon"
                     className="absolute top-0 right-0 text-zinc-500"
                     onClick={handleRemoveAudio}
                   >
-                    <Trash2 size={16} className="text-white hover:cursor-pointer" />
+                    <Trash2
+                      size={16}
+                      className="text-white hover:cursor-pointer"
+                    />
                   </Button>
                 </>
               ) : (
@@ -313,7 +349,9 @@ const formatDuration = (seconds: number): string => {
           </div>
           <p className="text-xs text-gray-500 mb-4">Max size: 30 MB</p>
           {errors.audioFile && (
-            <p className="text-red-500 text-xs mb-4">{errors.audioFile.message}</p>
+            <p className="text-red-500 text-xs mb-4">
+              {errors.audioFile.message}
+            </p>
           )}
         </div>
 
@@ -337,7 +375,10 @@ const formatDuration = (seconds: number): string => {
                     className="absolute top-0 right-0 text-zinc-500"
                     onClick={handleRemoveImage}
                   >
-                    <Trash2 size={16} className="text-white hover:cursor-pointer" />
+                    <Trash2
+                      size={16}
+                      className="text-white hover:cursor-pointer"
+                    />
                   </Button>
                 </>
               ) : (
@@ -368,14 +409,20 @@ const formatDuration = (seconds: number): string => {
           </div>
           <p className="text-xs text-gray-500 mb-4">Size: 170x170 pixels</p>
           {errors.imageFile && (
-            <p className="text-red-500 text-xs mb-4">{errors.imageFile.message}</p>
+            <p className="text-red-500 text-xs mb-4">
+              {errors.imageFile.message}
+            </p>
           )}
         </div>
       </div>
 
       {/* Submit Button */}
-      <Button type="submit" className="bg-[#1A3F70] hover:bg-[#1A3F70] max-w-52">
-        Upload
+      <Button
+        type="submit"
+        className="bg-[#1A3F70] hover:bg-[#1A3F70] max-w-52"
+        disabled={isSubmitting}
+      >
+        {isSubmitting ? "Uploading..." : "Upload"}
       </Button>
     </form>
   );
