@@ -46,7 +46,7 @@ const RecentNewUsers = () => {
             setCurrentPage(newPage);
         }
     };
-
+ 
     const handleClick = (id: string) => {
         router.push(`/admin/user-lists/user-profile-edit/${id}`);
     };
