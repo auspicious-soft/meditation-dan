@@ -21,8 +21,8 @@ const AllCollection: React.FC = () => {
 
   return (
     <div className="grid grid-cols-12 gap-4 w-full">
-      <div className="col-span-12  space-y-6 bg-[#1b2236] rounded-[12px] md:rounded-[20px] py-4 px-4 md:py-8 md:px-9">
-        <div className="flex items-center justify-between flex-wrap mb-0">
+      <div className="col-span-12 space-y-6 bg-[#1b2236] rounded-[12px] md:rounded-[20px] py-4 px-4 md:py-8 md:px-9">
+        <div className="flex items-center justify-between flex-wrap  mb-2">
           <h2 className="text-white text-[20px] md:text-2xl font-bold mb-3">
             Categories
           </h2>
@@ -33,7 +33,7 @@ const AllCollection: React.FC = () => {
             + Add New Collection
           </Button>
         </div>
-        <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 justify-center gap-4 i ">
+        <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 justify-center gap-4 ">
           {categories.map((category, index) => (
             <Card
               key={index}

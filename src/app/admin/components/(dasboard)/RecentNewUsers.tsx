@@ -21,13 +21,13 @@ interface Invoice {
 }
 
 const invoices: Invoice[] = [
-    { Id: "#0032", NameCustomer: "Rakesh Choudhary",  CompanyName: "Acme Corporation", email:"rakeshchoudhary123@gmail.com", DueDate: "08/01/2025", Action: "View" },
-    { Id: "#0033", NameCustomer: "Rakesh Choudhary", CompanyName: "Acme Corporation", email:"rakeshchoudhary123@gmail.com", DueDate: "08/01/2025", Action: "View" },
-    { Id: "#0034", NameCustomer: "Rakesh Choudhary", CompanyName: "Acme Corporation", email:"rakeshchoudhary123@gmail.com", DueDate: "08/01/2025", Action: "View" },
-    { Id: "#0035", NameCustomer: "Rakesh Choudhary", CompanyName: "Acme Corporation", email:"rakeshchoudhary123@gmail.com", DueDate: "08/01/2025", Action: "View" },
-    { Id: "#0036", NameCustomer: "Rakesh Choudhary", CompanyName: "Beta Ltd.", email:"rakeshchoudhary123@gmail.com", DueDate: "09/01/2025", Action: "View" },
-    { Id: "#0037", NameCustomer: "Rakesh Choudhary", CompanyName: "Gamma Inc.", email:"rakeshchoudhary123@gmail.com", DueDate: "10/01/2025", Action: "View" },
-    { Id: "#0038", NameCustomer: "Rakesh Choudhary", CompanyName: "Delta LLC", email:"rakeshchoudhary123@gmail.com", DueDate: "11/01/2025", Action: "View" },
+    { Id: "0032", NameCustomer: "Rakesh Choudhary",  CompanyName: "Acme Corporation", email:"rakeshchoudhary123@gmail.com", DueDate: "08/01/2025", Action: "View" },
+    { Id: "0033", NameCustomer: "Rakesh Choudhary", CompanyName: "Acme Corporation", email:"rakeshchoudhary123@gmail.com", DueDate: "08/01/2025", Action: "View" },
+    { Id: "0034", NameCustomer: "Rakesh Choudhary", CompanyName: "Acme Corporation", email:"rakeshchoudhary123@gmail.com", DueDate: "08/01/2025", Action: "View" },
+    { Id: "0035", NameCustomer: "Rakesh Choudhary", CompanyName: "Acme Corporation", email:"rakeshchoudhary123@gmail.com", DueDate: "08/01/2025", Action: "View" },
+    { Id: "0036", NameCustomer: "Rakesh Choudhary", CompanyName: "Beta Ltd.", email:"rakeshchoudhary123@gmail.com", DueDate: "09/01/2025", Action: "View" },
+    { Id: "0037", NameCustomer: "Rakesh Choudhary", CompanyName: "Gamma Inc.", email:"rakeshchoudhary123@gmail.com", DueDate: "10/01/2025", Action: "View" },
+    { Id: "0038", NameCustomer: "Rakesh Choudhary", CompanyName: "Delta LLC", email:"rakeshchoudhary123@gmail.com", DueDate: "11/01/2025", Action: "View" },
 ];
 
 const PAGE_SIZE = 20;
@@ -47,10 +47,9 @@ const RecentNewUsers = () => {
         }
     };
 
-    const handleViewClick = (id: string) => {
-        router.push(`/invoice/${id}`);
+    const handleClick = (id: string) => {
+        router.push(`/admin/user-lists/user-profile-edit/${id}`);
     };
-
     return (
         <div>
                 <Table>
@@ -76,7 +75,7 @@ const RecentNewUsers = () => {
                                 <TableCell className="text-right py-4">
                                     <Button 
                                         className="px-3 !py-0 h-6 !bg-[#1a3f70] hover:cursor-pointer rounded inline-flex justify-center items-center text-white text-sm !font-normal !leading-tight !tracking-tight"
-                                        onClick={() => handleViewClick(invoice.Id)}
+                                        onClick={() => handleClick(invoice.Id)}
                                     >
                                         {invoice.Action}
                                     </Button>

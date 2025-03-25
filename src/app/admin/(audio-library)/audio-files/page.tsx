@@ -55,6 +55,9 @@ const AudioList = () => {
 
   console.log(setAudios);
   // Handle delete
+  const handleDelete = (id: number) => {
+    setAudios(audios.filter((audio) => audio.id !== id));
+  };
 
   return (
     <div className="p-6 bg-[#1B2236] flex flex-col  text-white rounded-lg shadow-md">
@@ -69,41 +72,49 @@ const AudioList = () => {
       </div>
 
       {/* Audio Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2  gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {audios.map((audio) => (
           <div
             key={audio.id}
-            className="flex items-center justify-around max-w-[505px] h-24 relative bg-slate-900 p-3 rounded"
+            className="flex flex-row md:flex-row items-center justify-between w-full min-h-[100px] relative bg-slate-900 p-4 rounded"
           >
-            <div className="rounded bg-slate-800 overflow-hidden">
+            {/* Image */}
+            <div className="rounded bg-slate-800 overflow-hidden flex-shrink-0">
               <Image
                 src={audioimage}
                 alt={audio.name}
-                className=" object-cover"
+                className="object-cover"
                 width={60}
                 height={60}
               />
             </div>
 
-            <div>
+            {/* Music Name */}
+            <div className="flex-1 min-w-0 mx-3">
               <div className="text-sm text-slate-400">Music Name:</div>
-              <div className="text-white font-medium">{audio.name}</div>
+              <div className="text-white font-medium truncate">{audio.name}</div>
             </div>
 
-            <div className="text-center">
+            {/* Duration */}
+            <div className="text-center flex-1 min-w-0 mx-3">
               <div className="text-sm text-slate-400">Duration</div>
-              <div className="flex items-center text-white">
+              <div className="flex items-center justify-center text-white">
                 <Clock size={14} className="mr-1" />
                 <span>{audio.duration}</span>
               </div>
             </div>
 
-            <div className="text-center">
+            {/* Collection */}
+            <div className="text-center flex-1 min-w-0 mx-3">
               <div className="text-sm text-slate-400">Collection</div>
-              <div className=" text-white border-0">{audio.collection}</div>
+              <div className="text-white border-0 truncate">{audio.collection}</div>
             </div>
 
-            <button className="text-slate-400 absolute top-1 right-1 hover:cursor-pointer rounded-md bg-[#1B2236] p-1 hover:text-white">
+            {/* Delete Button */}
+            <button
+              className="text-slate-400 absolute top-2 right-2 hover:cursor-pointer rounded-md bg-[#1B2236] p-1 hover:text-white"
+              onClick={() => handleDelete(audio.id)}
+            >
               <Trash2 size={18} />
             </button>
           </div>
