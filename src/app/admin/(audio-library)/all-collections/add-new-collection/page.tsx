@@ -14,6 +14,7 @@ const AddCollectionForm = () => {
   const [levels, setLevels] = useState<string[]>([]);
   const [bestForOptions, setBestForOptions] = useState<string[]>([]);
   const [selectedLevels, setSelectedLevels] = useState<string[]>([]);
+  console.log('selectedLevels:', selectedLevels);
   const [selectedBestFor, setSelectedBestFor] = useState<string | null>(null);
   console.log('selectedBestFor:', selectedBestFor);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
