@@ -173,12 +173,21 @@ const AddNewAudio = () => {
         const audioUploadResponse = await fetch(signedUrl, {
           method: "PUT",
           body: audio,
-          headers: { "Content-Type": audio.type },
+          headers: { "Content-Type": audio.type 
+
+          },
+          mode: "no-cors",
         });
 
         if (!audioUploadResponse.ok) {
-          throw new Error("Failed to upload audio to S3");
-        }
+  const errorText = await audioUploadResponse.text();
+  console.error("Upload failed:", {
+    status: audioUploadResponse.status,
+    statusText: audioUploadResponse.statusText,
+    body: errorText
+  });
+  throw new Error(`Failed to upload audio: ${errorText}`);
+}
         audioKey = key;
       }
 
