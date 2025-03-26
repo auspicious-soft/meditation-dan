@@ -173,21 +173,18 @@ const AddNewAudio = () => {
         const audioUploadResponse = await fetch(signedUrl, {
           method: "PUT",
           body: audio,
-          headers: { "Content-Type": audio.type 
-
-          },
-          mode: "no-cors",
+          headers: { "Content-Type": audio.type },
         });
 
         if (!audioUploadResponse.ok) {
-  const errorText = await audioUploadResponse.text();
-  console.error("Upload failed:", {
-    status: audioUploadResponse.status,
-    statusText: audioUploadResponse.statusText,
-    body: errorText
-  });
-  throw new Error(`Failed to upload audio: ${errorText}`);
-}
+          const errorText = await audioUploadResponse.text();
+          console.error("Upload failed:", {
+            status: audioUploadResponse.status,
+            statusText: audioUploadResponse.statusText,
+            body: errorText,
+          });
+          throw new Error(`Failed to upload audio: ${errorText}`);
+        }
         audioKey = key;
       }
 
@@ -207,7 +204,6 @@ const AddNewAudio = () => {
           method: "PUT",
           body: image,
           headers: { "Content-Type": image.type },
-          mode: "no-cors",
         });
 
         if (!imageUploadResponse.ok) {
