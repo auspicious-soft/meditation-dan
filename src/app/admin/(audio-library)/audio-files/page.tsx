@@ -76,7 +76,7 @@ const AudioList = () => {
         {audios.map((audio) => (
           <div
             key={audio.id}
-            className="flex flex-row md:flex-row items-center justify-between w-full min-h-[100px] relative bg-slate-900 p-4 rounded"
+            className="flex flex-col md:flex-row items-center justify-between w-full min-h-[100px] relative bg-slate-900 p-4 rounded"
           >
             {/* Image */}
             <div className="rounded bg-slate-800 overflow-hidden flex-shrink-0">
