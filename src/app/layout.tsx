@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { DM_Sans } from "next/font/google";
+// import { DM_Sans } from "next/font/google";
 
-const dmSans = DM_Sans({
+const dmSans = ({
   subsets: ["latin"],
   weight: ["400", "500", "700"], 
   variable: "--font-dm-sans",
@@ -19,8 +19,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
+    
+    // <body className={` ${dmSans.variable}`}>{children}</body>
+    // <div >{children}</div>
     <html lang="en">
-      <body className={dmSans.variable}>{children}</body>
+      <body>{children}</body>
     </html>
   );
 }

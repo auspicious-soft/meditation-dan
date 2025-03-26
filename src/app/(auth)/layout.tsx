@@ -1,22 +1,36 @@
 import "../globals.css";
-import { DM_Sans } from "next/font/google";
+// import { DM_Sans } from "next/font/google";
+import type { Metadata } from "next";
+import localFont from "next/font/local";
+// import "./globals.css";
+import { Toaster } from "sonner";
+// import Providers from "./components/ProgressBarProvider";
 
-const dmSans = DM_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "700"], 
-  variable: "--font-dm-sans",
-});
+import { SessionProvider } from "next-auth/react";
+import { auth } from "@/auth";
+import { AppRouterCacheProvider } from '@mui/material-nextjs/v15-appRouter';
 
 
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await auth();
   return (
     <html lang="en">
-      <body className={dmSans.variable}>{children}</body>
+      <body >
+      <SessionProvider session={session}>
+          <SessionProvider>
+          <Toaster richColors />
+          <AppRouterCacheProvider>
+            {children}
+          </AppRouterCacheProvider>
+          </SessionProvider>
+        </SessionProvider>  
+    </body>
     </html>
+
   );
 }
