@@ -176,7 +176,7 @@ const AddNewAudio = () => {
           headers: { "Content-Type": audio.type 
 
           },
-          // mode: "no-cors",
+          mode: "no-cors",
         });
 
         if (!audioUploadResponse.ok) {
@@ -207,7 +207,7 @@ const AddNewAudio = () => {
           method: "PUT",
           body: image,
           headers: { "Content-Type": image.type },
-          // mode: "no-cors",
+          mode: "no-cors",
         });
 
         if (!imageUploadResponse.ok) {
