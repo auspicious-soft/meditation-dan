@@ -285,7 +285,7 @@ const AddCollectionForm = () => {
       <Input
         {...register("collectionName")}
         placeholder="Enter Collection Name"
-        className="mb-4 bg-[#0B132B] border-none h-12 text-white"
+        className="mb-4 bg-[#0B132B] border-none h-12 text-white autofill-fix"
       />
       {errors.collectionName && (
         <p className="text-red-500 text-sm">{errors.collectionName.message}</p>

@@ -124,9 +124,6 @@ const AllCollection: React.FC = () => {
                   width={200}
                   height={200}
                   className="w-60 h-48 object-cover rounded-xl"
-                  onError={(e) => {
-                    e.currentTarget.src = "/default-placeholder.png"; // Fallback on error
-                  }}
                 />
               </CardContent>
               <div className="text-white text-center bg-transparent p-2 text-sm font-medium">

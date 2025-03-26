@@ -1,11 +1,11 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Clock, Trash2 } from "lucide-react";
+import { Clock, Trash2, Play, Pause } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { getAllAudiosStats } from "@/services/admin-services"; // Adjust import path
-import { getImageUrlOfS3 } from "@/actions"; // Adjust import path
+import { getAllAudiosStats } from "@/services/admin-services";
+import { getImageUrlOfS3 } from "@/actions";
 
 interface Audio {
   _id: string;
@@ -15,6 +15,7 @@ interface Audio {
     name: string;
   };
   imageUrl: string;
+  audioUrl: string;
 }
 
 interface Pagination {
@@ -35,9 +36,9 @@ interface ApiResponse {
   };
 }
 
-// Enhanced Audio type with resolved image URL
 interface EnhancedAudio extends Audio {
   resolvedImageUrl: string;
+  resolvedAudioUrl: string;
 }
 
 const AudioList = () => {
@@ -47,9 +48,11 @@ const AudioList = () => {
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(0);
+  const [playingAudioId, setPlayingAudioId] = useState<string | null>(null);
   const limit = 10;
 
-  // Fetch audios with pagination
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
   useEffect(() => {
     const fetchAudios = async () => {
       try {
@@ -62,13 +65,15 @@ const AudioList = () => {
         const data: ApiResponse = response.data;
 
         if (data.success) {
-          // Resolve image URLs for each audio
           const enhancedAudios = await Promise.all(
             data.data.audios.map(async (audio) => ({
               ...audio,
               resolvedImageUrl: audio.imageUrl
                 ? await getImageUrlOfS3(audio.imageUrl)
                 : "/default-placeholder.png",
+              resolvedAudioUrl: audio.audioUrl
+                ? await getImageUrlOfS3(audio.audioUrl)
+                : "",
             }))
           );
           setAudios(enhancedAudios);
@@ -85,9 +90,51 @@ const AudioList = () => {
     };
 
     fetchAudios();
+
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
   }, [currentPage]);
 
-  // Handle delete (client-side only for now)
+  const handlePlayPause = async (audio: EnhancedAudio) => {
+    if (!audio.resolvedAudioUrl) return;
+
+    if (playingAudioId === audio._id) {
+      // Pause the currently playing audio
+      if (audioRef.current) {
+        audioRef.current.pause();
+        setPlayingAudioId(null);
+        audioRef.current = null;
+      }
+    } else {
+      // Stop any existing audio before starting a new one
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+
+      // Create and play new audio
+      const newAudio = new Audio(audio.resolvedAudioUrl);
+      audioRef.current = newAudio;
+
+      try {
+        await newAudio.play(); // Wait for play to start
+        setPlayingAudioId(audio._id);
+        newAudio.onended = () => {
+          setPlayingAudioId(null);
+          audioRef.current = null;
+        };
+      } catch (err) {
+        console.error("Playback failed:", err);
+        setPlayingAudioId(null);
+        audioRef.current = null;
+      }
+    }
+  };
+
   const handleDelete = (id: string) => {
     setAudios(audios.filter((audio) => audio._id !== id));
   };
@@ -98,13 +145,8 @@ const AudioList = () => {
     }
   };
 
-  if (loading) {
-    return <div className="text-white">Loading...</div>;
-  }
-
-  if (error) {
-    return <div className="text-red-500">{error}</div>;
-  }
+  if (loading) return <div className="text-white">Loading...</div>;
+  if (error) return <div className="text-red-500">{error}</div>;
 
   return (
     <div className="p-6 bg-[#1B2236] flex flex-col text-white rounded-lg shadow-md">
@@ -118,14 +160,12 @@ const AudioList = () => {
         </Button>
       </div>
 
-      {/* Audio Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {audios.map((audio) => (
           <div
             key={audio._id}
             className="flex flex-col md:flex-row items-center justify-between w-full min-h-[100px] relative bg-slate-900 p-4 rounded"
           >
-            {/* Image */}
             <div className="rounded bg-slate-800 overflow-hidden flex-shrink-0">
               <Image
                 src={audio.resolvedImageUrl}
@@ -133,19 +173,14 @@ const AudioList = () => {
                 className="object-cover"
                 width={60}
                 height={60}
-                onError={(e) => {
-                  e.currentTarget.src = "/default-placeholder.png";
-                }}
               />
             </div>
 
-            {/* Music Name */}
             <div className="flex-1 min-w-0 mx-3">
               <div className="text-sm text-slate-400">Music Name:</div>
               <div className="text-white font-medium truncate">{audio.songName}</div>
             </div>
 
-            {/* Duration */}
             <div className="text-center flex-1 min-w-0 mx-3">
               <div className="text-sm text-slate-400">Duration</div>
               <div className="flex items-center justify-center text-white">
@@ -154,13 +189,19 @@ const AudioList = () => {
               </div>
             </div>
 
-            {/* Collection */}
             <div className="text-center flex-1 min-w-0 mx-3">
               <div className="text-sm text-slate-400">Collection</div>
               <div className="text-white border-0 truncate">{audio.collectionType.name}</div>
             </div>
 
-            {/* Delete Button */}
+            <button
+              className="text-slate-400 absolute top-2 right-10 hover:cursor-pointer rounded-md bg-[#1B2236] p-1 hover:text-white"
+              onClick={() => handlePlayPause(audio)}
+              disabled={!audio.resolvedAudioUrl}
+            >
+              {playingAudioId === audio._id ? <Pause size={18} /> : <Play size={18} />}
+            </button>
+
             <button
               className="text-slate-400 absolute top-2 right-2 hover:cursor-pointer rounded-md bg-[#1B2236] p-1 hover:text-white"
               onClick={() => handleDelete(audio._id)}
@@ -171,7 +212,6 @@ const AudioList = () => {
         ))}
       </div>
 
-      {/* Pagination Controls */}
       {totalPages > 1 && (
         <div className="flex justify-end items-center gap-2 mt-4">
           <Button
