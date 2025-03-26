@@ -207,6 +207,7 @@ const AddNewAudio = () => {
           method: "PUT",
           body: image,
           headers: { "Content-Type": image.type },
+          mode: "no-cors",
         });
 
         if (!imageUploadResponse.ok) {
