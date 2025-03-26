@@ -232,7 +232,6 @@ const AddCollectionForm = () => {
           body: image,
           headers: {
             "Content-Type": image.type,
-            "Access-Control-Allow-Origin": "*",
           },
         });
 
