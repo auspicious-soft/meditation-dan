@@ -217,17 +217,15 @@ const AddNewAudio = () => {
         duration: formattedDuration,
       };
 
-      
       // Send to backend
-      const response = await uploadAudioStats("/admin/upload-audio",payload);
+      const response = await uploadAudioStats("/admin/upload-audio", payload);
 
       if (response?.status === 201) {
         toast.success("Audio added successfully");
         window.location.href = "/admin/audio-files";
       } else {
-        toast.error(response?.data?.message ||"Failed to add audio");
+        toast.error(response?.data?.message || "Failed to add audio");
       }
-      
     } catch (error) {
       console.log("error while uploading audio:", error);
       toast.error("An error occurred while adding audio");
@@ -312,7 +310,7 @@ const AddNewAudio = () => {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="absolute top-0 right-0 text-zinc-500"
+                    className="absolute top-0 hover:bg-[#373f57] right-0 text-zinc-500"
                     onClick={handleRemoveAudio}
                   >
                     <Trash2
@@ -372,7 +370,7 @@ const AddNewAudio = () => {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="absolute top-0 right-0 text-zinc-500"
+                    className="absolute top-0 hover:bg-[#373f57] right-0 text-zinc-500"
                     onClick={handleRemoveImage}
                   >
                     <Trash2
