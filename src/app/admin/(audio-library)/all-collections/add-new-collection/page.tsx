@@ -358,10 +358,10 @@ const AddCollectionForm = () => {
               <Button
                 variant="ghost"
                 size="icon"
-                className="absolute top-0 right-0 text-zinc-500"
+                className="absolute top-0 right-0 hover:bg-[#373f57] text-zinc-500"
                 onClick={handleRemoveImage}
               >
-                <Trash2 size={16} className="text-red-600" />
+                <Trash2 size={16} className="text-white " />
               </Button>
             </>
           ) : (

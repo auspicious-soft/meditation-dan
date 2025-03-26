@@ -11,7 +11,7 @@ const PageTitle = () => {
     .replace(/-/g, " ")
     .replace(/\b\w/g, (char) => char.toUpperCase());
   // Check if the pathname matches the pattern for company detail
-  const companyDetailPattern = /^\/admin\/company-lists\/company-detail\/\d+$/;
+  const companyDetailPattern = /^\/admin\/company-lists\/company-detail\/[0-9a-fA-F]{24}$/;
   if (companyDetailPattern.test(pathname)) {
     pageTitle = "Company Detail";
   }

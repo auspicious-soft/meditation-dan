@@ -23,3 +23,15 @@ export const getBestForStats = async (route: string ,params: any = {}) => {
     const axiosInstance = await getAxiosInstance()
     return axiosInstance.get(route,{ params })
 }
+export const getUserDetailStats = async (route: string ,params: any = {}) => {
+    const axiosInstance = await getAxiosInstance()
+    return axiosInstance.get(route,{ params })
+}
+export const getCompanyDetailStats = async (route: string ,params: any = {}) => {
+    const axiosInstance = await getAxiosInstance()
+    return axiosInstance.get(route,{ params })
+}
+export const getSingleCompanydetailStats = async (route: string ) => {
+    const axiosInstance = await getAxiosInstance()
+    return axiosInstance.get(route,)
+}
