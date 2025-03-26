@@ -5,7 +5,7 @@
 import { cookies } from "next/headers";
 import { createS3Client } from "@/config/s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { DeleteObjectCommand, PutObjectCommand,  } from "@aws-sdk/client-s3";
+import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand,  } from "@aws-sdk/client-s3";
 
 // export const loginAction = async (payload: any) => {
 //   try {
@@ -106,7 +106,26 @@ export const generateSignedUrlForCollectionImage = async (bestFor:string,collect
     throw error;
   }
 };
+export const getImageUrl = async (imageKey: string) => {
+  const params = {
+      Bucket: process.env.AWS_BUCKET_NAME,
+      Key: imageKey,
+  }
+  try {
+      const command = new GetObjectCommand(params)
+      const url = await getSignedUrl(await createS3Client(), command
+          // , { expiresIn: 3600 }
+      )
+      return url;
+  } catch (error) {
+      throw error
+  }
+}
 
+export const getImageUrlOfS3 = async(subPath: string): Promise<string> => {
+  const path = `${process.env.NEXT_PUBLIC_AWS_BUCKET_PATH}${subPath}`
+  return path
+}
 
 
 export const deleteFileFromS3 = async (imageKey: string) => {

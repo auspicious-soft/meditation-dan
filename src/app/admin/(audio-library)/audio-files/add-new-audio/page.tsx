@@ -23,6 +23,7 @@ import {
   generateSignedUrlForAudios,
 } from "@/actions";
 import { uploadAudioStats } from "@/services/admin-services";
+import { AxiosError } from "axios";
 
 // Assuming these functions exist
 
@@ -37,7 +38,7 @@ type FormValues = {
   collectionType: string;
   songName: string;
   description: string;
-  audioFile: FileList;
+  audioFile: FileList ;
   imageFile: FileList;
 };
 
@@ -77,6 +78,8 @@ const AddNewAudio = () => {
       collectionType: "",
       songName: "",
       description: "",
+      audioFile: undefined,
+      imageFile: undefined,
     },
   });
 
@@ -228,14 +231,20 @@ const AddNewAudio = () => {
 
       if (response?.status === 201) {
         toast.success("Audio added successfully");
-        window.location.href = "/admin/audio-files";
+        setTimeout(() => {
+        window.location.href = "/admin/audio-files"
+      }, 1000);
       } else {
         toast.error(response?.data?.message || "Failed to add audio");
       }
     } catch (error) {
-      console.log("error while uploading audio:", error);
-      toast.error("An error occurred while adding audio");
-    }
+      console.log("Error while uploading audio:", error);
+      // Check if it's an AxiosError with a response
+      if (error instanceof AxiosError && error.response?.data?.message) {
+        toast.error(error.response.data.message); // Display backend message
+      } else {
+        toast.error(error instanceof Error ? error.message : "An error occurred while adding audio");
+      }}
   };
 
   return (
@@ -423,7 +432,7 @@ const AddNewAudio = () => {
       {/* Submit Button */}
       <Button
         type="submit"
-        className="bg-[#1A3F70] hover:bg-[#1A3F70] max-w-52"
+        className="bg-[#1A3F70] hover:cursor-pointer hover:bg-[#1A3F70] max-w-52"
         disabled={isSubmitting}
       >
         {isSubmitting ? "Uploading..." : "Upload"}

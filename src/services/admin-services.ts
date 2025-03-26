@@ -33,9 +33,17 @@ export const getCompanyDetailStats = async (route: string ,params: any = {}) => 
 }
 export const getSingleCompanydetailStats = async (route: string ) => {
     const axiosInstance = await getAxiosInstance()
-    return axiosInstance.get(route,)
+    return axiosInstance.get(route)
 }
 export const addNewCompanyStats = async (route: string,payload: any ) => {
     const axiosInstance = await getAxiosInstance()
     return axiosInstance.post(route,payload)
+}
+export const getAllCollectionStats = async (route: string,params: any = {} ) => {
+    const axiosInstance = await getAxiosInstance()
+    return axiosInstance.get(route,{ params })
+}
+export const getAllAudiosStats = async (route: string,params: any = {} ) => {
+    const axiosInstance = await getAxiosInstance()
+    return axiosInstance.get(route,{ params })
 }

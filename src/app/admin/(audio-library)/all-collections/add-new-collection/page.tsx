@@ -44,8 +44,11 @@ const schema = yup
     bestFor: yup.string().required("Best for is required"),
     imageFile: yup
       .mixed<File>()
-      .nullable()
-    .required("Image file is required"),
+      .test("fileRequired", "Image file is required", (value) => {
+        // Check if value is a File and has a size greater than 0
+        return value instanceof File && value.size > 0;
+      })
+      .required("Image file is required"),
   })
 
 interface LevelOption {
@@ -82,7 +85,7 @@ const AddCollectionForm = () => {
       description: "",
       levels: [] as string[],
       bestFor: "",
-      imageFile: new File([], ""),
+     
     },
   });
 

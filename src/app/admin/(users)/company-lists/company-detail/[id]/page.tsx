@@ -21,7 +21,6 @@ interface CompanyData {
   lastName: string | null;
   gender: string;
   dob: string | null;
-  subscriptionExpiryDate: string | null;
   createdAt: string;
   isBlocked: boolean;
   isAccountActive: boolean;
@@ -92,12 +91,12 @@ const Page = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6">
         <div>
           <p className="text-sm text-slate-400 mb-1">First Name</p>
-          <p className="text-white">{userData.firstName}</p>
+          <p className="text-white">{userData.firstName || "N/A"}</p>
         </div>
 
         <div>
           <p className="text-sm text-slate-400 mb-1">Last Name</p>
-          <p className="text-white">{userData.lastName}</p>
+          <p className="text-white">{userData.lastName || "N/A"}</p>
         </div>
 
         <div>
@@ -112,7 +111,7 @@ const Page = () => {
 
         <div>
           <p className="text-sm text-slate-400 mb-1">Birthday</p>
-          <p className="text-white">{userData.dob}</p>
+          <p className="text-white">{userData.dob || "N/A"}</p>
         </div>
 
         <div>
@@ -122,12 +121,6 @@ const Page = () => {
           </p>
         </div>
 
-       
-
-       
-
-
-      
       </div>
 
       <div className="flex gap-4 mt-12">
