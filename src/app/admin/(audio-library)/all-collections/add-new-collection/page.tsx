@@ -44,10 +44,9 @@ const schema = yup
     bestFor: yup.string().required("Best for is required"),
     imageFile: yup
       .mixed<File>()
-      .test("fileType", "Invalid file type", (value) => value instanceof File)
-      .required("Image is required"),
+      .nullable()
+    .required("Image file is required"),
   })
-  .required();
 
 interface LevelOption {
   id: string;
@@ -262,7 +261,7 @@ const AddCollectionForm = () => {
         // Reset form state on success
         setImagePreview(null);
         if (fileInputRef.current) fileInputRef.current.value = "";
-        window.location.href = "/admin/audio-files";
+        window.location.href = "/admin/all-collections";
       } else {
         toast.error(response?.data?.message || "Failed to add collection");
       }
