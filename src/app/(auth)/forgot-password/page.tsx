@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import LogoAuth from "../components/LogoAuth";
 import BannerImage from "../components/BannerImage";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export default function Home() {
   interface FormElements extends HTMLFormControlsCollection {
@@ -31,11 +32,14 @@ export default function Home() {
       });
 
       const data = await response.json();
+      console.log('data: ', data);
 
       if (response.ok && data.success) {
+        toast.error(data.message);
+
         router.push("/reset-password");
       } else {
-        console.log("Failed to send reset email: ");
+        toast.error(data.message || "Failed to send reset email.");
       }
     } catch (error) {
       console.error("Error:", error);

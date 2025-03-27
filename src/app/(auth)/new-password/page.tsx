@@ -9,6 +9,7 @@ import BannerImage from "../components/BannerImage";
 import LogoAuth from "../components/LogoAuth";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
+import { resetUserPassword } from "@/services/admin-services";
 
 export default function NewPasswordPage() {
   const [showNewPassword, setShowNewPassword] = useState(false);
@@ -48,20 +49,20 @@ export default function NewPasswordPage() {
 
     startTransition(async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/otp-new-password-verification`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ otp, password: newPassword }),
-        });
+        // const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/otp-new-password-verification`, {
+        //   method: "PATCH",
+        //   headers: { "Content-Type": "application/json" },
+        //   body: JSON.stringify({ otp, password: newPassword }),
+        // });
+        const response = await resetUserPassword({ otp, password: newPassword });
+        console.log('response: ', response);
 
-        const data = await response.json();
-
-        if (response.ok && data.success) {
-          toast.success("Password updated successfully!");
-          router.push("/");
-        } else {
-          toast.error(data.message || "Invalid OTP or failed to update password.");
-        }
+        // if (response.ok && data.success) {
+        //   toast.success("Password updated successfully!");
+        //   router.push("/");
+        // } else {
+        //   toast.error(data.message || "Invalid OTP or failed to update password.");
+        // }
       } catch (error) {
         console.error("Error updating password:", error);
         toast.error("Something went wrong. Please try again.");
