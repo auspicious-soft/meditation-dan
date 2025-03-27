@@ -27,7 +27,7 @@ export default function Home() {
     
         try {
           // Example API call (replace with your actual API endpoint)
-          const response = await fetch("http://localhost:8000/api/forgot-password", {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/forgot-password`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
