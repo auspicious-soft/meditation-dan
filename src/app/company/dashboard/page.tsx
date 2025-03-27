@@ -90,7 +90,7 @@ const RecentNewUsers = () => {
         <Table className="min-w-[500px] scrollbar-thin scroll-container">
          <TableHeader>
           <TableRow className="text-white text-sm font-bold dm-sans border-0 border-b border-[#666666] hover:bg-transparent">
-           <TableHead className="w-[100px] py-4">Id</TableHead>
+           <TableHead className="w-[100px] py-4">ID</TableHead>
            <TableHead className="py-4">Company Name</TableHead>
            <TableHead className="py-4">Plan</TableHead>
            <TableHead className="text-right py-4">Transaction</TableHead>
@@ -120,7 +120,7 @@ const RecentNewUsers = () => {
       <Table className="min-w-[500px] scrollbar-thin scroll-container">
         <TableHeader>
           <TableRow className="text-white text-sm font-bold dm-sans border-0 border-b border-[#666666] hover:bg-transparent">
-            <TableHead className="w-[100px] py-4">Id</TableHead>
+            <TableHead className="w-[100px] py-4">ID</TableHead>
             <TableHead className="py-4">Name of Customer</TableHead>
             <TableHead className="py-4">Email Id</TableHead>
             <TableHead className="py-4">Register Date</TableHead>

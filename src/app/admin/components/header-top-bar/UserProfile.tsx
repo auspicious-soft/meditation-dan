@@ -1,8 +1,15 @@
+"use client";
+import { useState } from "react";
+import { usePathname } from 'next/navigation';
+import logo from '@/assets/images/logo.png';
+import Link from "next/link";
+import Image from "next/image";
+import { signOut } from "next-auth/react"
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import Link from "next/link";
+// import Link from "next/link";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 const UserProfile = () => {
