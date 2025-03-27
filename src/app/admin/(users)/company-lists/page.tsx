@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,96 +10,69 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { getCompanyDetailStats } from "@/services/admin-services";
+import { toast } from "sonner";
 
+// Updated Invoice interface based on backend data
 interface Invoice {
-  Id: string;
-  CompanyName: string;
-  NameCustomer: string;
-  plan: string;
-  registrationdate: string;
-  expirydate: string;
+  _id: string;
+  companyName: string;
   email: string;
+  subscriptionStatus: string;
+  planInterval: string | null;
+  subscriptionStartDate: string | null;
+  subscriptionExpiryDate: string | null;
+  createdAt: string;
 }
 
-const invoices: Invoice[] = [
-  {
-    Id: "1",
-    CompanyName: "Acme Corporation",
-    NameCustomer: "John Doe",
-    email: "rakeshchoudhary123@gmail.com",
-    plan: "monthly",
-    registrationdate: "08/01/2025",
-    expirydate: "08/01/2025",
-  },
-  {
-    Id: "2",
-    CompanyName: "Acme Corporation",
-    NameCustomer: "Jane Smith",
-    email: "rakeshchoudhary123@gmail.com",
-    plan: "monthly",
-    registrationdate: "08/01/2025",
-    expirydate: "08/01/2025",
-  },
-  {
-    Id: "3",
-    CompanyName: "Acme Corporation",
-    NameCustomer: "Alice Johnson",
-    email: "rakeshchoudhary123@gmail.com",
-    plan: "monthly",
-    registrationdate: "08/01/2025",
-    expirydate: "08/01/2025",
-  },
-  {
-    Id: "4",
-    CompanyName: "Acme Corporation",
-    NameCustomer: "Bob Brown",
-    email: "rakeshchoudhary123@gmail.com",
-    plan: "monthly",
-    registrationdate: "08/01/2025",
-    expirydate: "08/01/2025",
-  },
-  {
-    Id: "5",
-    CompanyName: "Beta Ltd.",
-    NameCustomer: "Charlie Davis",
-    email: "rakeshchoudhary123@gmail.com",
-    plan: "monthly",
-    registrationdate: "08/01/2025",
-    expirydate: "08/01/2025",
-  },
-  {
-    Id: "6",
-    CompanyName: "Gamma Inc.",
-    NameCustomer: "Diana Evans",
-    email: "rakeshchoudhary123@gmail.com",
-    plan: "monthly",
-    registrationdate: "08/01/2025",
-    expirydate: "08/01/2025",
-  },
-  {
-    Id: "7",
-    CompanyName: "Delta LLC",
-    NameCustomer: "Ethan Foster",
-    email: "rakeshchoudhary123@gmail.com",
-    plan: "monthly",
-    registrationdate: "08/01/2025",
-    expirydate: "08/01/2025",
-  },
-];
-
-const PAGE_SIZE = 20;
+interface ApiResponse {
+  success: boolean;
+  data: Invoice[];
+  total: number;
+  page: number;
+  limit: number;
+  statusCode: number;
+  message?: string; // Added optional message property
+}
 
 const RecentNewUsers = () => {
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [totalPages, setTotalPages] = useState<number>(0);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const indexOfLastInvoice = currentPage * PAGE_SIZE;
-  const indexOfFirstInvoice = indexOfLastInvoice - PAGE_SIZE;
-  const currentInvoices = invoices.slice(
-    indexOfFirstInvoice,
-    indexOfLastInvoice
-  );
-  const totalPages = Math.ceil(invoices.length / PAGE_SIZE);
+  // Fetch company details with pagination
+  useEffect(() => {
+    const fetchCompanyDetails = async () => {
+      try {
+        setLoading(true);
+        const response = await getCompanyDetailStats("/admin/get-all-companies", {
+          page: currentPage,
+          limit: 10, // Match backend limit or make it configurable
+        });
+        const data: ApiResponse = response.data;
+
+        if (data.success) {
+          setInvoices(data.data);
+          setTotalPages(Math.ceil(data.total / data.limit));
+          toast.success("Company details fetched successfully.");
+        } else {
+          setError(data.message || "Failed to fetch company details.");
+          console.error(data.message);
+          toast.error(data.message || "Failed to fetch company details.");
+        }
+      } catch (err) {
+        setError("Failed to fetch company details.");
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCompanyDetails();
+  }, [currentPage]); // Refetch when currentPage changes
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
@@ -111,15 +84,24 @@ const RecentNewUsers = () => {
     router.push(`/admin/company-lists/company-detail/${id}`);
   };
 
+  if (loading) {
+    return <div className="text-white">Loading...</div>;
+  }
+
+  if (error) {
+    return <div className="text-red-500">{error}</div>;
+  }
+
   return (
     <div className="grid grid-cols-12 gap-4 w-full">
-      <div className="col-span-12  space-y-6 bg-[#1b2236] rounded-[12px] md:rounded-[20px] py-4 px-4 md:py-8 md:px-9">
+      <div className="col-span-12 space-y-6 bg-[#1b2236] rounded-[12px] md:rounded-[20px] py-4 px-4 md:py-8 md:px-9">
         <div className="flex items-center justify-between flex-wrap mb-0">
           <h2 className="text-white text-[20px] md:text-2xl font-bold mb-3">
             Company Lists
           </h2>
-          <Button className="w-44 h-8 px-12 py-2 !bg-[#1a3f70] rounded inline-flex justify-center items-center hover:cursor-pointer text-white text-sm !font-normal !leading-tight !tracking-tight"
-          onClick={() => router.push('/admin/company-lists/add-new-company')}
+          <Button
+            className="w-44 h-8 px-12 py-2 !bg-[#1a3f70] rounded inline-flex justify-center items-center hover:cursor-pointer text-white text-sm !font-normal !leading-tight !tracking-tight"
+            onClick={() => router.push("/admin/company-lists/add-new-company")}
           >
             + Add New Company
           </Button>
@@ -136,23 +118,28 @@ const RecentNewUsers = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {currentInvoices.map((invoice) => (
+            {invoices.map((invoice) => (
               <TableRow
-                key={invoice.Id}
+                key={invoice._id}
                 className="border-0 text-sm font-normal hover:bg-transparent"
               >
-                <TableCell className="py-4">{invoice.CompanyName}</TableCell>
+                <TableCell className="py-4">{invoice.companyName}</TableCell>
                 <TableCell className="py-4">{invoice.email}</TableCell>
-                <TableCell className="py-4">{invoice.plan}</TableCell>
                 <TableCell className="py-4">
-                  {invoice.registrationdate}
+                  {invoice.planInterval || "N/A"}
                 </TableCell>
-
-                <TableCell className="py-4">{invoice.expirydate}</TableCell>
+                <TableCell className="py-4">
+                  {new Date(invoice.createdAt).toLocaleDateString()}
+                </TableCell>
+                <TableCell className="py-4">
+                  {invoice.subscriptionExpiryDate
+                    ? new Date(invoice.subscriptionExpiryDate).toLocaleDateString()
+                    : "N/A"}
+                </TableCell>
                 <TableCell className="text-right py-4">
                   <Button
                     className="px-3 !py-0 w-16 h-6 hover:cursor-pointer !bg-[#1a3f70] rounded inline-flex justify-center items-center text-white text-sm !font-normal !leading-tight !tracking-tight"
-                    onClick={() => handleViewClick(invoice.Id)}
+                    onClick={() => handleViewClick(invoice._id)}
                   >
                     View
                   </Button>
@@ -162,7 +149,7 @@ const RecentNewUsers = () => {
           </TableBody>
         </Table>
         {/* Pagination Controls */}
-        <div className="flex justify-end items-center gap-2 mt-4 ">
+        <div className="flex justify-end items-center gap-2 mt-4">
           <Button
             className="bg-[#0B132B]"
             onClick={() => handlePageChange(currentPage - 1)}

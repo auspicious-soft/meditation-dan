@@ -11,7 +11,7 @@ const PageTitle = () => {
     .replace(/-/g, " ")
     .replace(/\b\w/g, (char) => char.toUpperCase());
   // Check if the pathname matches the pattern for company detail
-  const companyDetailPattern = /^\/admin\/company-lists\/company-detail\/\d+$/;
+  const companyDetailPattern = /^\/admin\/company-lists\/company-detail\/[0-9a-fA-F]{24}$/;
   if (companyDetailPattern.test(pathname)) {
     pageTitle = "Company Detail";
   }
@@ -19,6 +19,10 @@ const PageTitle = () => {
     /^\/admin\/user-lists\/user-profile-edit\/\d+$/;
   if (userprofileEditPattern.test(pathname)) {
     pageTitle = "User Profile Edit";
+  }
+  const editAudioPattern = /^\/admin\/audio-files\/edit-audio\/[0-9a-fA-F]{24}$/
+  if (editAudioPattern.test(pathname)) {
+    pageTitle = "Audio Library";
   }
   const blockedUserPattern = /^\/admin\/blocked-users\/user-detail\/\d+$/;
   if (blockedUserPattern.test(pathname)) {

@@ -1,16 +1,12 @@
 "use client";
-import { useState } from "react";
-import { usePathname } from 'next/navigation';
-import logo from '@/assets/images/logo.png';
-import Link from "next/link";
-import Image from "next/image";
-import { signOut } from "next-auth/react"
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 // import Link from "next/link";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { signOut } from "next-auth/react";
+import Link from "next/link";
 
 const UserProfile = () => {
  return (
@@ -55,7 +51,7 @@ const UserProfile = () => {
       </AlertDialogHeader>
       <AlertDialogFooter className="!justify-center">
        <AlertDialogCancel className="cursor-pointer !bg-[#1a3f70] !text-white rounded-lg  border-0 min-w-[170px] h-11">No</AlertDialogCancel>
-       <AlertDialogAction className=" cursor-pointer !bg-[#ff4747] !text-white rounded-lg min-w-[170px] h-11">Yes</AlertDialogAction>
+       <AlertDialogAction onClick={() => signOut({ redirectTo: '/' })} className=" cursor-pointer !bg-[#ff4747] !text-white rounded-lg min-w-[170px] h-11">Yes</AlertDialogAction>
       </AlertDialogFooter>
      </AlertDialogContent>
     </AlertDialog>

@@ -6,33 +6,27 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 
-
-
 const invoices = [
  {
   Id: "#0032",
   CompanyName: "Favorable Digital Services.",
   DueDate: "Monthly",
-  Action: "$125",
- },
+  Action: "$125", },
  {
   Id: "#0033",
   CompanyName: "Blessed Codeworks.",
   DueDate: "Annual",
-  Action: "$321",
- },
+  Action: "$321", },
  {
   Id: "#0034",
   CompanyName: "Fortune Software Group.",
   DueDate: "Annual",
-  Action: "$321",
- },
+  Action: "$321",},
  {
   Id: "#0035",
   CompanyName: "Acme Corporation",
   DueDate: "Monthly",
-  Action: "$125",
- },
+  Action: "$125",},
 ];
 
 interface Invoice {
@@ -64,7 +58,6 @@ const RecentNewUsers = () => {
  const totalPages = Math.ceil(invoices.length / PAGE_SIZE);
 
  const handleViewClick = () => {
-  // router.push(`/invoice/${id}`);
   router.push(`/company/users/details`);
  };
 
@@ -76,7 +69,8 @@ const RecentNewUsers = () => {
 
  return (
   <>
-   <div className="flex flex-1 flex-col gap-4">
+   <div className="flex flex-1 flex-col gap-4">   </div>
+
     <h1 className="text-2xl font-bold block md:hidden">Dashboard</h1>
 {/* container  */}
 
@@ -113,7 +107,7 @@ const RecentNewUsers = () => {
      </div>
 
 {/* bottom  */}
-<div className="px-[36px] py-[30px] h-auto bg-[#1B2236] rounded-tl-[20px] rounded-tr-[20px]">
+<div className="mt-[10px] px-[36px] py-[30px]  h-auto bg-[#1B2236] rounded-tl-[20px] rounded-tr-[20px]">
   <div className="justify-center text-white text-2xl font-bold font-['SF_Pro_Display'] leading-loose">Recent New Users</div>
   <div className="w-full rounded-none overflow-hidden">
     <div className="w-full overflow-auto h-[300px] scroll-container"> {/* Added scroll height */}
@@ -162,7 +156,6 @@ const RecentNewUsers = () => {
 
 
     </div>
-   </div>
   </>
  );
 };

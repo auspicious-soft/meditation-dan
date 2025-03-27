@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react"; // Added useState
+import React, { startTransition, useState } from "react"; // Added useState
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import LogoAuth from "../components/LogoAuth";
@@ -7,6 +7,7 @@ import BannerImage from "../components/BannerImage";
 import { InputOTP, InputOTPSlot } from "@/components/ui/input-otp";
 import { useRouter } from "next/navigation"; // Added for programmatic navigation
 import { toast } from "sonner"; // Optional: for user feedback
+import { sendOtpService } from "@/services/admin-services";
 
 export default function Home() {
  interface FormElements extends HTMLFormControlsCollection {
@@ -27,9 +28,25 @@ export default function Home() {
    toast.error("Please enter a valid OTP.");
    return;
   }
+  startTransition(async () => {
+      try {
+        const response = await sendOtpService({ otp: otpValue });
 
-  // Redirect to new-password with OTP as query parameter
-  router.push(`/new-password?otp=${encodeURIComponent(otpValue)}`);
+        if ( response.data.success) {
+          toast.success(response.data.message);
+          router.push(`/new-password?otp=${encodeURIComponent(otpValue)}`);
+        } else {
+          toast.error(response.data.message || "Invalid OTP.");
+        }
+      } catch (error) {
+        console.error("Error updating password:", error);
+        if ((error as any)?.response?.data?.message) {
+          toast.error((error as any)?.response?.data?.message);
+        } else {
+          toast.error("An unexpected error occurred.");
+        }
+      }
+    });
  };
  return (
   <div className="grid grid-cols-12 h-screen">
@@ -71,3 +88,4 @@ export default function Home() {
   </div>
  );
 }
+

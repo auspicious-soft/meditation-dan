@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 import { useEffect, useState, useRef } from "react";
+import { useParams, useRouter } from "next/navigation"; // Import useRouter for navigation and getting params
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -27,8 +28,9 @@ import { toast } from "sonner";
 import {
   generateSignedUrlForAudioImage,
   generateSignedUrlForAudios,
+  getImageUrlOfS3,
 } from "@/actions";
-import { getAllCollectionStats, getBestForStats, getlevelsStats, uploadAudioStats } from "@/services/admin-services";
+import { getAllCollectionStats, getBestForStats, getlevelsStats, uploadAudioStats, deleteAudio, getAudioDataById } from "@/services/admin-services";
 import { AxiosError } from "axios";
 
 // Interface for the collection data from the backend
@@ -43,6 +45,7 @@ interface Collection {
   createdAt: string;
   updatedAt: string;
 }
+
 interface CollectionsResponse {
   success: boolean;
   message: string;
@@ -50,15 +53,37 @@ interface CollectionsResponse {
     collections: Collection[];
   };
 }
+
+// Interface for the audio data from the backend
+interface Audio {
+  _id: string;
+  songName: string;
+  description: string;
+  collectionType: { _id: string; name: string };
+  levels: { _id: string; name: string }[];
+  bestFor: { _id: string; name: string };
+  audioUrl: string;
+  imageUrl: string;
+  duration: string;
+}
+
+interface AudioResponse {
+  success: boolean;
+  message: string;
+  data: Audio;
+}
+
 // Define FormValues type
 type FormValues = {
   collectionType: string;
   songName: string;
   description: string;
-  levels: string[]; // Added levels property
-  bestFor: string;  // Added bestFor property
-  audioFile: FileList;
-  imageFile: FileList;
+  levels: string[];
+  bestFor: string;
+  audioFile?: FileList | null | undefined;
+  imageFile?: FileList | null | undefined;
+  audioUrl?: string; // Add audioUrl to the type
+  imageUrl?: string; // Add imageUrl to the type
 };
 
 // Define schema
@@ -67,20 +92,15 @@ const schema = yup.object().shape({
   songName: yup.string().required("Song name is required"),
   description: yup.string().required("Description is required"),
   levels: yup
-        .array()
-        .of(yup.string().required("Each level must be a valid string"))
-        .min(1, "At least one level is required")
-        .required("Levels field is required"),
-      bestFor: yup.string().required("Best for is required"),
-  audioFile: yup
-    .mixed<FileList>()
-    .nullable()
-    .required("Audio file is required"),
-  imageFile: yup
-    .mixed<FileList>()
-    .nullable()
-    .required("Image file is required"),
+    .array()
+    .of(yup.string().required("Each level must be a valid string"))
+    .min(1, "At least one level is required")
+    .required("Levels field is required"),
+  bestFor: yup.string().required("Best for is required"),
+  audioFile: yup.mixed<FileList>().nullable(),
+  imageFile: yup.mixed<FileList>().nullable(),
 });
+
 interface LevelOption {
   id: string;
   name: string;
@@ -91,15 +111,19 @@ interface BestForOption {
   name: string;
 }
 
-const AddNewAudio = () => {
+const GetAudio = () => {
+  const params = useParams();
+  const [audioId, setAudioId] = useState<string | null>(null); // Store the audio ID from URL
   const [collections, setCollections] = useState<Collection[]>([]);
   const [audioPreview, setAudioPreview] = useState<string | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [loadingCollections, setLoadingCollections] = useState<boolean>(true)
+  const [existingAudioUrl, setExistingAudioUrl] = useState<string | null>(null); // Store existing audio URL
+  const [existingImageUrl, setExistingImageUrl] = useState<string | null>(null); // Store existing image URL
+  const [loadingCollections, setLoadingCollections] = useState<boolean>(true);
   const [isLoadingLevels, setIsLoadingLevels] = useState(false);
   const [levelsError, setLevelsError] = useState<string | null>(null);
-    const [levelOptions, setLevelOptions] = useState<LevelOption[]>([]);
-    const [bestForOptions, setBestForOptions] = useState<BestForOption[]>([]);
+  const [levelOptions, setLevelOptions] = useState<LevelOption[]>([]);
+  const [bestForOptions, setBestForOptions] = useState<BestForOption[]>([]);
   const [isLoadingBestFor, setIsLoadingBestFor] = useState(false);
   const [bestForError, setBestForError] = useState<string | null>(null);
   const [popoverWidth, setPopoverWidth] = useState("auto");
@@ -113,7 +137,8 @@ const AddNewAudio = () => {
     control,
     watch,
     setValue,
-    setError, 
+    setError,
+    reset,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
     resolver: yupResolver(schema),
@@ -121,43 +146,66 @@ const AddNewAudio = () => {
       collectionType: "",
       songName: "",
       description: "",
-      audioFile: undefined,
-      imageFile: undefined,
-      levels: [] as string[],
+      audioFile: null,
+      imageFile: null,
+      levels: [],
       bestFor: "",
-     
     },
   });
 
   const selectedLevels = watch("levels") || [];
   const selectedBestFor = watch("bestFor") || "";
-
-
-  const getAudioDuration = async (file: File) => {
-    const audioContext = new (window.AudioContext ||
-      (window as any).webkitAudioContext)();
-    const arrayBuffer = await file.arrayBuffer();
-    const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-    return audioBuffer.duration;
-  };
-  const formatDuration = (seconds: number): string => {
-    const hours = Math.floor(seconds / 3600); // Calculate hours (3600 seconds = 1 hour)
-    const minutes = Math.floor((seconds % 3600) / 60); // Calculate minutes from remaining seconds
-    const secs = Math.floor(seconds % 60); // Calculate seconds
-    const formattedHours = String(hours).padStart(2, "0"); // Ensure 2 digits (e.g., "00")
-    const formattedMinutes = String(minutes).padStart(2, "0"); // Ensure 2 digits (e.g., "05")
-    const formattedSeconds = String(secs).padStart(2, "0"); // Ensure 2 digits (e.g., "30")
-    return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`; // Return "HH:MM:SS"
-  };
-  // Watch file inputs for preview updates
   const audioFile = watch("audioFile");
   const imageFile = watch("imageFile");
 
+  // Fetch audio data based on ID
   useEffect(() => {
+    const fetchAudioData = async () => {
+      const id = Array.isArray(params.id) ? params.id[0] : params.id; // Ensure id is a string
+      if (!id) return;
+
+      setAudioId(id);
+      try {
+        const response = await getAudioDataById(`/api/audio/${id}`); // Replace with your actual API endpoint to fetch audio
+        const data: AudioResponse = await response.data;
+
+        if (data.success) {
+          const audioData = data.data;
+          // Pre-fill form with fetched data
+          reset({
+            collectionType: audioData.collectionType._id,
+            songName: audioData.songName,
+            description: audioData.description,
+            levels: audioData.levels.map((level) => level._id),
+            bestFor: audioData.bestFor._id,
+            audioFile: null,
+            imageFile: null,
+          });
+
+          // Resolve S3 URLs for audio and image
+          if (audioData.audioUrl) {
+            const audioUrl = await getImageUrlOfS3(audioData.audioUrl);
+            setExistingAudioUrl(audioUrl);
+            setAudioPreview(audioUrl);
+          }
+          if (audioData.imageUrl) {
+            const imageUrl = await getImageUrlOfS3(audioData.imageUrl);
+            setExistingImageUrl(imageUrl);
+            setImagePreview(imageUrl);
+          }
+        } else {
+          throw new Error(data.message || "Failed to fetch audio data");
+        }
+      } catch (error) {
+        console.error("Error fetching audio data:", error);
+        toast.error("Failed to load audio data");
+      }
+    };
+
     const fetchCollections = async () => {
       try {
         setLoadingCollections(true);
-        const response = await getAllCollectionStats("/collection"); // Replace with your actual API endpoint
+        const response = await getAllCollectionStats("/collection");
         const data: CollectionsResponse = await response.data;
 
         if (data.success) {
@@ -172,85 +220,90 @@ const AddNewAudio = () => {
         setLoadingCollections(false);
       }
     };
+
     const fetchLevels = async () => {
-          setIsLoadingLevels(true);
-          setLevelsError(null);
-          try {
-            const response = await getlevelsStats("/level", {});
-          
-    
-            if (response?.data?.success && Array.isArray(response?.data?.data)) {
-              const transformedLevels = response.data.data
-                .filter((level: any) => level.isActive)
-                .map((level: any) => ({
-                  id: level._id,
-                  name: level.name,
-                }));
-              setLevelOptions(transformedLevels);
-            } else {
-              setLevelsError(response?.data?.message || "Failed to load levels");
-            }
-          } catch (error) {
-            console.error("Error fetching levels:", error);
-            setLevelsError("An error occurred while fetching levels");
-          } finally {
-            setIsLoadingLevels(false);
-          }
-        };
-    
-        const fetchBestForOptions = async () => {
-          setIsLoadingBestFor(true);
-          setBestForError(null);
-          try {
-            const response = await getBestForStats("/bestfor", {});
-    
-            if (response?.data?.success && Array.isArray(response?.data?.data)) {
-              const transformedOptions = response.data.data
-                .filter((option: any) => option.isActive)
-                .map((option: any) => ({
-                  id: option._id,
-                  name: option.name,
-                }));
-              setBestForOptions(transformedOptions);
-            } else {
-              setBestForError(
-                response?.data?.message || "Failed to load best for options"
-              );
-            }
-          } catch (error) {
-            console.error("Error fetching best for options:", error);
-            setBestForError("An error occurred while fetching best for options");
-          } finally {
-            setIsLoadingBestFor(false);
-          }
-        };
-    
-        fetchLevels();
-        fetchBestForOptions();
+      setIsLoadingLevels(true);
+      setLevelsError(null);
+      try {
+        const response = await getlevelsStats("/level", {});
+        if (response?.data?.success && Array.isArray(response?.data?.data)) {
+          const transformedLevels = response.data.data
+            .filter((level: any) => level.isActive)
+            .map((level: any) => ({
+              id: level._id,
+              name: level.name,
+            }));
+          setLevelOptions(transformedLevels);
+        } else {
+          setLevelsError(response?.data?.message || "Failed to load levels");
+        }
+      } catch (error) {
+        console.error("Error fetching levels:", error);
+        setLevelsError("An error occurred while fetching levels");
+      } finally {
+        setIsLoadingLevels(false);
+      }
+    };
+
+    const fetchBestForOptions = async () => {
+      setIsLoadingBestFor(true);
+      setBestForError(null);
+      try {
+        const response = await getBestForStats("/bestfor", {});
+        if (response?.data?.success && Array.isArray(response?.data?.data)) {
+          const transformedOptions = response.data.data
+            .filter((option: any) => option.isActive)
+            .map((option: any) => ({
+              id: option._id,
+              name: option.name,
+            }));
+          setBestForOptions(transformedOptions);
+        } else {
+          setBestForError(
+            response?.data?.message || "Failed to load best for options"
+          );
+        }
+      } catch (error) {
+        console.error("Error fetching best for options:", error);
+        setBestForError("An error occurred while fetching best for options");
+      } finally {
+        setIsLoadingBestFor(false);
+      }
+    };
+
+    fetchAudioData();
+    fetchLevels();
+    fetchBestForOptions();
     fetchCollections();
-  }, []);
+  }, [reset]);
 
   // Update audio preview
   useEffect(() => {
     if (audioFile && audioFile.length > 0) {
       const audioUrl = URL.createObjectURL(audioFile[0]);
       setAudioPreview(audioUrl);
+      setExistingAudioUrl(null); // Clear existing audio URL since a new file is selected
       return () => URL.revokeObjectURL(audioUrl);
+    } else if (existingAudioUrl) {
+      setAudioPreview(existingAudioUrl);
     } else {
       setAudioPreview(null);
     }
-  }, [audioFile]);
+  }, [audioFile, existingAudioUrl]);
 
   // Update image preview
   useEffect(() => {
     if (imageFile && imageFile.length > 0) {
       const imageUrl = URL.createObjectURL(imageFile[0]);
       setImagePreview(imageUrl);
+      setExistingImageUrl(null); // Clear existing image URL since a new file is selected
       return () => URL.revokeObjectURL(imageUrl);
+    } else if (existingImageUrl) {
+      setImagePreview(existingImageUrl);
     } else {
       setImagePreview(null);
     }
-  }, [imageFile]);
+  }, [imageFile, existingImageUrl]);
 
   // Remove handlers
   const handleRemoveAudio = () => {
@@ -258,7 +311,8 @@ const AddNewAudio = () => {
       audioInputRef.current.value = "";
     }
     setAudioPreview(null);
-    setValue("audioFile", new DataTransfer().files); // Clear form state
+    setExistingAudioUrl(null);
+    setValue("audioFile", null);
   };
 
   const handleRemoveImage = () => {
@@ -266,8 +320,10 @@ const AddNewAudio = () => {
       imageInputRef.current.value = "";
     }
     setImagePreview(null);
-    setValue("imageFile", new DataTransfer().files); // Clear form state
+    setExistingImageUrl(null);
+    setValue("imageFile", null);
   };
+
   const debounce = (
     func: (...args: unknown[]) => void,
     delay: number
@@ -279,7 +335,6 @@ const AddNewAudio = () => {
     };
   };
 
-  // Function to update the popover width
   const updateWidth = () => {
     if (triggerRef.current) {
       const width = triggerRef.current.getBoundingClientRect().width;
@@ -287,53 +342,39 @@ const AddNewAudio = () => {
     }
   };
 
-  // Debounced version of updateWidth
-  const debouncedUpdateWidth = debounce(updateWidth, 0); // 100ms delay
+  const debouncedUpdateWidth = debounce(updateWidth, 0);
 
   useEffect(() => {
-    updateWidth(); // Set the initial width
-
-    // Add resize event listener with debouncing
+    updateWidth();
     window.addEventListener("resize", debouncedUpdateWidth);
-
-    // Cleanup
     return () => window.removeEventListener("resize", debouncedUpdateWidth);
   }, []);
 
-  // Form submission handler
+  // Form submission handler (Update Audio)
   const onSubmit = async (data: FormValues) => {
+    if (!audioId) return;
+
     try {
-      let audioKey = null;
-      let imageKey = null;
+      let audioKey = existingAudioUrl ? data.audioUrl : null;
+      let imageKey = existingImageUrl ? data.imageUrl : null;
       let formattedDuration = null;
-      // Upload audio to S3
-      if (!data.audioFile || data.audioFile.length === 0) {
-        setError("audioFile", { type: "manual", message: "Please upload audio file" });
-        return;
-      }
-      if (!data.imageFile || data.imageFile.length === 0) {
-        setError("imageFile", { type: "manual", message: "Please upload an image file" });
-        return;
-      }
 
       if (data.audioFile && data.audioFile.length > 0) {
         const audio = data.audioFile[0];
-        const duration = await getAudioDuration(audio); // Returns a number, e.g., 330
+        const duration = await getAudioDuration(audio);
         console.log("duration:", duration);
-       
-        
+
         const selectedCollection = collections.find((col) => col._id === data.collectionType);
-      if (!selectedCollection) {
-        toast.error("Selected collection not found");
-        return;
-      }
-      const collectionNameForAWS = selectedCollection.name.toLowerCase(); // e.g., "fds"
-      const songName = data.songName.toLowerCase();
-        // Convert to "HH:MM:SS" format
+        if (!selectedCollection) {
+          toast.error("Selected collection not found");
+          return;
+        }
+        const collectionNameForAWS = selectedCollection.name.toLowerCase();
+        const songName = data.songName.toLowerCase();
+
         formattedDuration = formatDuration(duration);
         console.log("formattedDuration:", formattedDuration);
-       
-      
+
         const audioFileName = `${audio.name}`;
         const { signedUrl, key } = await generateSignedUrlForAudios(
           collectionNameForAWS,
@@ -359,17 +400,15 @@ const AddNewAudio = () => {
         audioKey = key;
       }
 
-      
-      // Upload image to S3
       if (data.imageFile && data.imageFile.length > 0) {
         const image = data.imageFile[0];
         const selectedCollection = collections.find((col) => col._id === data.collectionType);
-      if (!selectedCollection) {
-        toast.error("Selected collection not found");
-        return;
-      }
-      const collectionNameForAWS = selectedCollection.name.toLowerCase(); // e.g., "fds"
-      const songName = data.songName.toLowerCase();
+        if (!selectedCollection) {
+          toast.error("Selected collection not found");
+          return;
+        }
+        const collectionNameForAWS = selectedCollection.name.toLowerCase();
+        const songName = data.songName.toLowerCase();
         const imageFileName = `${image.name}`;
         const { signedUrl, key } = await generateSignedUrlForAudioImage(
           collectionNameForAWS,
@@ -390,7 +429,6 @@ const AddNewAudio = () => {
       }
 
       console.log("imageKey:", imageKey);
-      // Prepare payload for backend
       const payload = {
         songName: data.songName,
         collectionType: data.collectionType,
@@ -401,27 +439,69 @@ const AddNewAudio = () => {
         levels: data.levels,
         bestFor: data.bestFor,
       };
-      console.log('payload:', payload);
+      console.log("payload:", payload);
 
-      // Send to backend
-      const response = await uploadAudioStats("/admin/upload-audio", payload);
+      // Update audio on backend
+      const response = await fetch(`/api/audio/${audioId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
-      if (response?.status === 201) {
-        toast.success("Audio added successfully");
+      const result = await response.json();
+      if (response.ok && result.success) {
+        toast.success("Audio updated successfully");
         setTimeout(() => {
-        window.location.href = "/admin/audio-files"
-      }, 1000);
+          window.location.href = "/admin/audio-files";
+        }, 1000);
       } else {
-        toast.error(response?.data?.message || "Failed to add audio");
+        toast.error(result?.message || "Failed to update audio");
       }
     } catch (error) {
-      console.log("Error while uploading audio:", error);
-      // Check if it's an AxiosError with a response
+      console.log("Error while updating audio:", error);
       if (error instanceof AxiosError && error.response?.data?.message) {
-        toast.error(error.response.data.message); // Display backend message
+        toast.error(error.response.data.message);
       } else {
-        toast.error(error instanceof Error ? error.message : "An error occurred while adding audio");
-      }}
+        toast.error(error instanceof Error ? error.message : "An error occurred while updating audio");
+      }
+    }
+  };
+
+  // Delete audio handler
+  const handleDelete = async () => {
+    if (!audioId) return;
+
+    try {
+      const response = await deleteAudio(`/audio/${audioId}`);
+      if (response?.data?.success) {
+        toast.success("Audio deleted successfully");
+        setTimeout(() => {
+          window.location.href = "/admin/audio-files";
+        }, 1000);
+      } else {
+        throw new Error(response?.data?.message || "Failed to delete audio");
+      }
+    } catch (error) {
+      console.error("Error deleting audio:", error);
+      toast.error("Failed to delete audio");
+    }
+  };
+
+  const getAudioDuration = async (file: File) => {
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const arrayBuffer = await file.arrayBuffer();
+    const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+    return audioBuffer.duration;
+  };
+
+  const formatDuration = (seconds: number): string => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = Math.floor(seconds % 60);
+    const formattedHours = String(hours).padStart(2, "0");
+    const formattedMinutes = String(minutes).padStart(2, "0");
+    const formattedSeconds = String(secs).padStart(2, "0");
+    return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
   };
 
   return (
@@ -429,7 +509,10 @@ const AddNewAudio = () => {
       onSubmit={handleSubmit(onSubmit)}
       className="p-6 bg-[#1B2236] text-white rounded-lg shadow-md"
     >
-      <h2 className="text-xl font-semibold mb-4">Add New Audio</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-semibold">Edit Audio</h2>
+        
+      </div>
 
       {/* Collection Type */}
       <Label className="text-gray-300 mb-3 block">Collection Type</Label>
@@ -442,12 +525,12 @@ const AddNewAudio = () => {
               <SelectValue placeholder="Select Collection Type" />
             </SelectTrigger>
             <SelectContent className="bg-[#0B132B] border-gray-700 text-white">
-            {loadingCollections ? (
+              {loadingCollections ? (
                 <SelectItem value="loading">Loading collections...</SelectItem>
               ) : collections.length > 0 ? (
                 collections.map((collection) => (
                   <SelectItem key={collection._id} value={collection._id}>
-                    {collection.name} 
+                    {collection.name}
                   </SelectItem>
                 ))
               ) : (
@@ -458,23 +541,21 @@ const AddNewAudio = () => {
         )}
       />
       {errors.collectionType && (
-        <p className="text-red-500 text-xs mb-4">
-          {errors.collectionType.message}
-        </p>
+        <p className="text-red-500 text-xs mb-4">{errors.collectionType.message}</p>
       )}
 
       {/* Song Name */}
       <Label className="text-gray-300 mb-3 block">Song Name</Label>
       <Input
         {...register("songName")}
-        placeholder="Enter Collection Name"
+        placeholder="Enter Song Name"
         className="mb-4 bg-[#0B132B] border-none h-12 placeholder:text-white text-white autofill-fix"
       />
       {errors.songName && (
         <p className="text-red-500 text-xs mb-4">{errors.songName.message}</p>
       )}
 
-<Label className="text-gray-300 mb-3 block">Level</Label>
+      <Label className="text-gray-300 mb-3 block">Level</Label>
       <Popover>
         <PopoverTrigger asChild>
           <Button
@@ -538,7 +619,7 @@ const AddNewAudio = () => {
         <p className="text-red-500 text-sm">{errors.levels.message}</p>
       )}
 
-<Label className="text-gray-300 mb-3 block">Best for</Label>
+      <Label className="text-gray-300 mb-3 block">Best for</Label>
       <Select
         onValueChange={(value) => setValue("bestFor", value)}
         value={selectedBestFor}
@@ -582,9 +663,7 @@ const AddNewAudio = () => {
         className="mb-4 bg-[#0B132B] border-none text-white"
       />
       {errors.description && (
-        <p className="text-red-500 text-xs mb-4">
-          {errors.description.message}
-        </p>
+        <p className="text-red-500 text-xs mb-4">{errors.description.message}</p>
       )}
 
       {/* File Upload Section */}
@@ -626,7 +705,7 @@ const AddNewAudio = () => {
                   accept=".mp3,.aac,.ogg,.wav"
                   onChange={(e) => {
                     const file = e.target.files?.[0] || null;
-                    setValue("audioFile", e.target.files as FileList); // Manually update form state
+                    setValue("audioFile", e.target.files as FileList);
                     if (file) {
                       setAudioPreview(URL.createObjectURL(file));
                     }
@@ -634,17 +713,15 @@ const AddNewAudio = () => {
                   ref={audioInputRef}
                 />
                 <div className="border p-1 px-4 rounded-sm border-white text-gray-300 cursor-pointer">
-                  Choose Audio File
+                  {audioPreview ? "Change Audio File" : "Choose Audio File"}
                 </div>
               </label>
             </div>
           </div>
           <p className="text-xs text-gray-500 mb-4">Max size: 30 MB</p>
           {errors.audioFile && (
-  <p className="text-red-500 text-xs mb-4">
-    {errors.audioFile.message}
-  </p>
-)}
+            <p className="text-red-500 text-xs mb-4">{errors.audioFile.message}</p>
+          )}
         </div>
 
         {/* Upload Image */}
@@ -686,7 +763,7 @@ const AddNewAudio = () => {
                   accept="image/jpeg,image/png"
                   onChange={(e) => {
                     const file = e.target.files?.[0] || null;
-                    setValue("imageFile", e.target.files as FileList); // Manually update form state
+                    setValue("imageFile", e.target.files as FileList);
                     if (file) {
                       setImagePreview(URL.createObjectURL(file));
                     }
@@ -694,30 +771,38 @@ const AddNewAudio = () => {
                   ref={imageInputRef}
                 />
                 <div className="border p-1 px-4 rounded-sm border-white text-gray-300 cursor-pointer">
-                  Choose Image
+                  {imagePreview ? "Change Image" : "Choose Image"}
                 </div>
               </label>
             </div>
           </div>
           <p className="text-xs text-gray-500 mb-4">Size: 170x170 pixels</p>
           {errors.imageFile && (
-            <p className="text-red-500 text-xs mb-4">
-              {errors.imageFile.message}
-            </p>
+            <p className="text-red-500 text-xs mb-4">{errors.imageFile.message}</p>
           )}
         </div>
       </div>
 
       {/* Submit Button */}
+      <div className="flex flex-wrap justify-start items-center gap-2">
       <Button
         type="submit"
-        className="bg-[#1A3F70] hover:cursor-pointer hover:bg-[#1A3F70] max-w-52"
+        className="bg-[#1A3F70] hover:cursor-pointer hover:bg-[#1A3F70] w-52"
         disabled={isSubmitting}
       >
-        {isSubmitting ? "Uploading..." : "Upload"}
+        {isSubmitting ? "Saving..." : "Save"}
       </Button>
+      <Button
+          type="button"
+          variant="destructive"
+          onClick={handleDelete}
+          className="bg-[#FF4747] hover:bg-[#FF4747] w-52"
+        >
+          Delete Audio
+        </Button>
+      </div>
     </form>
   );
 };
 
-export default AddNewAudio;
+export default GetAudio;

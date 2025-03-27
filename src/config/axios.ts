@@ -15,24 +15,8 @@ const createAuthInstance = async () => {
         return axios.create({
             baseURL: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`,
             headers: {
-                Authorization: `Bearer ${token}`,
-                'role' : 'admin', 
-                'Content-Type': 'application/json'
-            },
-        })
-    } catch (error) {
-        console.error('Error getting token:', error);
-        throw error
-    }
-};
-const createPublisherInstance = async () => {
-    try {
-        const token = await getTokenCustom();
-        return axios.create({
-            baseURL: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`,
-            headers: {
-                Authorization: `Bearer ${token}`,
-                'role' : 'publisher', 
+                // Authorization: `Bearer ${token}`,
+                'role' : 'admin',
                 'Content-Type': 'application/json'
             },
         })
@@ -44,11 +28,4 @@ const createPublisherInstance = async () => {
 
 export const getAxiosInstance = async () => {
     return await createAuthInstance()
-}
-export const getAxiosInstanceForPublisher = async () => {
-    return await createPublisherInstance()
-}
-
-export const getImageClientS3URL = (key: string) => {
-   return`${process.env.NEXT_PUBLIC_AWS_BUCKET_PATH}${key}`
-}
+};

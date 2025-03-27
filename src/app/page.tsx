@@ -11,8 +11,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
-import LogoAuth from "./components/LogoAuth";
-import BannerImage from "./components/BannerImage";
+import LogoAuth from "./(auth)/components/LogoAuth";
+import BannerImage from "./(auth)/components/BannerImage";
 import { useSession } from "next-auth/react";
 
 export default function LoginPage() {
@@ -55,15 +55,17 @@ export default function LoginPage() {
   startTransition(async () => {
    try {
     const response = await loginAction({ email, password });
+    console.log('response: ', response);
     if (response?.success) {
+      const userRole = response?.data?.user?.role;
+      if (userRole === "user") {
+       toast.error("You are not authorized to access this page.");
+       return;
+      }
      toast.success("Logged in successfully");
      // Redirect based on role
-     const userRole = response?.data?.user?.role;
-     console.log("response: ", response);
       router.push(userRole === "company" ? "/company/dashboard" : "/admin/dashboard");
-    } else if (response?.message === "Invalid password") {
-     setErrorMessage("Incorrect password. Please try again.");
-    } else {
+    }  else {
      toast.error(response?.message || "Invalid email or password.");
     }
    } catch (error) {
