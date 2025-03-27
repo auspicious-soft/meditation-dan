@@ -149,7 +149,9 @@ import { EyeOffIcon, EyeIcon } from "lucide-react";
 import BannerImage from "../components/BannerImage";
 import LogoAuth from "../components/LogoAuth";
 import { useRouter, useSearchParams } from "next/navigation";
+// import { toast } from "sonner";
 import { toast } from "sonner";
+
 
 export default function NewPasswordPage() {
  const [showNewPassword, setShowNewPassword] = useState(false);
