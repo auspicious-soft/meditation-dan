@@ -45,7 +45,7 @@ export default function Home() {
        <form onSubmit={handleSubmit}>
         <div className="space-y-6">
          <InputOTP
-          maxLength={6}
+          maxLength={4}
           value={otpValue} // Bind OTP value to state
           onChange={(value) => setOtpValue(value)} // Update state on change
           className="border-none justify-between flex !gap-10"
