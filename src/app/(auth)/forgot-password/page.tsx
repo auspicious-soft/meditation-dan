@@ -35,7 +35,7 @@ export default function Home() {
       console.log('data: ', data);
 
       if (response.ok && data.success) {
-        toast.error(data.message);
+        toast.success(data.message);
 
         router.push("/reset-password");
       } else {
