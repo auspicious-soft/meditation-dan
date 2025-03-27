@@ -1,40 +1,43 @@
 "use server";
 
-// import { signIn, signOut } from "@/auth";
-// import { loginService } from "@/services/admin-services";
+import { signIn, signOut } from "@/auth";
+import { loginService } from "@/services/admin-services";
 import { cookies } from "next/headers";
 import { createS3Client } from "@/config/s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand,  } from "@aws-sdk/client-s3";
 
-// export const loginAction = async (payload: any) => {
-//   try {
-//     const res: any = await loginService(payload);
-//     const user = res?.data?.data?.user;
-//     const userName = user.name ? user.name.eng : user.fullName;
-//     if (res && res?.data?.success) {
-//       await signIn("credentials", {
-//         username: payload.username,
-//         fullName: userName,
-//         _id: res?.data?.data?.user?._id,
-//         role: res?.data?.data?.user?.role,
-//         profilePic: res?.data?.data?.user?.image,
-//         redirect: false,
-//       });
-//     }
-//     return res.data;
-//   } catch (error: any) {
-//     return error?.response?.data;
-//   }
-// };
 
-// export const logoutAction = async () => {
-//   try {
-//     await signOut();
-//   } catch (error: any) {
-//     return error?.response?.data;
-//   }
-// };
+export const loginAction = async (payload: any) => {
+  try {
+    const res: any = await loginService(payload);
+    const user = res?.data?.data?.user;
+    const userName =  user.firstName + " " + user.lastName;
+    if (res && res?.data?.success) {
+      await signIn("credentials", {
+        email: user.email, 
+        fullName: userName,
+        _id: user._id,
+        role: user?.role,
+        profilePic: user.image,
+        redirect: false,
+      });
+    }
+    return res?.data;
+  } catch (error: any) {
+    return error?.response?.data;
+  }
+};
+
+
+
+export const logoutAction = async () => {
+  try {
+    await signOut();
+  } catch (error: any) {
+    return error?.response?.data;
+  }
+};
 
 export const getTokenCustom = async () => {
   const cookiesOfNextAuth = await cookies();
