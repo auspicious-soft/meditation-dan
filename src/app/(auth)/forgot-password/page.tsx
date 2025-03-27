@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import LogoAuth from "../components/LogoAuth";
 import BannerImage from "../components/BannerImage";
-import Link from "next/link";
+// import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 export default function Home() {

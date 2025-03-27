@@ -22,6 +22,7 @@ export default function LoginPage() {
  const [isPending, startTransition] = React.useTransition();
  const router = useRouter();
  const [errorMessage, setErrorMessage] = useState("");
+ console.log('errorMessage: ', errorMessage);
  const { data: session } = useSession();
 
  useEffect(() => {

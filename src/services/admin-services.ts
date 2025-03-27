@@ -1,4 +1,4 @@
-import { axiosInstance, getAxiosInstance } from "@/config/axios";
+import { axiosInstance } from "@/config/axios";
 
 export const loginService = async (payload: any) => {
  const res = await axiosInstance.post(`/login`, { email: payload.email, password: payload.password });

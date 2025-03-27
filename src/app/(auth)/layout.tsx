@@ -1,7 +1,7 @@
 import "../globals.css";
 // import { DM_Sans } from "next/font/google";
-import type { Metadata } from "next";
-import localFont from "next/font/local";
+// import type { Metadata } from "next";
+// import localFont from "next/font/local";
 // import "./globals.css";
 import { Toaster } from "sonner";
 // import Providers from "./components/ProgressBarProvider";
