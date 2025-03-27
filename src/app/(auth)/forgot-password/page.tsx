@@ -22,7 +22,6 @@ export default function Home() {
   const handleSubmit = async (e: React.FormEvent<SignInFormElement>) => {
     e.preventDefault();
     const email = e.currentTarget.elements.email.value;
-    console.log("email: ", email);
 
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/forgot-password`, {
