@@ -124,8 +124,13 @@ export default function LoginPage() {
           </Link>
          </div>
 
+  <Link href="/signup" className="text-[#9a9a9a] text-base font-medium ">
+  Dont have an account?
+  <span className="hover:underline"> Sign Up</span>
+</Link>  
+
          {/* Sign In Button */}
-         <Button type="submit" className="px-3 py-1.5 bg-[#1a3f70] h-auto rounded-lg text-white text-lg font w-full leading-[30px] hover:bg-[#1a3f70]" disabled={isPending}>
+         <Button type="submit" className="mt-[20px] px-3 py-1.5 bg-[#1a3f70] h-auto rounded-lg text-white text-lg font w-full leading-[30px] hover:bg-[#1a3f70]" disabled={isPending}>
           {isPending ? "Signing in..." : "Sign in"}
          </Button>
         </div>

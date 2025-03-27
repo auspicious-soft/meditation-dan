@@ -127,23 +127,27 @@ const Page = () => {
      </div>
      
     </div>
-  
-    <div className="flex gap-4 mt-12">
-     <Button variant="destructive" className="bg-[#FF4747] w-48 h-11 hover:bg-[#FF4747] hover:cursor-pointer" onClick={() => setIsDialogOpen(true)}>
-      Decline Account
-     </Button>
+ 
+    <div className="flex flex-wrap gap-4 mt-12 justify-center md:justify-start">
+  <Button
+    variant="destructive"
+    className="bg-[#FF4747] w-full md:w-48 h-11 hover:bg-[#FF4747] hover:cursor-pointer text-center"
+    onClick={() => setIsDialogOpen(true)}
+  >
+    Decline Account
+  </Button>
 
-     <Button variant="default" className="bg-[#1A3F70] w-48 h-11 hover:bg-[#1A3F70] hover:cursor-pointer" onClick={handleSave}>
-      Approve Account
-     </Button>
-     {/* <Button
-            variant="default"
-            className="bg-[#1A3F70] w-28 h-11 hover:bg-[#1A3F70] hover:cursor-pointer"
-            onClick={handleSave}
-          >
-            Save
-          </Button> */}
-    </div>
+  <Button
+    variant="default"
+    className="bg-[#1A3F70] w-full md:w-48 h-11 hover:bg-[#1A3F70] hover:cursor-pointer text-center"
+    onClick={handleSave}
+  >
+    Approve Account
+  </Button>
+</div>
+
+
+
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
      <DialogContent className="bg-[#141B2D] border-[#1F2937] w-[450px]  p-6 flex flex-col  items-center text-white rounded-lg">
       <DialogHeader className="text-center">

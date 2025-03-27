@@ -8,6 +8,9 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand,  } from "@aws-sdk/client-s3";
 
 
+export const signupAction = async (payload: any) => {
+  
+}
 export const loginAction = async (payload: any) => {
   try {
     const res: any = await loginService(payload);
