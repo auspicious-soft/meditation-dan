@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import Image from "next/image";
 import { getAllCollectionStats } from "@/services/admin-services";
-import { getImageUrlOfS3 } from "@/actions";
 
 interface Collection {
   _id: string;
@@ -31,21 +30,16 @@ interface ApiResponse {
   };
 }
 
-// Extend Collection with a resolved image URL
-interface EnhancedCollection extends Collection {
-  resolvedImageUrl: string;
-}
-
 const AllCollection: React.FC = () => {
   const router = useRouter();
-  const [collections, setCollections] = useState<EnhancedCollection[]>([]);
+  const [collections, setCollections] = useState<Collection[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(0);
   const limit = 10;
 
-  // Fetch collections with pagination and resolve image URLs
+  // Fetch collections with pagination
   useEffect(() => {
     const fetchCollections = async () => {
       try {
@@ -58,16 +52,7 @@ const AllCollection: React.FC = () => {
         const data: ApiResponse = response.data;
 
         if (data.success) {
-          // Resolve image URLs for each collection
-          const enhancedCollections = await Promise.all(
-            data.data.collections.map(async (collection) => ({
-              ...collection,
-              resolvedImageUrl: collection.imageUrl
-                ? await getImageUrlOfS3(collection.imageUrl)
-                : "/default-placeholder.png",
-            }))
-          );
-          setCollections(enhancedCollections);
+          setCollections(data.data.collections);
           setTotalPages(data.data.pagination.totalPages);
         } else {
           throw new Error(data.message || "Failed to fetch collections");
@@ -82,6 +67,10 @@ const AllCollection: React.FC = () => {
 
     fetchCollections();
   }, [currentPage]);
+
+  const getS3Url = (subPath: string) => {
+    return `${process.env.NEXT_PUBLIC_AWS_BUCKET_PATH}${subPath}`;
+  };
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
@@ -119,15 +108,15 @@ const AllCollection: React.FC = () => {
             >
               <CardContent className="p-0">
                 <Image
-                  src={collection.resolvedImageUrl}
-                  alt={collection.name}
+                  src={collection?.imageUrl ? getS3Url(collection?.imageUrl) : "/default-placeholder.png"}
+                  alt={collection?.name}
                   width={200}
                   height={200}
                   className="w-60 h-48 object-cover rounded-xl"
                 />
               </CardContent>
               <div className="text-white text-center bg-transparent p-2 text-sm font-medium">
-                {collection.name}
+                {collection?.name}
               </div>
             </Card>
           ))}

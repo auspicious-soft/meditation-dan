@@ -6,7 +6,6 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { getAllAudiosStats } from "@/services/admin-services";
 import { deleteAudio } from "@/services/admin-services";
-import { getImageUrlOfS3 } from "@/actions";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import {
   Dialog,
@@ -47,14 +46,9 @@ interface ApiResponse {
   };
 }
 
-interface EnhancedAudio extends Audio {
-  resolvedImageUrl: string;
-  resolvedAudioUrl: string;
-}
-
 const AudioList = () => {
   const router = useRouter();
-  const [audios, setAudios] = useState<EnhancedAudio[]>([]);
+  const [audios, setAudios] = useState<Audio[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -78,18 +72,7 @@ const AudioList = () => {
         const data: ApiResponse = response.data;
 
         if (data.success) {
-          const enhancedAudios = await Promise.all(
-            data.data.audios.map(async (audio) => ({
-              ...audio,
-              resolvedImageUrl: audio.imageUrl
-                ? await getImageUrlOfS3(audio.imageUrl)
-                : "/default-placeholder.png",
-              resolvedAudioUrl: audio.audioUrl
-                ? await getImageUrlOfS3(audio.audioUrl)
-                : "",
-            }))
-          );
-          setAudios(enhancedAudios);
+          setAudios(data.data.audios);
           setTotalPages(data.data.pagination.totalPages);
         } else {
           throw new Error(data.message || "Failed to fetch audios");
@@ -112,8 +95,14 @@ const AudioList = () => {
     };
   }, [currentPage]);
 
-  const handlePlayPause = async (audio: EnhancedAudio) => {
-    if (!audio.resolvedAudioUrl) return;
+  const getS3Url = (subPath: string) => {
+    return `${process.env.NEXT_PUBLIC_AWS_BUCKET_PATH}${subPath}`;
+  };
+
+  const handlePlayPause = async (audio: Audio) => {
+    if (!audio.audioUrl) return;
+
+    const audioUrl = getS3Url(audio.audioUrl);
 
     if (playingAudioId === audio._id) {
       if (audioRef.current) {
@@ -127,7 +116,7 @@ const AudioList = () => {
         audioRef.current = null;
       }
 
-      const newAudio = new Audio(audio.resolvedAudioUrl);
+      const newAudio = new Audio(audioUrl);
       audioRef.current = newAudio;
 
       try {
@@ -151,7 +140,6 @@ const AudioList = () => {
 
       if (response?.data?.success) {
         toast.success("Audio deleted successfully");
-        // Refresh the page to refetch the updated audio list
         window.location.reload();
       } else {
         throw new Error(response?.data?.message || "Failed to delete audio");
@@ -170,7 +158,7 @@ const AudioList = () => {
   };
 
   const handlePageChange = (newPage: number) => {
-    if (newPage >= 1 && newPage <= totalPages) {
+    if (newPage >= 1 && newPage <= totalPages && newPage !== currentPage) {
       setCurrentPage(newPage);
     }
   };
@@ -208,8 +196,8 @@ const AudioList = () => {
           >
             <div className="rounded bg-slate-800 overflow-hidden flex-shrink-0">
               <Image
-                src={audio.resolvedImageUrl}
-                alt={audio.songName}
+                src={audio?.imageUrl ? getS3Url(audio?.imageUrl) : "/default-placeholder.png"}
+                alt={audio?.songName}
                 className="object-cover"
                 width={60}
                 height={40}
@@ -219,27 +207,27 @@ const AudioList = () => {
 
             <div className="flex-1 min-w-0 mx-3">
               <div className="text-sm text-center text-slate-400">Music Name:</div>
-              <div className="text-white text-center font-medium truncate">{audio.songName}</div>
+              <div className="text-white text-center font-medium truncate">{audio?.songName}</div>
             </div>
 
             <div className="text-center flex-1 min-w-0 mx-3">
               <div className="text-sm text-center text-slate-400">Duration</div>
               <div className="flex text-center items-center justify-center text-white">
                 <Clock size={14} className="mr-1" />
-                <span>{audio.duration}</span>
+                <span>{audio?.duration}</span>
               </div>
             </div>
 
             <div className="text-center flex-1 min-w-0 mx-3">
               <div className="text-sm text-center text-slate-400">Collection</div>
-              <div className="text-white text-center border-0 truncate">{audio.collectionType?.name || "Unknown Collection"}</div>
+              <div className="text-white text-center border-0 truncate">{audio?.collectionType?.name || "Unknown Collection"}</div>
             </div>
 
             <div>
               <button
                 className="text-slate-400 hover:cursor-pointer rounded-md bg-[#1B2236] p-2 hover:text-white"
                 onClick={() => handlePlayPause(audio)}
-                disabled={!audio.resolvedAudioUrl}
+                disabled={!audio?.audioUrl}
               >
                 {playingAudioId === audio._id ? <Pause size={25} /> : <Play size={24} color="white" fill="white" />}
               </button>
