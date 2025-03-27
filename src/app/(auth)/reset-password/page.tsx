@@ -16,11 +16,11 @@ export default function Home() {
     password: HTMLInputElement;
   }
 
-  interface SignInFormElement extends HTMLFormElement {
-    readonly elements: FormElements;
-  }
+//   interface SignInFormElement extends HTMLFormElement {
+//     readonly elements: FormElements;
+//   }
 
-  const handleSubmit = (e: React.FormEvent<SignInFormElement>) => {
+  const handleSubmit = (e:any ) => {
     e.preventDefault();
     console.log("Form submitted");
   };
