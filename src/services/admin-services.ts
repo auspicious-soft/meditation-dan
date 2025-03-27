@@ -47,3 +47,11 @@ export const getAllAudiosStats = async (route: string,params: any = {} ) => {
     const axiosInstance = await getAxiosInstance()
     return axiosInstance.get(route,{ params })
 }
+export const deleteAudio = async (route: string,params: any = {} ) => {
+    const axiosInstance = await getAxiosInstance()
+    return axiosInstance.delete(route,{ params })
+}
+export const getAudioDataById = async (route: string,params: any = {} ) => {
+    const axiosInstance = await getAxiosInstance()
+    return axiosInstance.get(route,{ params })
+}

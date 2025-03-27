@@ -77,6 +77,7 @@ const AddCollectionForm = () => {
     handleSubmit,
     setValue,
     watch,
+    setError,
     formState: { errors, isSubmitting },
   } = useForm({
     resolver: yupResolver(schema),
@@ -212,6 +213,10 @@ const AddCollectionForm = () => {
       let imageKey = "";
       const imageFile = data.imageFile as File;
 
+      if (!data.imageFile) {
+        setError("imageFile", { type: "manual", message: "Please upload an image file" });
+        return;
+      }
       // Upload image using signed URL
       if (data.imageFile) {
         const image = data.imageFile;
@@ -285,7 +290,7 @@ const AddCollectionForm = () => {
       <Input
         {...register("collectionName")}
         placeholder="Enter Collection Name"
-        className="mb-4 bg-[#0B132B] border-none h-12 text-white autofill-fix"
+        className="mb-2 bg-[#0B132B] border-none h-12 text-white autofill-fix"
       />
       {errors.collectionName && (
         <p className="text-red-500 text-sm">{errors.collectionName.message}</p>
@@ -297,7 +302,7 @@ const AddCollectionForm = () => {
           <Button
             ref={triggerRef}
             variant="outline"
-            className="w-full justify-between text-left h-12 text-gray-300 hover:bg-[#0B132B] hover:text-white border-none mb-4"
+            className="w-full justify-between text-left h-12 text-gray-300 hover:bg-[#0B132B] hover:text-white border-none mb-2"
           >
             {isLoadingLevels ? (
               <span>Loading levels...</span>
@@ -360,12 +365,12 @@ const AddCollectionForm = () => {
         onValueChange={(value) => setValue("bestFor", value)}
         value={selectedBestFor}
       >
-        <SelectTrigger className="mb-4 w-full bg-[#0B132B] h-12 border-none text-white">
+        <SelectTrigger className="mb-2 w-full bg-[#0B132B] h-12 border-none text-white">
           <SelectValue
             placeholder={
               isLoadingBestFor
                 ? "Loading best for options..."
-                : "Select BestFor"
+                : "Select Best For"
             }
           />
         </SelectTrigger>
@@ -395,7 +400,7 @@ const AddCollectionForm = () => {
       <Textarea
         {...register("description")}
         placeholder=""
-        className="mb-4 bg-[#0B132B] border-none text-white"
+        className="mb-2 bg-[#0B132B] border-none text-white"
       />
       {errors.description && (
         <p className="text-red-500 text-sm">{errors.description.message}</p>
@@ -404,7 +409,7 @@ const AddCollectionForm = () => {
       <Label className="text-gray-300 mb-3 block">
         Upload Collection Image
       </Label>
-      <div className="flex flex-wrap items-end gap-4 mb-4">
+      <div className="flex flex-wrap items-end gap-4 mb-2">
         <Card className="w-64 min-h-44 flex items-center justify-center bg-[#0B132B] border-none rounded-lg relative">
           {imagePreview ? (
             <>
@@ -439,7 +444,7 @@ const AddCollectionForm = () => {
               ref={fileInputRef}
             />
             <div className="top-183 rounded-sm border p-1 px-4 border-white text-gray-300">
-              Choose Image
+             {imagePreview ? "Change Image":" Choose Image"}
             </div>
           </label>
         </div>

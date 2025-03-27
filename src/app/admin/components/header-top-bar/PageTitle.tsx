@@ -20,6 +20,10 @@ const PageTitle = () => {
   if (userprofileEditPattern.test(pathname)) {
     pageTitle = "User Profile Edit";
   }
+  const editAudioPattern = /^\/admin\/audio-files\/edit-audio\/[0-9a-fA-F]{24}$/
+  if (editAudioPattern.test(pathname)) {
+    pageTitle = "Audio Library";
+  }
   const blockedUserPattern = /^\/admin\/blocked-users\/user-detail\/\d+$/;
   if (blockedUserPattern.test(pathname)) {
     pageTitle = "Blocked User Detail";
