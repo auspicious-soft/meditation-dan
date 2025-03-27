@@ -196,8 +196,8 @@ const AudioList = () => {
           >
             <div className="rounded bg-slate-800 overflow-hidden flex-shrink-0">
               <Image
-                src={audio.imageUrl ? getS3Url(audio.imageUrl) : "/default-placeholder.png"}
-                alt={audio.songName}
+                src={audio?.imageUrl ? getS3Url(audio?.imageUrl) : "/default-placeholder.png"}
+                alt={audio?.songName}
                 className="object-cover"
                 width={60}
                 height={40}
@@ -207,27 +207,27 @@ const AudioList = () => {
 
             <div className="flex-1 min-w-0 mx-3">
               <div className="text-sm text-center text-slate-400">Music Name:</div>
-              <div className="text-white text-center font-medium truncate">{audio.songName}</div>
+              <div className="text-white text-center font-medium truncate">{audio?.songName}</div>
             </div>
 
             <div className="text-center flex-1 min-w-0 mx-3">
               <div className="text-sm text-center text-slate-400">Duration</div>
               <div className="flex text-center items-center justify-center text-white">
                 <Clock size={14} className="mr-1" />
-                <span>{audio.duration}</span>
+                <span>{audio?.duration}</span>
               </div>
             </div>
 
             <div className="text-center flex-1 min-w-0 mx-3">
               <div className="text-sm text-center text-slate-400">Collection</div>
-              <div className="text-white text-center border-0 truncate">{audio.collectionType?.name || "Unknown Collection"}</div>
+              <div className="text-white text-center border-0 truncate">{audio?.collectionType?.name || "Unknown Collection"}</div>
             </div>
 
             <div>
               <button
                 className="text-slate-400 hover:cursor-pointer rounded-md bg-[#1B2236] p-2 hover:text-white"
                 onClick={() => handlePlayPause(audio)}
-                disabled={!audio.audioUrl}
+                disabled={!audio?.audioUrl}
               >
                 {playingAudioId === audio._id ? <Pause size={25} /> : <Play size={24} color="white" fill="white" />}
               </button>

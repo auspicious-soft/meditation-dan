@@ -108,15 +108,15 @@ const AllCollection: React.FC = () => {
             >
               <CardContent className="p-0">
                 <Image
-                  src={collection.imageUrl ? getS3Url(collection.imageUrl) : "/default-placeholder.png"}
-                  alt={collection.name}
+                  src={collection?.imageUrl ? getS3Url(collection?.imageUrl) : "/default-placeholder.png"}
+                  alt={collection?.name}
                   width={200}
                   height={200}
                   className="w-60 h-48 object-cover rounded-xl"
                 />
               </CardContent>
               <div className="text-white text-center bg-transparent p-2 text-sm font-medium">
-                {collection.name}
+                {collection?.name}
               </div>
             </Card>
           ))}
