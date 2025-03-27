@@ -136,7 +136,7 @@ const AudioList = () => {
 
   const handleDelete = async (id: string) => {
     try {
-      const response = await deleteAudio(`/audio/${id}`);
+      const response = await deleteAudio(`/admin/delete-audio/${id}`);
 
       if (response?.data?.success) {
         toast.success("Audio deleted successfully");
