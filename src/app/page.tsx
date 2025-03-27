@@ -55,6 +55,7 @@ export default function LoginPage() {
   startTransition(async () => {
    try {
     const response = await loginAction({ email, password });
+    console.log('response: ', response);
     if (response?.success) {
       const userRole = response?.data?.user?.role;
       if (userRole === "user") {
@@ -64,9 +65,7 @@ export default function LoginPage() {
      toast.success("Logged in successfully");
      // Redirect based on role
       router.push(userRole === "company" ? "/company/dashboard" : "/admin/dashboard");
-    } else if (response?.message === "Invalid password") {
-     setErrorMessage("Incorrect password. Please try again.");
-    } else {
+    }  else {
      toast.error(response?.message || "Invalid email or password.");
     }
    } catch (error) {

@@ -41,10 +41,10 @@ export default function NewPasswordPage() {
       return;
     }
 
-    if (newPassword.length < 8) {
-      toast.warning("Password must be at least 8 characters long.");
-      return;
-    }
+    // if (newPassword.length < 8) {
+    //   toast.warning("Password must be at least 8 characters long.");
+    //   return;
+    // }
 
     startTransition(async () => {
       try {
@@ -58,7 +58,7 @@ export default function NewPasswordPage() {
 
         if (response.ok && data.success) {
           toast.success("Password updated successfully!");
-          router.push("/admin/dashboard");
+          router.push("/");
         } else {
           toast.error(data.message || "Invalid OTP or failed to update password.");
         }
