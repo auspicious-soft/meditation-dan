@@ -75,7 +75,7 @@ export default function Home() {
                   </InputOTP>
                   <Button type="submit" className="px-3 py-1.5 bg-[#1a3f70] h-auto rounded-lg text-white text-lg font w 전에w-full leading-[30px] cursor-pointer hover:bg-[#1a3f70]">
                     {isPending ? "Signing in..."
-                      : "Sign in"}
+                      : "Verify"}
                   </Button>
                 </div>
               </form>

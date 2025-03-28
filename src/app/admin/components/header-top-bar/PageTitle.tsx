@@ -53,7 +53,7 @@ const PageTitle = () => {
 
   const companyRequest = /^\/admin\/requests$/;
   if (companyRequest.test(pathname)) {
-    pageTitle = "Company Requests";
+    pageTitle = "Join Requests";
   }
 
 
