@@ -29,13 +29,12 @@ export default function LoginPage() {
   useEffect(() => {
     if (session) {
       if ((session as any)?.user?.role === "company") {
-        console.log("userrole: ", (session as any)?.user?.role);
-        window.location.href = "/company/dashboard";
+        router.push("/company/dashboard");
       } else {
-        window.location.href = "/admin/dashboard";
+        router.push("/admin/dashboard");
       }
     }
-  }, [ session, router]);
+  }, [session, router]);
 
   // Toggle password visibility
   const togglePasswordVisibility = useCallback(() => {
