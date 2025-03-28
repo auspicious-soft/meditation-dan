@@ -262,7 +262,7 @@ const AudioList = () => {
       </div>
         :
         <div >
-          <SkeletonTheme baseColor="#444" highlightColor="#ffffff" borderRadius={10}>
+          <SkeletonTheme baseColor="#ebebeb" highlightColor="#1b2236" borderRadius={10}>
             <Skeleton count={5} height={100} />
           </SkeletonTheme>
         </div>
