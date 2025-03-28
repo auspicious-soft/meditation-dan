@@ -79,6 +79,7 @@ interface AudioResponse {
 
 type FormValues = {
   collectionType: string;
+  collectionName?: string; // Added collectionName
   songName: string;
   description: string;
   levels: string[];
@@ -181,6 +182,7 @@ const GetAudio = () => {
           const audioData = data.data;
           reset({
             collectionType: audioData.collectionType._id,
+            collectionName: audioData.collectionType.name,
             songName: audioData.songName,
             description: audioData.description,
             levels: audioData.levels.map((level) => level._id),
@@ -684,7 +686,7 @@ const GetAudio = () => {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="absolute top-0 right-0 hover:bg-[#373f57] text-zinc-500"
+                    className="absolute top-0 right-0 hover:cursor-pointer hover:bg-[#373f57] text-zinc-500"
                     onClick={handleRemoveAudio}
                   >
                     <Trash2 size={16} className="text-white hover:cursor-pointer" />
@@ -730,7 +732,7 @@ const GetAudio = () => {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="absolute top-0 right-0 hover:bg-[#373f57] text-zinc-500"
+                    className="absolute top-0 right-0 hover:cursor-pointer hover:bg-[#373f57] text-zinc-500"
                     onClick={handleRemoveImage}
                   >
                     <Trash2 size={16} className="text-white hover:cursor-pointer" />
@@ -773,7 +775,7 @@ const GetAudio = () => {
           type="button"
           variant="destructive"
           onClick={handleDelete}
-          className="bg-[#FF4747] hover:bg-[#FF4747] w-52"
+          className="bg-[#FF4747] hover:cursor-pointer hover:bg-[#FF4747] w-52"
         >
           Delete Audio
         </Button>
