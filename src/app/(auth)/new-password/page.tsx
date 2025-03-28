@@ -42,10 +42,10 @@ export default function NewPasswordPage() {
       return;
     }
 
-    // if (newPassword.length < 8) {
-    //   toast.warning("Password must be at least 8 characters long.");
-    //   return;
-    // }
+    if (newPassword.length < 8) {
+      toast.warning("Password must be at least 8 characters long.");
+      return;
+    }
 
     startTransition(async () => {
       try {

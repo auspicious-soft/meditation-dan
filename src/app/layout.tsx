@@ -65,11 +65,7 @@ export default async function RootLayout({
   const session = await auth();
 
   return (
-    // <html lang="en">
-    //   <body className={dmSans.variable}>
-    //   <Toaster />    
-    //     {children}</body>
-    // </html>
+  
     <html lang="en">
       <body className={`${dmSans.variable}`} suppressHydrationWarning>
         <SessionProvider session={session}>

@@ -39,7 +39,6 @@ export default function Home() {
           toast.error(response.data.message || "Invalid OTP.");
         }
       } catch (error) {
-        console.error("Error updating password:", error);
         if ((error as any)?.response?.data?.message) {
           toast.error((error as any)?.response?.data?.message);
         } else {
