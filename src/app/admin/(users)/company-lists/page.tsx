@@ -12,7 +12,8 @@ import {
 } from "@/components/ui/table";
 import { getCompanyDetailStats } from "@/services/admin-services";
 import { toast } from "sonner";
-import Skeleton from "react-loading-skeleton";
+import { Skeleton } from "@/components/ui/skeleton";
+// import Skeleton from "react-loading-skeleton";
 // Updated Invoice interface based on backend data
 interface Invoice {
   _id: string;
@@ -137,7 +138,9 @@ const RecentNewUsers = () => {
                   <Skeleton />
                   </TableCell>
                   <TableCell className="text-right py-4">
-                  <Skeleton width={50} />
+                  <div style={{ width: 50 }}>
+                    <Skeleton />
+                  </div>
                   </TableCell>
                 </TableRow>
                 ))
