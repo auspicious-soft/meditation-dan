@@ -1,39 +1,37 @@
 "use client";
-
+// export const dynamic = "force-dynamic";
 import React, { useEffect, useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { loginAction } from "@/actions"; // Ensure this function correctly sends a request
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { EyeOffIcon, EyeIcon } from "lucide-react";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import LogoAuth from "./(auth)/components/LogoAuth";
 import BannerImage from "./(auth)/components/BannerImage";
 import { useSession } from "next-auth/react";
 
+
 export default function LoginPage() {
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isPending, startTransition] = React.useTransition();
   const router = useRouter();
-  const [errorMessage, setErrorMessage] = useState("");
   const { data: session } = useSession();
 
   useEffect(() => {
     if (session) {
       if ((session as any)?.user?.role === "company") {
-        console.log("(session as any)?.user?.role: ", (session as any)?.user?.role);
-        window.location.href = "/company/dashboard";
+        router.push("/company/dashboard");
       } else {
-        window.location.href = "/admin/dashboard";
+        router.push("/admin/dashboard");
       }
     }
-  }, [router, session]);
+  }, [session, router]);
 
   // Toggle password visibility
   const togglePasswordVisibility = useCallback(() => {
@@ -113,25 +111,21 @@ export default function LoginPage() {
 
                   {/* Remember Me & Forgot Password */}
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox id="remember" className="w-[18px] h-[18px] border-2 border-white rounded-[4px]" />
-                      <Label htmlFor="remember" className="text-[#9a9a9a] text-base font-medium">
-                        Keep me logged in
-                      </Label>
-                    </div>
+                    {/* <div className="flex items-center space-x-2">
+           <Checkbox id="remember" className="w-[18px] h-[18px] border-2 border-white rounded-[4px]" />
+           <Label htmlFor="remember" className="text-[#9a9a9a] text-base font-medium">
+            Keep me logged in
+           </Label>
+          </div> */}
                     <Link href="/forgot-password" className="text-[#9a9a9a] text-base font-medium">
                       Forgot Password?
                     </Link>
                   </div>
 
-                  <Link href="/signup" className="text-[#9a9a9a] text-base font-medium ">
-                    Dont have an account?
-                    <span className="hover:underline"> Sign Up</span>
-                  </Link>
-
                   {/* Sign In Button */}
-                  <Button type="submit" className="mt-[20px] px-3 py-1.5 bg-[#1a3f70] h-auto rounded-lg text-white text-lg font w-full leading-[30px] hover:bg-[#1a3f70]" disabled={isPending}>
-                    {isPending ? "Signing in..." : "Sign in"}
+                  <Button type="submit" className="px-3 py-1.5 bg-[#1a3f70] h-auto rounded-lg text-white text-lg font w-full leading-[30px] hover:bg-[#1a3f70]" disabled={isPending}>
+                    {isPending ? "Signing in..."
+                      : "Sign in"}
                   </Button>
                 </div>
               </form>
@@ -147,3 +141,4 @@ export default function LoginPage() {
     </div>
   );
 }
+
