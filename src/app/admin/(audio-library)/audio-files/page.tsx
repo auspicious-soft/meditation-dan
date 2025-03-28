@@ -276,13 +276,13 @@ const AudioList = () => {
           </DialogHeader>
           <DialogFooter className="flex  items-center justify-center gap-4">
             <Button
-              className="bg-[#1A3F70] text-white hover:bg-#1A3F70] w-42"
+              className="bg-[#1A3F70] border-none hover:cursor-pointer text-white hover:bg-#1A3F70] w-42"
               onClick={cancelDelete}
             >
               Cancel
             </Button>
             <Button
-              className="bg-[#FF4747] hover:bg-[#FF4747] w-42"
+              className="bg-[#FF4747] border-none hover:cursor-pointer hover:bg-[#FF4747] w-42"
               onClick={() => audioToDelete && handleDelete(audioToDelete)}
             >
               Delete

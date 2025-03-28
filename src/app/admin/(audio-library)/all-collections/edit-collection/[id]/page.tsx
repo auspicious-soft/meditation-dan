@@ -29,14 +29,13 @@ import {
   getBestForStats,
   getlevelsStats,
   getCollectionById,
-  updateCollectionStats,
   deleteCollectionByID,
-  // New service for deleting a collection
+  updateCollectionStats,
 } from "@/services/admin-services";
 import { toast } from "sonner";
 import { useRouter, useParams } from "next/navigation";
 
-// Validation Schema
+// Updated Validation Schema with imagePreview included
 const schema = yup.object({
   collectionName: yup.string().required("Collection name is required"),
   description: yup.string().required("Description is required"),
@@ -50,8 +49,14 @@ const schema = yup.object({
     .of(yup.string().required("Each best for must be a valid string"))
     .min(1, "At least one best for is required")
     .required("Best for field is required"),
-  imageFile: yup.mixed<File>().optional(), // Image is optional for updates
-});
+  imageFile: yup
+    .mixed<File>()
+    .test("image-required", "An image is required", function (value) {
+      // If no new image file is uploaded, check if imagePreview exists
+      return value !== undefined || this.parent.imagePreview !== null;
+    }),
+  imagePreview: yup.string().nullable().defined(), // Ensure imagePreview is strictly string | null
+}).required();
 
 interface LevelOption {
   id: string;
@@ -75,7 +80,7 @@ const EditCollectionForm = () => {
   const [isBestForOpen, setIsBestForOpen] = useState(false);
   const [levelsPopoverWidth, setLevelsPopoverWidth] = useState("auto");
   const [bestForPopoverWidth, setBestForPopoverWidth] = useState("auto");
-  const [isDialogOpen, setIsDialogOpen] = useState(false); // State for dialog
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const levelsTriggerRef = useRef<HTMLButtonElement>(null);
   const bestForTriggerRef = useRef<HTMLButtonElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -90,7 +95,14 @@ const EditCollectionForm = () => {
     watch,
     setError,
     formState: { errors, isSubmitting },
-  } = useForm({
+  } = useForm<{
+    collectionName: string;
+    description: string;
+    levels: string[];
+    bestFor: string[];
+    imageFile?: File;
+    imagePreview: string | null;
+  }>({
     resolver: yupResolver(schema),
     defaultValues: {
       collectionName: "",
@@ -98,6 +110,7 @@ const EditCollectionForm = () => {
       levels: [] as string[],
       bestFor: [] as string[],
       imageFile: undefined,
+      imagePreview: null as string | null,
     },
   });
 
@@ -118,6 +131,7 @@ const EditCollectionForm = () => {
           setValue("bestFor", collection.bestFor.map((b: any) => b._id));
           const imageUrl = await getImageUrlOfS3(collection.imageUrl);
           setImagePreview(imageUrl);
+          setValue("imagePreview", imageUrl);
         } else {
           toast.error("Failed to load collection data");
         }
@@ -226,12 +240,14 @@ const EditCollectionForm = () => {
       const imageUrl = URL.createObjectURL(file);
       setImagePreview(imageUrl);
       setValue("imageFile", file);
+      setValue("imagePreview", imageUrl);
     }
   };
 
   const handleRemoveImage = () => {
     setImagePreview(null);
     setValue("imageFile", undefined);
+    setValue("imagePreview", null);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -259,13 +275,12 @@ const EditCollectionForm = () => {
     setIsBestForOpen(false);
   };
 
-  // Delete functionality
   const handleDeleteClick = () => {
-    setIsDialogOpen(true); // Open the dialog when Delete button is clicked
+    setIsDialogOpen(true);
   };
 
   const cancelDelete = () => {
-    setIsDialogOpen(false); // Close the dialog
+    setIsDialogOpen(false);
   };
 
   const handleDelete = async () => {
@@ -273,10 +288,12 @@ const EditCollectionForm = () => {
       const response = await deleteCollectionByID(
         `/admin/delete-collection/${collectionId}`
       );
-      if (response?.status === 200) { // Assuming 200 for successful deletion
-        toast.success("Collection deleted successfully");
+      if (response?.status === 200) {
         setIsDialogOpen(false);
-        router.push("/admin/all-collections"); // Redirect after deletion
+        toast.success("Collection deleted successfully");
+        setTimeout(() => {
+        router.push("/admin/all-collections");
+        })
       } else {
         toast.error(response?.data?.message || "Failed to delete collection");
         setIsDialogOpen(false);
@@ -294,11 +311,34 @@ const EditCollectionForm = () => {
     levels: string[];
     bestFor: string[];
     imageFile?: File;
+    imagePreview?: string | null;
   }
 
   const onSubmit = async (data: FormData) => {
     try {
       let imageKey = imagePreview;
+
+      // Validate all fields before proceeding
+      if (!data.collectionName) {
+        setError("collectionName", { type: "manual", message: "Collection name is required" });
+        toast.error("Collection name is required");
+        return;
+      }
+      if (!data.description) {
+        setError("description", { type: "manual", message: "Description is required" });
+        toast.error("Description is required");
+        return;
+      }
+      if (!data.levels || data.levels.length === 0) {
+        setError("levels", { type: "manual", message: "At least one level is required" });
+        toast.error("At least one level is required");
+        return;
+      }
+      if (!data.bestFor || data.bestFor.length === 0) {
+        setError("bestFor", { type: "manual", message: "At least one best for is required" });
+        toast.error("At least one best for is required");
+        return;
+      }
 
       if (data.imageFile) {
         const image = data.imageFile;
@@ -332,19 +372,22 @@ const EditCollectionForm = () => {
         imageKey = key;
       }
 
-      const collectionData = {
+      if (!imageKey) {
+        setError("imageFile", { type: "manual", message: "An image is required" });
+        toast.error("An image is required");
+        return;
+      }
+
+      const payload = {
         name: data.collectionName,
         imageUrl: imageKey,
         levels: data.levels,
         bestFor: data.bestFor,
         description: data.description,
       };
-      console.log("collectionData:", collectionData);
-
-      const response = await updateCollectionStats(
-        `/admin/update/collection/${collectionId}`,
-        collectionData
-      );
+      console.log("collectionData:", payload);
+      const id = collectionId;
+      const response = await updateCollectionStats(`/admin/update/collection/${id}`,payload);
 
       if (response?.status === 200) {
         toast.success("Collection updated successfully");
@@ -543,7 +586,7 @@ const EditCollectionForm = () => {
                 className="absolute top-0 right-0 hover:cursor-pointer hover:bg-[#373f57] text-zinc-500"
                 onClick={handleRemoveImage}
               >
-                <Trash2 size={16} className="text-white " />
+                <Trash2 size={16} className="text-white" />
               </Button>
             </>
           ) : (
@@ -583,15 +626,14 @@ const EditCollectionForm = () => {
           {isSubmitting ? "Saving..." : "Save"}
         </Button>
         <Button
-          type="button" // Changed to type="button" to prevent form submission
+          type="button"
           className="bg-[#FF4747] w-52 hover:cursor-pointer hover:bg-[#FF4747]"
-          onClick={handleDeleteClick} // Open dialog on click
+          onClick={handleDeleteClick}
         >
           Delete
         </Button>
       </div>
 
-      {/* Delete Confirmation Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="bg-[#1B2236] text-center w-96 flex flex-col justify-center items-center text-white border border-[#334155]">
           <DialogHeader className="flex flex-col items-center">
@@ -615,7 +657,7 @@ const EditCollectionForm = () => {
             </Button>
             <Button
               className="bg-[#FF4747] hover:cursor-pointer hover:bg-[#FF4747] w-42"
-              onClick={handleDelete} // Call delete handler
+              onClick={handleDelete}
             >
               Delete
             </Button>

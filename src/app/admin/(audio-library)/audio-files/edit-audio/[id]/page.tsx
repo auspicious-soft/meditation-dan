@@ -1,8 +1,8 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 import { useEffect, useState, useRef } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { useForm, Controller } from "react-hook-form";
+import { useParams } from "next/navigation";
+import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { Button } from "@/components/ui/button";
@@ -22,14 +22,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ChevronDown, Trash2, Upload } from "lucide-react";
+import { ChevronDown, Trash2, Upload, X } from "lucide-react";
 import Image from "next/image";
 import { toast } from "sonner";
 import {
   generateSignedUrlForAudioImage,
   generateSignedUrlForAudios,
 } from "@/actions";
-import { getAllCollectionStats, getBestForStats, getlevelsStats, deleteAudio, getAudioDataById } from "@/services/admin-services";
+import {
+  getAllCollectionStats,
+  getBestForStats,
+  getlevelsStats,
+  deleteAudio,
+  getAudioDataById,
+} from "@/services/admin-services";
 import { AxiosError } from "axios";
 
 // Interfaces
@@ -76,7 +82,7 @@ type FormValues = {
   songName: string;
   description: string;
   levels: string[];
-  bestFor: string;
+  bestFor: string; // Changed to string for single selection
   audioFile?: FileList | null | undefined;
   imageFile?: FileList | null | undefined;
   audioUrl?: string;
@@ -92,7 +98,7 @@ const schema = yup.object().shape({
     .of(yup.string().required("Each level must be a valid string"))
     .min(1, "At least one level is required")
     .required("Levels field is required"),
-  bestFor: yup.string().required("Best for is required"),
+  bestFor: yup.string().required("Best for is required"), // Changed to single string
   audioFile: yup.mixed<FileList>().nullable(),
   imageFile: yup.mixed<FileList>().nullable(),
 });
@@ -119,18 +125,18 @@ const GetAudio = () => {
   const [isLoadingLevels, setIsLoadingLevels] = useState(false);
   const [levelsError, setLevelsError] = useState<string | null>(null);
   const [levelOptions, setLevelOptions] = useState<LevelOption[]>([]);
-  const [bestForOptions, setBestForOptions] = useState<BestForOption[]>([]);
   const [isLoadingBestFor, setIsLoadingBestFor] = useState(false);
   const [bestForError, setBestForError] = useState<string | null>(null);
+  const [bestForOptions, setBestForOptions] = useState<BestForOption[]>([]);
+  const [isLevelsOpen, setIsLevelsOpen] = useState(false);
   const audioInputRef = useRef<HTMLInputElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
-  const triggerRef = useRef<HTMLButtonElement>(null);
-  const [popoverWidth, setPopoverWidth] = useState("auto");
+  const levelsTriggerRef = useRef<HTMLButtonElement>(null);
+  const [levelsPopoverWidth, setLevelsPopoverWidth] = useState("auto");
 
   const {
     register,
     handleSubmit,
-    control,
     watch,
     setValue,
     reset,
@@ -154,6 +160,7 @@ const GetAudio = () => {
 
   const selectedLevels = watch("levels") || [];
   const selectedBestFor = watch("bestFor") || "";
+  const selectedCollectionType = watch("collectionType") || "";
   const audioFile = watch("audioFile");
   const imageFile = watch("imageFile");
 
@@ -166,6 +173,7 @@ const GetAudio = () => {
       try {
         const response = await getAudioDataById(`/audio/${audioIdParam}`);
         const data: AudioResponse = await response.data;
+        console.log('data:', data);
 
         if (data.success) {
           const audioData = data.data;
@@ -174,7 +182,7 @@ const GetAudio = () => {
             songName: audioData.songName,
             description: audioData.description,
             levels: audioData.levels.map((level) => level._id),
-            bestFor: audioData.bestFor[0]?._id || "", // Since bestFor is an array, take the first item
+            bestFor: audioData.bestFor[0]?._id || "", // Take the first bestFor ID if it exists
             audioFile: null,
             imageFile: null,
             audioUrl: audioData.audioUrl,
@@ -273,7 +281,7 @@ const GetAudio = () => {
     fetchLevels();
     fetchBestForOptions();
     fetchCollections();
-  }, [reset]);
+  }, [id, reset]);
 
   useEffect(() => {
     if (audioFile && audioFile.length > 0) {
@@ -302,47 +310,54 @@ const GetAudio = () => {
   }, [imageFile, existingImageUrl]);
 
   const handleRemoveAudio = () => {
-    if (audioInputRef.current) {
-      audioInputRef.current.value = "";
-    }
+    if (audioInputRef.current) audioInputRef.current.value = "";
     setAudioPreview(null);
     setExistingAudioUrl(null);
     setValue("audioFile", null);
   };
 
   const handleRemoveImage = () => {
-    if (imageInputRef.current) {
-      imageInputRef.current.value = "";
-    }
+    if (imageInputRef.current) imageInputRef.current.value = "";
     setImagePreview(null);
     setExistingImageUrl(null);
     setValue("imageFile", null);
   };
 
-  const debounce = (
-    func: (...args: unknown[]) => void,
-    delay: number
-  ): ((...args: unknown[]) => void) => {
+  const removeLevel = (levelId: string) => {
+    const newLevels = selectedLevels.filter((id) => id !== levelId);
+    setValue("levels", newLevels);
+  };
+
+  const addLevel = (levelId: string) => {
+    if (!selectedLevels.includes(levelId)) {
+      setValue("levels", [...selectedLevels, levelId]);
+    }
+    setIsLevelsOpen(false);
+  };
+
+  const debounce = (func: (...args: any[]) => void, delay: number) => {
     let timeoutId: NodeJS.Timeout;
-    return (...args: Parameters<typeof func>) => {
+    return (...args: any[]) => {
       clearTimeout(timeoutId);
       timeoutId = setTimeout(() => func(...args), delay);
     };
   };
 
-  const updateWidth = () => {
-    if (triggerRef.current) {
-      const width = triggerRef.current.getBoundingClientRect().width;
-      setPopoverWidth(`${width}px`);
+  const updateLevelsWidth = () => {
+    if (levelsTriggerRef.current) {
+      const width = levelsTriggerRef.current.getBoundingClientRect().width;
+      setLevelsPopoverWidth(`${width}px`);
     }
   };
 
-  const debouncedUpdateWidth = debounce(updateWidth, 0);
+  const debouncedUpdateLevelsWidth = debounce(updateLevelsWidth, 100);
 
   useEffect(() => {
-    updateWidth();
-    window.addEventListener("resize", debouncedUpdateWidth);
-    return () => window.removeEventListener("resize", debouncedUpdateWidth);
+    updateLevelsWidth();
+    window.addEventListener("resize", debouncedUpdateLevelsWidth);
+    return () => {
+      window.removeEventListener("resize", debouncedUpdateLevelsWidth);
+    };
   }, []);
 
   const onSubmit = async (data: FormValues) => {
@@ -357,7 +372,9 @@ const GetAudio = () => {
         const audio = data.audioFile[0];
         const duration = await getAudioDuration(audio);
 
-        const selectedCollection = collections.find((col) => col._id === data.collectionType);
+        const selectedCollection = collections.find(
+          (col) => col._id === data.collectionType
+        );
         if (!selectedCollection) {
           toast.error("Selected collection not found");
           return;
@@ -389,7 +406,9 @@ const GetAudio = () => {
 
       if (data.imageFile && data.imageFile.length > 0) {
         const image = data.imageFile[0];
-        const selectedCollection = collections.find((col) => col._id === data.collectionType);
+        const selectedCollection = collections.find(
+          (col) => col._id === data.collectionType
+        );
         if (!selectedCollection) {
           toast.error("Selected collection not found");
           return;
@@ -423,7 +442,7 @@ const GetAudio = () => {
         imageUrl: imageKey,
         duration: formattedDuration,
         levels: data.levels,
-        bestFor: data.bestFor,
+        bestFor: data.bestFor, // Single string now
       };
 
       const response = await fetch(`/api/audio/${audioId}`, {
@@ -446,7 +465,11 @@ const GetAudio = () => {
       if (error instanceof AxiosError && error.response?.data?.message) {
         toast.error(error.response.data.message);
       } else {
-        toast.error(error instanceof Error ? error.message : "An error occurred while updating audio");
+        toast.error(
+          error instanceof Error
+            ? error.message
+            : "An error occurred while updating audio"
+        );
       }
     }
   };
@@ -497,30 +520,31 @@ const GetAudio = () => {
       </div>
 
       <Label className="text-gray-300 mb-3 block">Collection Type</Label>
-      <Controller
-        name="collectionType"
-        control={control}
-        render={({ field }) => (
-          <Select onValueChange={field.onChange} value={field.value}>
-            <SelectTrigger className="mb-4 w-full bg-[#0B132B] h-12 border-none text-white">
-              <SelectValue placeholder="Select Collection Type" />
-            </SelectTrigger>
-            <SelectContent className="bg-[#0B132B] border-gray-700 text-white">
-              {loadingCollections ? (
-                <SelectItem value="loading" key="loading">Loading collections...</SelectItem>
-              ) : collections.length > 0 ? (
-                collections.map((collection) => (
-                  <SelectItem key={collection._id} value={collection._id}>
-                    {collection.name}
-                  </SelectItem>
-                ))
-              ) : (
-                <SelectItem value="no-collections" key="no-collections">No collections available</SelectItem>
-              )}
-            </SelectContent>
-          </Select>
-        )}
-      />
+      <Select
+        onValueChange={(value) => setValue("collectionType", value)}
+        value={selectedCollectionType}
+      >
+        <SelectTrigger className="mb-4 w-full bg-[#0B132B] h-12 border-none text-white">
+          <SelectValue placeholder="Select Collection Type" />
+        </SelectTrigger>
+        <SelectContent className="bg-[#0B132B] border-gray-700 text-white">
+          {loadingCollections ? (
+            <SelectItem value="loading" disabled>
+              Loading collections...
+            </SelectItem>
+          ) : collections.length > 0 ? (
+            collections.map((collection) => (
+              <SelectItem key={collection._id} value={collection._id}>
+                {collection.name}
+              </SelectItem>
+            ))
+          ) : (
+            <SelectItem value="no-collections" disabled>
+              No collections available
+            </SelectItem>
+          )}
+        </SelectContent>
+      </Select>
       {errors.collectionType && (
         <p className="text-red-500 text-xs mb-4">{errors.collectionType.message}</p>
       )}
@@ -536,58 +560,62 @@ const GetAudio = () => {
       )}
 
       <Label className="text-gray-300 mb-3 block">Level</Label>
-      <Popover>
+      <Popover open={isLevelsOpen} onOpenChange={setIsLevelsOpen}>
         <PopoverTrigger asChild>
           <Button
-            ref={triggerRef}
+            ref={levelsTriggerRef}
             variant="outline"
-            className="w-full justify-between text-left h-12 text-gray-300 hover:bg-[#0B132B] hover:text-white border-none mb-2"
+            className="mb-2 w-full bg-[#0B132B] hover:bg-[#0B132B] hover:cursor-pointer h-12 border-none text-white justify-between"
           >
-            {isLoadingLevels ? (
-              <span>Loading levels...</span>
-            ) : selectedLevels.length > 0 ? (
-              <div className="flex flex-wrap gap-2">
-                {selectedLevels.map((levelId) => {
+            <div className="flex flex-wrap gap-2 items-center">
+              {isLoadingLevels ? (
+                <span>Loading levels...</span>
+              ) : selectedLevels.length > 0 ? (
+                selectedLevels.map((levelId) => {
                   const level = levelOptions.find((l) => l.id === levelId);
                   return (
                     <span
                       key={levelId}
-                      className="bg-[#334155] py-1 px-2 rounded-md text-white"
+                      className="bg-[#1B2236] p-1 rounded-md text-white flex items-center"
                     >
                       {level?.name || levelId}
+                      <span
+                        className="h-4 w-4 ml-1 flex items-center justify-center cursor-pointer text-gray-400 hover:text-white"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          removeLevel(levelId);
+                        }}
+                      >
+                        <X size={12} />
+                      </span>
                     </span>
                   );
-                })}
-              </div>
-            ) : (
-              <span>Select levels</span>
-            )}
-            <ChevronDown className="ml-2 h-4 w-4" />
+                })
+              ) : (
+                <span className="text-gray-400">Select Levels</span>
+              )}
+            </div>
+            <ChevronDown className="h-4 w-4" />
           </Button>
         </PopoverTrigger>
         <PopoverContent
-          className="p-0 bg-[#0B132B] border-gray-700"
-          style={{ width: popoverWidth }}
+          className="bg-[#0B132B] border-gray-700 text-white p-0"
+          style={{ width: levelsPopoverWidth }}
         >
           {isLoadingLevels ? (
-            <div className="p-2 text-gray-500" key="loading">Loading levels...</div>
+            <div className="p-2 text-gray-500">Loading levels...</div>
           ) : levelsError ? (
-            <div className="p-2 text-red-500" key="error">{levelsError}</div>
+            <div className="p-2 text-red-500">{levelsError}</div>
           ) : levelOptions.length === 0 ? (
-            <div className="p-2 text-gray-500" key="no-levels">No levels available</div>
+            <div className="p-2 text-gray-500">No levels available</div>
           ) : (
             levelOptions.map((level) => (
               <div
                 key={level.id}
-                className={`space-x-2 p-2 text-white ${
+                className={`p-2 hover:bg-[#1B2236] cursor-pointer ${
                   selectedLevels.includes(level.id) ? "bg-[#1B2236]" : ""
                 }`}
-                onClick={() => {
-                  const newLevels = selectedLevels.includes(level.id)
-                    ? selectedLevels.filter((l) => l !== level.id)
-                    : [...selectedLevels, level.id];
-                  setValue("levels", newLevels);
-                }}
+                onClick={() => addLevel(level.id)}
               >
                 {level.name}
               </div>
@@ -604,28 +632,24 @@ const GetAudio = () => {
         onValueChange={(value) => setValue("bestFor", value)}
         value={selectedBestFor}
       >
-        <SelectTrigger className="mb-2 w-full bg-[#0B132B] h-12 border-none text-white">
-          <SelectValue
-            placeholder={
-              isLoadingBestFor
-                ? "Loading best for options..."
-                : "Select Best For"
-            }
-          />
+        <SelectTrigger className="mb-4 w-full bg-[#0B132B] h-12 border-none text-white">
+          <SelectValue placeholder="Select Best For" />
         </SelectTrigger>
         <SelectContent className="bg-[#0B132B] border-gray-700 text-white">
           {isLoadingBestFor ? (
-            <SelectItem value="loading" key="loading">Loading best for options...</SelectItem>
-          ) : bestForError ? (
-            <SelectItem value="error" key="error">{bestForError}</SelectItem>
-          ) : bestForOptions.length === 0 ? (
-            <SelectItem value="no-options" key="no-options">No best for options available</SelectItem>
-          ) : (
+            <SelectItem value="loading" disabled>
+              Loading best for options...
+            </SelectItem>
+          ) : bestForOptions.length > 0 ? (
             bestForOptions.map((option) => (
               <SelectItem key={option.id} value={option.id}>
                 {option.name}
               </SelectItem>
             ))
+          ) : (
+            <SelectItem value="no-options" disabled>
+              No best for options available
+            </SelectItem>
           )}
         </SelectContent>
       </Select>
@@ -644,126 +668,99 @@ const GetAudio = () => {
       )}
 
       <div className="flex flex-wrap items-center space-x-16">
-        <div key="audio-upload-section">
+        <div>
           <Label className="text-gray-300 mb-3 block">Upload Song</Label>
           <div className="flex flex-wrap items-end gap-4 mb-4">
-            <div key="audio-card">
-              <Card className="w-44 h-44 flex items-center justify-center bg-[#0B132B] border-none rounded-lg relative">
-                {audioPreview ? (
-                  <div key="audio-preview">
-                    <audio
-                      src={audioPreview}
-                      controls
-                      className="w-full h-full object-contain"
-                    />
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="absolute top-0 hover:bg-[#373f57] right-0 text-zinc-500"
-                      onClick={handleRemoveAudio}
-                    >
-                      <Trash2
-                        size={16}
-                        className="text-white hover:cursor-pointer"
-                      />
-                    </Button>
-                  </div>
-                ) : (
-                  <Upload size={32} className="text-gray-400" key="audio-upload-icon" />
-                )}
-              </Card>
-            </div>
-            <div key="audio-input">
-              <label htmlFor="audio-upload">
-                <input
-                  type="file"
-                  className="hidden"
-                  id="audio-upload"
-                  accept=".mp3,.aac,.ogg,.wav"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0] || null;
-                    setValue("audioFile", e.target.files as FileList);
-                    if (file) {
-                      setAudioPreview(URL.createObjectURL(file));
-                    }
-                  }}
-                  ref={audioInputRef}
-                />
-                <div className="border p-1 px-4 rounded-sm border-white text-gray-300 cursor-pointer">
-                  {audioPreview ? "Change Audio File" : "Choose Audio File"}
-                </div>
-              </label>
-            </div>
+            <Card className="w-44 h-44 flex items-center justify-center bg-[#0B132B] border-none rounded-lg relative">
+              {audioPreview ? (
+                <>
+                  <audio
+                    src={audioPreview}
+                    controls
+                    className="w-full h-full object-contain"
+                  />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute top-0 right-0 hover:bg-[#373f57] text-zinc-500"
+                    onClick={handleRemoveAudio}
+                  >
+                    <Trash2 size={16} className="text-white hover:cursor-pointer" />
+                  </Button>
+                </>
+              ) : (
+                <Upload size={32} className="text-gray-400" />
+              )}
+            </Card>
+            <label htmlFor="audio-upload">
+              <input
+                type="file"
+                className="hidden"
+                id="audio-upload"
+                accept=".mp3,.aac,.ogg,.wav"
+                onChange={(e) => setValue("audioFile", e.target.files)}
+                ref={audioInputRef}
+              />
+              <div className="border p-1 px-4 rounded-sm border-white text-gray-300 cursor-pointer">
+                {audioPreview ? "Change Audio File" : "Choose Audio File"}
+              </div>
+            </label>
           </div>
-          <p className="text-xs text-gray-500 mb-4" key="audio-max-size">Max size: 30 MB</p>
+          <p className="text-xs text-gray-500 mb-4">Max size: 30 MB</p>
           {errors.audioFile && (
-            <p className="text-red-500 text-xs mb-4" key="audio-error">{errors.audioFile.message}</p>
+            <p className="text-red-500 text-xs mb-4">{errors.audioFile.message}</p>
           )}
         </div>
 
-        <div key="image-upload-section">
+        <div>
           <Label className="text-gray-300 mb-3 block">Upload Audio Image</Label>
           <div className="flex flex-wrap items-end gap-4 mb-4">
-            <div key="image-card">
-              <Card className="w-44 h-44 flex items-center justify-center bg-[#0B132B] border-none rounded-lg relative">
-                {imagePreview ? (
-                  <div key="image-preview">
-                    <Image
-                      src={imagePreview}
-                      alt="Preview"
-                      width={170}
-                      height={220}
-                      className="rounded-lg w-full h-full object-cover"
-                    />
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="absolute top-0 hover:bg-[#373f57] right-0 text-zinc-500"
-                      onClick={handleRemoveImage}
-                    >
-                      <Trash2
-                        size={16}
-                        className="text-white hover:cursor-pointer"
-                      />
-                    </Button>
-                  </div>
-                ) : (
-                  <Upload size={32} className="text-gray-400" key="image-upload-icon" />
-                )}
-              </Card>
-            </div>
-            <div key="image-input">
-              <label htmlFor="image-upload">
-                <input
-                  type="file"
-                  className="hidden"
-                  id="image-upload"
-                  accept="image/jpeg,image/png"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0] || null;
-                    setValue("imageFile", e.target.files as FileList);
-                    if (file) {
-                      setImagePreview(URL.createObjectURL(file));
-                    }
-                  }}
-                  ref={imageInputRef}
-                />
-                <div className="border p-1 px-4 rounded-sm border-white text-gray-300 cursor-pointer">
-                  {imagePreview ? "Change Image" : "Choose Image"}
-                </div>
-              </label>
-            </div>
+            <Card className="w-44 h-44 flex items-center justify-center bg-[#0B132B] border-none rounded-lg relative">
+              {imagePreview ? (
+                <>
+                  <Image
+                    src={imagePreview}
+                    alt="Preview"
+                    width={170}
+                    height={220}
+                    className="rounded-lg w-full h-full object-cover"
+                  />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute top-0 right-0 hover:bg-[#373f57] text-zinc-500"
+                    onClick={handleRemoveImage}
+                  >
+                    <Trash2 size={16} className="text-white hover:cursor-pointer" />
+                  </Button>
+                </>
+              ) : (
+                <Upload size={32} className="text-gray-400" />
+              )}
+            </Card>
+            <label htmlFor="image-upload">
+              <input
+                type="file"
+                className="hidden"
+                id="image-upload"
+                accept="image/jpeg,image/png"
+                onChange={(e) => setValue("imageFile", e.target.files)}
+                ref={imageInputRef}
+              />
+              <div className="border p-1 px-4 rounded-sm border-white text-gray-300 cursor-pointer">
+                {imagePreview ? "Change Image" : "Choose Image"}
+              </div>
+            </label>
           </div>
-          <p className="text-xs text-gray-500 mb-4" key="image-size">Size: 170x170 pixels</p>
+          <p className="text-xs text-gray-500 mb-4">Size: 170x170 pixels</p>
           {errors.imageFile && (
-            <p className="text-red-500 text-xs mb-4" key="image-error">{errors.imageFile.message}</p>
+            <p className="text-red-500 text-xs mb-4">{errors.imageFile.message}</p>
           )}
         </div>
       </div>
 
       <div className="flex flex-wrap justify-start items-center gap-2">
         <Button
-          key="save-button"
           type="submit"
           className="bg-[#1A3F70] hover:cursor-pointer hover:bg-[#1A3F70] w-52"
           disabled={isSubmitting}
@@ -771,7 +768,6 @@ const GetAudio = () => {
           {isSubmitting ? "Saving..." : "Save"}
         </Button>
         <Button
-          key="delete-button"
           type="button"
           variant="destructive"
           onClick={handleDelete}
