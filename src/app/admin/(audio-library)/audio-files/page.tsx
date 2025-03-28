@@ -261,7 +261,7 @@ const AudioList = () => {
       </div>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="bg-[#1B2236] text-white border border-[#334155]">
+        <DialogContent className="bg-[#1B2236] text-center w-96 flex flex-col justify-center items-center text-white border border-[#334155]">
           <DialogHeader className="flex flex-col items-center">
             <div className="mb-4">
               <AlertCircle size={40} className="text-red-500" />
@@ -274,7 +274,7 @@ const AudioList = () => {
               This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter className="flex justify-center gap-4">
+          <DialogFooter className="flex  items-center justify-center gap-4">
             <Button
               className="bg-[#1A3F70] text-white hover:bg-#1A3F70] w-42"
               onClick={cancelDelete}

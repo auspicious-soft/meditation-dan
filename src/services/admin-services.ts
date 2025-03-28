@@ -55,3 +55,15 @@ export const getAudioDataById = async (route: string,params: any = {} ) => {
     const axiosInstance = await getAxiosInstance()
     return axiosInstance.get(route,{ params })
 }
+export const getCollectionById = async (route: string,params: any = {} ) => {
+    const axiosInstance = await getAxiosInstance()
+    return axiosInstance.get(route,{ params })
+}
+export const updateCollectionStats = async (route: string,params: any = {} ) => {
+    const axiosInstance = await getAxiosInstance()
+    return axiosInstance.put(route,{ params })
+}
+export const deleteCollectionByID = async (route: string,params: any = {} ) => {
+    const axiosInstance = await getAxiosInstance()
+    return axiosInstance.delete(route,{ params })
+}

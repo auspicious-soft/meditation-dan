@@ -37,7 +37,7 @@ const AllCollection: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(0);
-  const limit = 10;
+  const limit = 12;
 
   // Fetch collections with pagination
   useEffect(() => {
@@ -105,6 +105,7 @@ const AllCollection: React.FC = () => {
             <Card
               key={collection._id}
               className="bg-transparent border-none p-0 overflow-hidden items-center hover:cursor-pointer duration-300 shadow-none"
+              onClick={() => router.push(`/admin/all-collections/edit-collection/${collection._id}`)}
             >
               <CardContent className="p-0">
                 <Image

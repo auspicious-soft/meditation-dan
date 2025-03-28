@@ -9,20 +9,32 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { ChevronDown, Trash2, Upload, X } from "lucide-react";
+import { ChevronDown, Trash2, Upload, X, AlertCircle } from "lucide-react";
 import Image from "next/image";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { generateSignedUrlForCollectionImage } from "@/actions";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { generateSignedUrlForCollectionImage, getImageUrlOfS3 } from "@/actions";
 import {
   getBestForStats,
   getlevelsStats,
-  uploadCollectionStats,
+  getCollectionById,
+  updateCollectionStats,
+  deleteCollectionByID,
+  // New service for deleting a collection
 } from "@/services/admin-services";
 import { toast } from "sonner";
+import { useRouter, useParams } from "next/navigation";
 
 // Validation Schema
 const schema = yup.object({
@@ -38,12 +50,7 @@ const schema = yup.object({
     .of(yup.string().required("Each best for must be a valid string"))
     .min(1, "At least one best for is required")
     .required("Best for field is required"),
-  imageFile: yup
-    .mixed<File>()
-    .test("fileRequired", "Image file is required", (value) => {
-      return value instanceof File && value.size > 0;
-    })
-    .required("Image file is required"),
+  imageFile: yup.mixed<File>().optional(), // Image is optional for updates
 });
 
 interface LevelOption {
@@ -56,7 +63,7 @@ interface BestForOption {
   name: string;
 }
 
-const AddCollectionForm = () => {
+const EditCollectionForm = () => {
   const [levelOptions, setLevelOptions] = useState<LevelOption[]>([]);
   const [bestForOptions, setBestForOptions] = useState<BestForOption[]>([]);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -68,9 +75,13 @@ const AddCollectionForm = () => {
   const [isBestForOpen, setIsBestForOpen] = useState(false);
   const [levelsPopoverWidth, setLevelsPopoverWidth] = useState("auto");
   const [bestForPopoverWidth, setBestForPopoverWidth] = useState("auto");
+  const [isDialogOpen, setIsDialogOpen] = useState(false); // State for dialog
   const levelsTriggerRef = useRef<HTMLButtonElement>(null);
   const bestForTriggerRef = useRef<HTMLButtonElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const router = useRouter();
+  const params = useParams();
+  const collectionId = params.id as string;
 
   const {
     register,
@@ -86,13 +97,36 @@ const AddCollectionForm = () => {
       description: "",
       levels: [] as string[],
       bestFor: [] as string[],
+      imageFile: undefined,
     },
   });
 
   const selectedLevels = watch("levels") || [];
   const selectedBestFor = watch("bestFor") || [];
 
+  // Fetch collection data by ID
   useEffect(() => {
+    const fetchCollection = async () => {
+      if (!collectionId) return;
+      try {
+        const response = await getCollectionById(`/collection/${collectionId}`);
+        if (response?.data?.success) {
+          const collection = response.data.data;
+          setValue("collectionName", collection.name);
+          setValue("description", collection.description);
+          setValue("levels", collection.levels.map((l: any) => l._id));
+          setValue("bestFor", collection.bestFor.map((b: any) => b._id));
+          const imageUrl = await getImageUrlOfS3(collection.imageUrl);
+          setImagePreview(imageUrl);
+        } else {
+          toast.error("Failed to load collection data");
+        }
+      } catch (error) {
+        console.error("Error fetching collection:", error);
+        toast.error("An error occurred while fetching collection data");
+      }
+    };
+
     const fetchLevels = async () => {
       setIsLoadingLevels(true);
       setLevelsError(null);
@@ -143,9 +177,10 @@ const AddCollectionForm = () => {
       }
     };
 
+    fetchCollection();
     fetchLevels();
     fetchBestForOptions();
-  }, []);
+  }, [collectionId, setValue]);
 
   // Debounce function to limit how often width updates are called
   const debounce = (func: (...args: any[]) => void, delay: number) => {
@@ -196,7 +231,7 @@ const AddCollectionForm = () => {
 
   const handleRemoveImage = () => {
     setImagePreview(null);
-    setValue("imageFile", new File([], ""));
+    setValue("imageFile", undefined);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -214,14 +249,43 @@ const AddCollectionForm = () => {
     if (!selectedLevels.includes(levelId)) {
       setValue("levels", [...selectedLevels, levelId]);
     }
-    setIsLevelsOpen(false); // Optional: Close dropdown after selection
+    setIsLevelsOpen(false);
   };
 
   const addBestFor = (bestForId: string) => {
     if (!selectedBestFor.includes(bestForId)) {
       setValue("bestFor", [...selectedBestFor, bestForId]);
     }
-    setIsBestForOpen(false); // Optional: Close dropdown after selection
+    setIsBestForOpen(false);
+  };
+
+  // Delete functionality
+  const handleDeleteClick = () => {
+    setIsDialogOpen(true); // Open the dialog when Delete button is clicked
+  };
+
+  const cancelDelete = () => {
+    setIsDialogOpen(false); // Close the dialog
+  };
+
+  const handleDelete = async () => {
+    try {
+      const response = await deleteCollectionByID(
+        `/admin/delete-collection/${collectionId}`
+      );
+      if (response?.status === 200) { // Assuming 200 for successful deletion
+        toast.success("Collection deleted successfully");
+        setIsDialogOpen(false);
+        router.push("/admin/all-collections"); // Redirect after deletion
+      } else {
+        toast.error(response?.data?.message || "Failed to delete collection");
+        setIsDialogOpen(false);
+      }
+    } catch (error) {
+      console.error("Error deleting collection:", error);
+      toast.error("An error occurred while deleting collection");
+      setIsDialogOpen(false);
+    }
   };
 
   interface FormData {
@@ -229,21 +293,12 @@ const AddCollectionForm = () => {
     description: string;
     levels: string[];
     bestFor: string[];
-    imageFile: File;
+    imageFile?: File;
   }
 
   const onSubmit = async (data: FormData) => {
     try {
-      let imageKey = "";
-      const imageFile = data.imageFile as File;
-
-      if (!data.imageFile) {
-        setError("imageFile", {
-          type: "manual",
-          message: "Please upload an image file",
-        });
-        return;
-      }
+      let imageKey = imagePreview;
 
       if (data.imageFile) {
         const image = data.imageFile;
@@ -254,7 +309,7 @@ const AddCollectionForm = () => {
           )
           .join("-");
         const collectionName = data.collectionName;
-        const imageFileName = `${imageFile.name}`;
+        const imageFileName = `${image.name}`;
 
         const { signedUrl, key } = await generateSignedUrlForCollectionImage(
           bestForNames,
@@ -284,24 +339,26 @@ const AddCollectionForm = () => {
         bestFor: data.bestFor,
         description: data.description,
       };
-      console.log('collectionData:', collectionData);
+      console.log("collectionData:", collectionData);
 
-      const response = await uploadCollectionStats(
-        "/	admin/upload-collection",
+      const response = await updateCollectionStats(
+        `/admin/update/collection/${collectionId}`,
         collectionData
       );
 
-      if (response?.status === 201) {
-        toast.success("Collection added successfully");
+      if (response?.status === 200) {
+        toast.success("Collection updated successfully");
         setImagePreview(null);
         if (fileInputRef.current) fileInputRef.current.value = "";
-        window.location.href = "/admin/all-collections";
+       setTimeout(() =>{
+         router.push("/admin/all-collections");
+       }, 1000);
       } else {
-        toast.error(response?.data?.message || "Failed to add collection");
+        toast.error(response?.data?.message || "Failed to update collection");
       }
     } catch (error) {
-      console.log("error while uploading collection:", error);
-      toast.error("An error occurred while adding collection");
+      console.log("error while updating collection:", error);
+      toast.error("An error occurred while updating collection");
     }
   };
 
@@ -310,7 +367,7 @@ const AddCollectionForm = () => {
       onSubmit={handleSubmit(onSubmit)}
       className="p-6 bg-[#1B2236] text-white rounded-lg shadow-md"
     >
-      <h2 className="text-xl font-semibold mb-4">Add New Collection</h2>
+      <h2 className="text-xl font-semibold mb-4">Edit Collection</h2>
 
       <Label className="text-gray-300 mb-3 block">Collection Name</Label>
       <Input
@@ -483,7 +540,7 @@ const AddCollectionForm = () => {
               <Button
                 variant="ghost"
                 size="icon"
-                className="absolute top-0 right-0 hover:bg-[#373f57] text-zinc-500"
+                className="absolute top-0 right-0 hover:cursor-pointer hover:bg-[#373f57] text-zinc-500"
                 onClick={handleRemoveImage}
               >
                 <Trash2 size={16} className="text-white " />
@@ -503,7 +560,7 @@ const AddCollectionForm = () => {
               onChange={handleImageUpload}
               ref={fileInputRef}
             />
-            <div className="top-183 rounded-sm border p-1 px-4 border-white text-gray-300">
+            <div className="top-183 rounded-sm border p-1 px-4 hover:cursor-pointer border-white text-gray-300">
               {imagePreview ? "Change Image" : "Choose Image"}
             </div>
           </label>
@@ -517,15 +574,56 @@ const AddCollectionForm = () => {
         Image Dimension: 250×200, 327×192, 172×101 Pixels
       </p>
 
-      <Button
-        type="submit"
-        className="bg-[#1A3F70] w-52 hover:cursor-pointer hover:bg-[#1A3F70]"
-        disabled={isSubmitting}
-      >
-        {isSubmitting ? "Uploading..." : "Upload"}
-      </Button>
+      <div className="flex justify-start flex-wrap gap-2">
+        <Button
+          type="submit"
+          className="bg-[#1A3F70] w-52 hover:cursor-pointer hover:bg-[#1A3F70]"
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? "Saving..." : "Save"}
+        </Button>
+        <Button
+          type="button" // Changed to type="button" to prevent form submission
+          className="bg-[#FF4747] w-52 hover:cursor-pointer hover:bg-[#FF4747]"
+          onClick={handleDeleteClick} // Open dialog on click
+        >
+          Delete
+        </Button>
+      </div>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="bg-[#1B2236] text-center w-96 flex flex-col justify-center items-center text-white border border-[#334155]">
+          <DialogHeader className="flex flex-col items-center">
+            <div className="mb-4">
+              <AlertCircle size={40} className="text-red-500" />
+            </div>
+            <DialogTitle className="text-xl font-semibold">
+              Delete Collection?
+            </DialogTitle>
+            <DialogDescription className="text-gray-400 text-center">
+              Are you sure you want to delete this collection? <br />
+              This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex items-center justify-center gap-4">
+            <Button
+              className="bg-[#1A3F70] text-white hover:cursor-pointer hover:bg-[#1A3F70] w-42"
+              onClick={cancelDelete}
+            >
+              Cancel
+            </Button>
+            <Button
+              className="bg-[#FF4747] hover:cursor-pointer hover:bg-[#FF4747] w-42"
+              onClick={handleDelete} // Call delete handler
+            >
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </form>
   );
 };
 
-export default AddCollectionForm;
+export default EditCollectionForm;
