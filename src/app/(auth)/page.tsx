@@ -7,9 +7,7 @@ import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { EyeOffIcon, EyeIcon } from "lucide-react";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import LogoAuth from "./components/LogoAuth";
 import BannerImage from "./components/BannerImage";
@@ -18,8 +16,7 @@ import { Spinner } from "@/components/ui/spinner";
 
 
 export default function LoginPage() {
-  const pathName = usePathname()
-  console.log('pathName: ', pathName);
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -38,7 +35,7 @@ export default function LoginPage() {
         window.location.href = "/admin/dashboard";
       }
     }
-  }, [router, session, pathName]);
+  }, [ session, router]);
 
   // Toggle password visibility
   const togglePasswordVisibility = useCallback(() => {
@@ -148,3 +145,5 @@ export default function LoginPage() {
     </div>
   );
 }
+
+export const dynamic = "force-dynamic";
