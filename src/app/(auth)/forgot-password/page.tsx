@@ -95,7 +95,6 @@ import LogoAuth from "../components/LogoAuth";
 import BannerImage from "../components/BannerImage";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Spinner } from '@/components/ui/spinner';
 export default function Home() {
   interface FormElements extends HTMLFormControlsCollection {
     email: HTMLInputElement;
@@ -164,7 +163,7 @@ export default function Home() {
                     disabled={loading} 
                   >
                     {loading ? (
-                      <Spinner size="medium" />
+                     "Loading..."
                     ) : (
                       "Continue"
                     )}

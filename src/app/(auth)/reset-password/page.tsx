@@ -8,7 +8,6 @@ import { InputOTP, InputOTPSlot } from "@/components/ui/input-otp";
 import { useRouter } from "next/navigation"; // Added for programmatic navigation
 import { toast } from "sonner"; // Optional: for user feedback
 import { sendOtpService } from "@/services/admin-services";
-import { Spinner } from "@/components/ui/spinner";
 
 export default function Home() {
   interface FormElements extends HTMLFormControlsCollection {
@@ -75,7 +74,7 @@ export default function Home() {
                     ))}
                   </InputOTP>
                   <Button type="submit" className="px-3 py-1.5 bg-[#1a3f70] h-auto rounded-lg text-white text-lg font w 전에w-full leading-[30px] cursor-pointer hover:bg-[#1a3f70]">
-                    {isPending ? <Spinner size="medium" />
+                    {isPending ? "Signing in..."
                       : "Sign in"}
                   </Button>
                 </div>

@@ -12,7 +12,6 @@ import Link from "next/link";
 import LogoAuth from "./components/LogoAuth";
 import BannerImage from "./components/BannerImage";
 import { useSession } from "next-auth/react";
-import { Spinner } from "@/components/ui/spinner";
 
 
 export default function LoginPage() {
@@ -127,7 +126,7 @@ export default function LoginPage() {
 
                   {/* Sign In Button */}
                   <Button type="submit" className="px-3 py-1.5 bg-[#1a3f70] h-auto rounded-lg text-white text-lg font w-full leading-[30px] hover:bg-[#1a3f70]" disabled={isPending}>
-                    {isPending ? <Spinner size="medium" />
+                    {isPending ? "Signing in..."
                       : "Sign in"}
                   </Button>
                 </div>
