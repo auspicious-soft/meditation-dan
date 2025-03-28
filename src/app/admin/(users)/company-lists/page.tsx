@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/table";
 import { getCompanyDetailStats } from "@/services/admin-services";
 import { toast } from "sonner";
-
+import Skeleton from "react-loading-skeleton";
 // Updated Invoice interface based on backend data
 interface Invoice {
   _id: string;
@@ -83,11 +83,7 @@ const RecentNewUsers = () => {
     router.push(`/admin/company-lists/company-detail/${id}`);
   };
 
-  if (loading) {
-    return <div className="text-white">Loading...</div>;
-  }
-
-  if (error) {
+ if (error) {
     return <div className="text-red-500">{error}</div>;
   }
 
@@ -117,11 +113,39 @@ const RecentNewUsers = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {invoices.map((invoice) => (
-              <TableRow
+            {loading
+              ? Array(10)
+                .fill(0)
+                .map((_, index) => (
+                <TableRow
+                  key={`skeleton-${index}`}
+                  className="border-0 text-sm font-normal hover:bg-transparent"
+                >
+                  <TableCell className="py-4">
+                  <Skeleton />
+                  </TableCell>
+                  <TableCell className="py-4">
+                  <Skeleton />
+                  </TableCell>
+                  <TableCell className="py-4">
+                  <Skeleton />
+                  </TableCell>
+                  <TableCell className="py-4">
+                  <Skeleton />
+                  </TableCell>
+                  <TableCell className="py-4">
+                  <Skeleton />
+                  </TableCell>
+                  <TableCell className="text-right py-4">
+                  <Skeleton width={50} />
+                  </TableCell>
+                </TableRow>
+                ))
+              : invoices.map((invoice) => (
+                <TableRow
                 key={invoice._id}
                 className="border-0 text-sm font-normal hover:bg-transparent"
-              >
+                >
                 <TableCell className="py-4">{invoice.companyName}</TableCell>
                 <TableCell className="py-4">{invoice.email}</TableCell>
                 <TableCell className="py-4">
@@ -132,19 +156,19 @@ const RecentNewUsers = () => {
                 </TableCell>
                 <TableCell className="py-4">
                   {invoice.subscriptionExpiryDate
-                    ? new Date(invoice.subscriptionExpiryDate).toLocaleDateString()
-                    : "N/A"}
+                  ? new Date(invoice.subscriptionExpiryDate).toLocaleDateString()
+                  : "N/A"}
                 </TableCell>
                 <TableCell className="text-right py-4">
                   <Button
-                    className="px-3 !py-0 w-16 h-6 hover:cursor-pointer !bg-[#1a3f70] rounded inline-flex justify-center items-center text-white text-sm !font-normal !leading-tight !tracking-tight"
-                    onClick={() => handleViewClick(invoice._id)}
+                  className="px-3 !py-0 w-16 h-6 hover:cursor-pointer !bg-[#1a3f70] rounded inline-flex justify-center items-center text-white text-sm !font-normal !leading-tight !tracking-tight"
+                  onClick={() => handleViewClick(invoice._id)}
                   >
-                    View
+                  View
                   </Button>
                 </TableCell>
-              </TableRow>
-            ))}
+                </TableRow>
+              ))}
           </TableBody>
         </Table>
         {/* Pagination Controls */}
