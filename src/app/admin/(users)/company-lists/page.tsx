@@ -57,7 +57,6 @@ const RecentNewUsers = () => {
         if (data.success) {
           setInvoices(data.data);
           setTotalPages(Math.ceil(data.total / data.limit));
-          toast.success("Company details fetched successfully.");
         } else {
           setError(data.message || "Failed to fetch company details.");
           console.error(data.message);
