@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import Image from "next/image";
 import { getAllCollectionStats } from "@/services/admin-services";
+import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
 
 interface Collection {
   _id: string;
@@ -37,13 +38,12 @@ const AllCollection: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(0);
-  const limit = 12;
+  const limit = 10;
 
   // Fetch collections with pagination
   useEffect(() => {
     const fetchCollections = async () => {
       try {
-        setLoading(true);
         const response = await getAllCollectionStats("/collection", {
           page: currentPage,
           limit,
@@ -78,9 +78,6 @@ const AllCollection: React.FC = () => {
     }
   };
 
-  if (loading) {
-    return <div className="text-white">Loading...</div>;
-  }
 
   if (error) {
     return <div className="text-red-500">{error}</div>;
@@ -100,28 +97,40 @@ const AllCollection: React.FC = () => {
             + Add New Collection
           </Button>
         </div>
-        <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 justify-center gap-4">
-          {collections.map((collection) => (
-            <Card
-              key={collection._id}
-              className="bg-transparent border-none p-0 overflow-hidden items-center hover:cursor-pointer duration-300 shadow-none"
-              onClick={() => router.push(`/admin/all-collections/edit-collection/${collection._id}`)}
-            >
-              <CardContent className="p-0">
-                <Image
-                  src={collection?.imageUrl ? getS3Url(collection?.imageUrl) : "/default-placeholder.png"}
-                  alt={collection?.name}
-                  width={200}
-                  height={200}
-                  className="w-60 h-48 object-cover rounded-xl"
-                />
-              </CardContent>
-              <div className="text-white text-center bg-transparent p-2 text-sm font-medium">
-                {collection?.name}
-              </div>
-            </Card>
-          ))}
-        </div>
+        {!loading ?
+          <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 justify-center gap-4">
+            {
+              collections.map((collection) => (
+                <Card
+                  key={collection._id}
+                  className="bg-transparent w-full border-none p-0 overflow-hidden items-center hover:cursor-pointer duration-300 shadow-none"
+                  onClick={() => router.push(`/admin/all-collections/edit-collection/${collection._id}`)}
+                >
+                  <CardContent className="p-0">
+                    <Image
+                      src={collection?.imageUrl ? getS3Url(collection?.imageUrl) : "/default-placeholder.png"}
+                      alt={collection?.name}
+                      width={200}
+                      height={200}
+                      className="w-60 h-48 object-cover rounded-xl"
+                    />
+                  </CardContent>
+                  <div className="text-white text-center bg-transparent p-2 text-sm font-medium">
+                    {collection?.name}
+                  </div>
+                </Card>
+              ))
+            }
+          </div>
+          :
+            <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
+            {Array(10).fill(null).map((_, index) => (
+              <SkeletonTheme key={index} baseColor="#444" highlightColor="#ffffff" borderRadius={10}>
+              <Skeleton height={250} width={260} />
+              </SkeletonTheme>
+            ))}
+            </div>
+        }
 
         {/* Pagination Controls */}
         {totalPages > 1 && (

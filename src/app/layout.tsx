@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { SessionProvider } from "next-auth/react";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v13-appRouter";
 import { auth } from "@/auth";
+import 'react-loading-skeleton/dist/skeleton.css'
 
 const dmSans = DM_Sans({
   subsets: ["latin"],

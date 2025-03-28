@@ -17,7 +17,6 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton'
-import 'react-loading-skeleton/dist/skeleton.css'
 
 interface Audio {
   _id: string;
@@ -189,90 +188,85 @@ const AudioList = () => {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {!loading ? <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-red-600">
         {audios.map((audio) => {
-          if (!loading) {
-            return (
-              <div key={audio._id}
-                className="flex flex-col md:flex-row items-center justify-between w-full min-h-[100px] relative bg-slate-900 p-4 rounded">
-                <div className="rounded bg-slate-800 overflow-hidden flex-shrink-0">
-                  <Image
-                    src={audio?.imageUrl ? getS3Url(audio?.imageUrl) : "/default-placeholder.png"}
-                    alt={audio?.songName}
-                    className="object-cover"
-                    width={60}
-                    height={40}
-                    style={{ height: "auto" }}
-                  />
-                </div>
+          return (
+            <div key={audio._id}
+              className="flex flex-col md:flex-row items-center justify-between w-full min-h-[100px] relative bg-slate-900 p-4 rounded">
+              <div className="rounded bg-slate-800 overflow-hidden flex-shrink-0">
+                <Image
+                  src={audio?.imageUrl ? getS3Url(audio?.imageUrl) : "/default-placeholder.png"}
+                  alt={audio?.songName}
+                  className="object-cover"
+                  width={60}
+                  height={40}
+                  style={{ height: "auto" }}
+                />
+              </div>
 
-                <div className="flex-1 min-w-0 mx-3">
-                  <div className="text-sm text-center text-slate-400">Music Name:</div>
-                  <div className="text-white text-center font-medium truncate">{audio?.songName}</div>
-                </div>
+              <div className="flex-1 min-w-0 mx-3">
+                <div className="text-sm text-center text-slate-400">Music Name:</div>
+                <div className="text-white text-center font-medium truncate">{audio?.songName}</div>
+              </div>
 
-                <div className="text-center flex-1 min-w-0 mx-3">
-                  <div className="text-sm text-center text-slate-400">Duration</div>
-                  <div className="flex text-center items-center justify-center text-white">
-                    <Clock size={14} className="mr-1" />
-                    <span>{audio?.duration}</span>
-                  </div>
-                </div>
-
-                <div className="text-center flex-1 min-w-0 mx-3">
-                  <div className="text-sm text-center text-slate-400">Collection</div>
-                  <div className="text-white text-center border-0 truncate">{audio?.collectionType?.name || "Unknown Collection"}</div>
-                </div>
-
-                <div>
-                  <button
-                    className="text-slate-400 hover:cursor-pointer rounded-md bg-[#1B2236] p-2 hover:text-white"
-                    onClick={() => handlePlayPause(audio)}
-                    disabled={!audio?.audioUrl}
-                  >
-                    {playingAudioId === audio._id ? <Pause size={25} /> : <Play size={24} color="white" fill="white" />}
-                  </button>
-
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <button className="text-slate-400 hover:cursor-pointer rounded-md p-1 hover:text-white">
-                        <MoreVertical size={25} />
-                      </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="bg-[#1B2236] text-white border border-[#334155]">
-                      <DropdownMenuItem
-                        className="hover:bg-[#1B2236] cursor-pointer"
-                        onClick={() => handleEdit(audio._id)}
-                      >
-                        <Pencil size={16} className="mr-2 hover:text-black" />
-                        Edit
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        className="hover:bg-[#1B2236] cursor-pointer"
-                        onClick={() => openDeleteDialog(audio._id)}
-                      >
-                        <Trash2 size={16} className="mr-2 hover:text-black" />
-                        Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+              <div className="text-center flex-1 min-w-0 mx-3">
+                <div className="text-sm text-center text-slate-400">Duration</div>
+                <div className="flex text-center items-center justify-center text-white">
+                  <Clock size={14} className="mr-1" />
+                  <span>{audio?.duration}</span>
                 </div>
               </div>
-            )
-          }
-          else {
-            return (
-              <SkeletonTheme key={audio._id} baseColor="#8f929c" highlightColor="#444" >
-                <p>
-                  <Skeleton count={3} />
-                </p>
-              </SkeletonTheme>
-            )
-          }
 
+              <div className="text-center flex-1 min-w-0 mx-3">
+                <div className="text-sm text-center text-slate-400">Collection</div>
+                <div className="text-white text-center border-0 truncate">{audio?.collectionType?.name || "Unknown Collection"}</div>
+              </div>
 
-        })}
+              <div>
+                <button
+                  className="text-slate-400 hover:cursor-pointer rounded-md bg-[#1B2236] p-2 hover:text-white"
+                  onClick={() => handlePlayPause(audio)}
+                  disabled={!audio?.audioUrl}
+                >
+                  {playingAudioId === audio._id ? <Pause size={25} /> : <Play size={24} color="white" fill="white" />}
+                </button>
+
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="text-slate-400 hover:cursor-pointer rounded-md p-1 hover:text-white">
+                      <MoreVertical size={25} />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="bg-[#1B2236] text-white border border-[#334155]">
+                    <DropdownMenuItem
+                      className="hover:bg-[#1B2236] cursor-pointer"
+                      onClick={() => handleEdit(audio._id)}
+                    >
+                      <Pencil size={16} className="mr-2 hover:text-black" />
+                      Edit
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      className="hover:bg-[#1B2236] cursor-pointer"
+                      onClick={() => openDeleteDialog(audio._id)}
+                    >
+                      <Trash2 size={16} className="mr-2 hover:text-black" />
+                      Delete
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </div>
+          )
+        })
+        }
       </div>
+        :
+        <div >
+          <SkeletonTheme baseColor="#444" highlightColor="#ffffff" borderRadius={10}>
+            <Skeleton count={5} height={100} />
+          </SkeletonTheme>
+        </div>
+      }
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="bg-[#1B2236] text-center w-96 flex flex-col justify-center items-center text-white border border-[#334155]">
