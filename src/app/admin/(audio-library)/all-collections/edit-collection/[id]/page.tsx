@@ -52,10 +52,9 @@ const schema = yup.object({
   imageFile: yup
     .mixed<File>()
     .test("image-required", "An image is required", function (value) {
-      // If no new image file is uploaded, check if imagePreview exists
       return value !== undefined || this.parent.imagePreview !== null;
     }),
-  imagePreview: yup.string().nullable().defined(), // Ensure imagePreview is strictly string | null
+  imagePreview: yup.string().nullable().defined(),
 }).required();
 
 interface LevelOption {
@@ -72,6 +71,7 @@ const EditCollectionForm = () => {
   const [levelOptions, setLevelOptions] = useState<LevelOption[]>([]);
   const [bestForOptions, setBestForOptions] = useState<BestForOption[]>([]);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [originalImageKey, setOriginalImageKey] = useState<string | null>(null); // New state for original image key
   const [isLoadingLevels, setIsLoadingLevels] = useState(false);
   const [levelsError, setLevelsError] = useState<string | null>(null);
   const [isLoadingBestFor, setIsLoadingBestFor] = useState(false);
@@ -132,6 +132,7 @@ const EditCollectionForm = () => {
           const imageUrl = await getImageUrlOfS3(collection.imageUrl);
           setImagePreview(imageUrl);
           setValue("imagePreview", imageUrl);
+          setOriginalImageKey(collection.imageUrl); // Store the original image key
         } else {
           toast.error("Failed to load collection data");
         }
@@ -289,11 +290,11 @@ const EditCollectionForm = () => {
         `/admin/delete-collection/${collectionId}`
       );
       if (response?.status === 200) {
-        setIsDialogOpen(false);
         toast.success("Collection deleted successfully");
+        setIsDialogOpen(false);
         setTimeout(() => {
-        router.push("/admin/all-collections");
-        })
+          router.push("/admin/all-collections");
+        }, 1000);
       } else {
         toast.error(response?.data?.message || "Failed to delete collection");
         setIsDialogOpen(false);
@@ -316,7 +317,7 @@ const EditCollectionForm = () => {
 
   const onSubmit = async (data: FormData) => {
     try {
-      let imageKey = imagePreview;
+      let imageKey = originalImageKey; // Default to the original image key
 
       // Validate all fields before proceeding
       if (!data.collectionName) {
@@ -341,6 +342,7 @@ const EditCollectionForm = () => {
       }
 
       if (data.imageFile) {
+        // If a new image is uploaded, upload it and get the new key
         const image = data.imageFile;
         const bestForNames = data.bestFor
           .map(
@@ -369,10 +371,9 @@ const EditCollectionForm = () => {
         if (!imageUploadResponse.ok) {
           throw new Error("Failed to upload image to S3");
         }
-        imageKey = key;
-      }
-
-      if (!imageKey) {
+        imageKey = key; // Update imageKey with the new uploaded key
+      } else if (!imageKey) {
+        // If no new image is uploaded and no original key exists, throw an error
         setError("imageFile", { type: "manual", message: "An image is required" });
         toast.error("An image is required");
         return;
@@ -380,22 +381,22 @@ const EditCollectionForm = () => {
 
       const payload = {
         name: data.collectionName,
-        imageUrl: imageKey,
+        imageUrl: imageKey, // Use the determined imageKey
         levels: data.levels,
         bestFor: data.bestFor,
         description: data.description,
       };
       console.log("collectionData:", payload);
       const id = collectionId;
-      const response = await updateCollectionStats(`/admin/update/collection/${id}`,payload);
+      const response = await updateCollectionStats(`/admin/update/collection/${id}`, payload);
 
       if (response?.status === 200) {
         toast.success("Collection updated successfully");
         setImagePreview(null);
         if (fileInputRef.current) fileInputRef.current.value = "";
-       setTimeout(() =>{
-         router.push("/admin/all-collections");
-       }, 1000);
+        setTimeout(() => {
+          router.push("/admin/all-collections");
+        }, 1000);
       } else {
         toast.error(response?.data?.message || "Failed to update collection");
       }
