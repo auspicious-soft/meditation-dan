@@ -1,5 +1,5 @@
 "use client";
-
+// export const dynamic = "force-dynamic";
 import React, { useEffect, useState, useCallback } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { loginAction } from "@/actions"; // Ensure this function correctly sends a request
@@ -146,4 +146,3 @@ export default function LoginPage() {
   );
 }
 
-export const dynamic = "force-dynamic";
