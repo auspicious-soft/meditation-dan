@@ -18,22 +18,19 @@ const data = {
       url: "/company/dashboard",
       icon: CompassIcon 
     },
+
     {
       title: "Users",
       url: "/company/users",
       icon: UsersIcon,
-      items: [
-        { title: "Add Users", url: "/company/users/add-user" },
-        { title: "User Lists", url: "/company/users/user-list" },
-
-       
-      ],
     },
+
     {
       title: "Subscription",
       url: "/company/subscription",
       icon: SubscriptionIcon,
     },
+    
     {
       title: "Join Requests",
       url: "/company/join-request",

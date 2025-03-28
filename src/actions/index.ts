@@ -1,16 +1,37 @@
 "use server";
-
 import { signIn, signOut } from "@/auth";
-import { loginService } from "@/services/admin-services";
+import { loginService, signupService } from "@/services/admin-services";
 import { cookies } from "next/headers";
 import { createS3Client } from "@/config/s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand,  } from "@aws-sdk/client-s3";
 
 
-export const signupAction = async (payload: any) => {
-   
+
+export const signupAction = async (payload:any) => {
+  console.log('payload:', payload);
+try {
+  const res: any = await signupService(payload);
+  const user = res?.data?.data?.user;
+  const userName =  user.firstName + " " + user.lastName;
+  if (res && res?.data?.success) {
+    await signIn("credentials", {
+      email: user.email, 
+      fullName: userName,
+      _id: user._id,
+      role: user?.role,
+      profilePic: user.image,
+      redirect: false,
+    });
+  }
+  return res?.data;
+} catch (error: any) {
+  return error?.response?.data;
 }
+};
+
+
+
 export const loginAction = async (payload: any) => {
   try {
     const res: any = await loginService(payload);

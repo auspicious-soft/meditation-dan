@@ -13,7 +13,7 @@ interface Invoice {
 }
 
 const invoices: Invoice[] = [
- { Id: "1", UserName: "Rakesh Choudhary", email: "rakeshchoudhary123@gmail.com", birthday: "01/21/1997", gender: "male" },
+ { Id: "0032", UserName: "Rakesh Choudhary", email: "rakeshchoudhary123@gmail.com", birthday: "01/21/1997", gender: "male" },
  { Id: "0033", UserName: "Ravi Pandit", email: "rakeshchoudhary123@gmail.com", birthday: "01/21/1997", gender: "male" },
  { Id: "0034", UserName: "Harsh Bhatia", email: "rakeshchoudhary123@gmail.com", birthday: "01/21/1997", gender: "male" },
  { Id: "0035", UserName: "Gautam Patial", email: "rakeshchoudhary123@gmail.com", birthday:" 01/21/1997", gender: "male" },
@@ -41,12 +41,13 @@ const Page = () => {
   }
  };
 
-//  const handleViewClick = (id: string) => {
-//   router.push(`/company/users/details${id}`);
-//  };
 
  const handleViewClick = () => {
   router.push(`/company/users/details`);
+ };
+
+ const handleViewClickk = () => {
+  router.push(`/company/users/add-user`);
  };
 
 
@@ -59,7 +60,7 @@ const Page = () => {
     <h2 className="text-white text-[20px] md:text-2xl font-bold mb-3">User Lists</h2>
 
     <div className=" px-[48px] py-[8px] bg-[#1A3F70] rounded inline-flex justify-center items-center gap-2.5">
-    <div className="text-center justify-start text-white text-sm font-normal  ">+ Add New User</div>
+    <div  onClick={() => handleViewClickk()} className="text-center justify-start text-white text-sm font-normal  ">+ Add New User</div>
 </div>
 </div>
 
