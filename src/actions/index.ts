@@ -8,27 +8,105 @@ import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand,  } from "@aws-
 
 
 
-export const signupAction = async (payload:any) => {
-  console.log('payload:', payload);
-try {
-  const res: any = await signupService(payload);
-  const user = res?.data?.data?.user;
-  const userName =  user.firstName + " " + user.lastName;
-  if (res && res?.data?.success) {
-    await signIn("credentials", {
-      email: user.email, 
-      fullName: userName,
-      _id: user._id,
-      role: user?.role,
-      profilePic: user.image,
-      redirect: false,
-    });
+// export const signupAction = async (payload:any) => {
+//   console.log('payload:', payload);
+// try {
+//   const res: any = await signupService(payload);
+//   const user = res?.data?.data?.user;
+//   const userName =  user.firstName + " " + user.lastName;
+//   if (res && res?.data?.success) {
+//     await signIn("credentials", {
+//       email: user.email, 
+//       fullName: userName,
+//       _id: user._id,
+//       role: user?.role,
+//       profilePic: user.image,
+//       redirect: false,
+//     });
+//   }
+//   return res?.data;
+// } catch (error: any) {
+//   return error?.response?.data;
+// }
+// };
+
+// export const signupAction = async (payload: any) => {
+//   console.log('payload:', payload); // { name, email, companyName, password }
+//   try {
+//     const res: any = await signupService(payload);
+//     console.log('res: ', res);
+//     const user = res?.data?.data?.user;
+//     console.log('res: ', res);
+
+//     const userName = user.name;
+
+//     if (res && res?.data?.success) {
+//       console.log('res: ', res);
+//       await signIn("credentials", {
+//         email: user.email,
+//         // fullName: userName, 
+//         _id: user._id,
+//         role: user?.role,
+//         profilePic: user.image,
+//         redirect: false,
+//       });
+//     }
+//     return res?.data;
+//   } catch (error: any) {
+//     console.error('Signup action error:', error);
+//     return error?.response?.data;
+//   }
+// };
+
+export const signupAction = async (payload: any) => {
+  console.log('1. Payload received in signupAction:', payload);
+
+  try {
+    console.log('2. Calling signupService with payload:', payload);
+    const res: any = await signupService(payload);
+    console.log('3. Response from signupService:', res); 
+
+    const user = res?.data?.data?.user;
+    console.log('4. Extracted user object:', user); 
+
+    const userName = user?.name; 
+    console.log('5. userName set to:', userName); 
+
+    if (res && res?.data?.success) {
+      console.log('6. Success condition met, res.data:', res.data.data.userData);
+      const user = res.data.data.userData;
+      console.log('7. Calling signIn with:', {
+        email: user.email,
+        name: user?.companyName,
+        _id: user._id,
+        role: user?.role,
+        profilePic: user?.image,
+        redirect: false,
+      });
+
+      await signIn("credentials", {
+        email: user.email,
+        // fullName: userName, 
+        _id: user._id,
+        role: user?.role,
+        profilePic: user?.image,
+        redirect: false,
+      });
+      console.log('8. signIn completed successfully');
+    } else {
+      console.log('9. Success condition NOT met, res.data:', res?.data);
+    }
+
+    console.log('10. Returning res.data:', res?.data);
+    return res?.data;
+  } catch (error: any) {
+    console.error('11. Error caught in signupAction:', error); 
+    console.error('12. Error response data:', error?.response?.data); 
+    return error?.response?.data;
   }
-  return res?.data;
-} catch (error: any) {
-  return error?.response?.data;
-}
 };
+
+
 
 
 

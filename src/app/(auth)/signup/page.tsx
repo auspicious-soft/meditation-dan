@@ -42,6 +42,7 @@ export default function SignupPage() {
  }, []);
 
  const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (event) => {
+        console.log('handleSubmit: ', handleSubmit);
   event.preventDefault();
 
   // Console log all user details
@@ -79,7 +80,8 @@ export default function SignupPage() {
 
     if (response?.success) {
      toast.success("Account created successfully");
-     router.push("/admin/dashboard");
+//   router.push("/admin/dashboard");
+     router.push("/verifyotp");
     } else {
      toast.error(response?.message || "Signup failed. Please try again.");
     }
@@ -153,7 +155,7 @@ export default function SignupPage() {
          </div>
 
          <Button type="submit" className="cursor-pointer px-3 py-1.5 bg-[#1a3f70] h-[50px] rounded-lg text-white text-lg font w-full leading-[30px] hover:bg-[#1a3f70]" disabled={isPending}>
-          {isPending ? "Signing up..." : "Sign Up"}
+          {isPending ? "Signing up..." : "Send Request"}
          </Button>
         </div>
        </form>
