@@ -5,6 +5,9 @@ import { Toaster } from "@/components/ui/sonner";
 import { SessionProvider } from "next-auth/react";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v13-appRouter";
 import { auth } from "@/auth";
+import 'react-loading-skeleton/dist/skeleton.css'
+import Providers from "@/components/progress-provider";
+
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
@@ -28,10 +31,12 @@ export default async function RootLayout({
     <html lang="en">
       <body className={`${dmSans.variable}`} suppressHydrationWarning>
         <SessionProvider session={session}>
-          <Toaster richColors />
-          <AppRouterCacheProvider>
-            {children}
-          </AppRouterCacheProvider>
+          <Providers>
+            <Toaster richColors />
+            <AppRouterCacheProvider>
+              {children}
+            </AppRouterCacheProvider>
+          </Providers>
         </SessionProvider>
       </body>
     </html>

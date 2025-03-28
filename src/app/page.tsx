@@ -117,10 +117,17 @@ export default function LoginPage() {
             Keep me logged in
            </Label>
           </div> */}
-                    <Link href="/forgot-password" className="text-[#9a9a9a] text-base font-medium">
+                    <Link href="/forgot-password" className="text-[#9a9a9a] text-base font-medium hover:underline">
                       Forgot Password?
                     </Link>
                   </div>
+
+                  <div className="flex items-center justify-between">
+          <Link href="/signup" className="text-[#9a9a9a] text-base font-medium">
+           Dont have an account?
+           <span className="hover:underline"> Sign Up</span>
+          </Link>
+         </div>
 
                   {/* Sign In Button */}
                   <Button type="submit" className="px-3 py-1.5 bg-[#1a3f70] h-auto rounded-lg text-white text-lg font w-full leading-[30px] hover:bg-[#1a3f70]" disabled={isPending}>
