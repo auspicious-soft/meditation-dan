@@ -9,7 +9,7 @@ import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand,  } from "@aws-
 
 
 export const signupAction = async (payload: any) => {
-  
+   
 }
 export const loginAction = async (payload: any) => {
   try {
