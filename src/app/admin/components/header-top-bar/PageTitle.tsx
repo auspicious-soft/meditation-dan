@@ -44,11 +44,19 @@ const PageTitle = () => {
   if (addNewAudioPattern.test(pathname)) {
     pageTitle = "Audio Library";
   }
+
   const addNewCollectionPattern =
     /^\/admin\/all-collections\/add-new-collection$/;
   if (addNewCollectionPattern.test(pathname)) {
     pageTitle = "Audio Library";
   }
+
+  const companyRequest = /^\/admin\/requests$/;
+  if (companyRequest.test(pathname)) {
+    pageTitle = "Company Requests";
+  }
+
+
   return <h1 className="text-2xl font-bold hidden md:block">{pageTitle}</h1>;
 };
 

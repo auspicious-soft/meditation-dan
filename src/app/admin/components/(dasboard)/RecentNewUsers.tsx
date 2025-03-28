@@ -55,7 +55,7 @@ const RecentNewUsers = () => {
                 <Table>
                     <TableHeader>
                         <TableRow className="text-white text-sm font-bold dm-sans border-0 border-b border-[#666666] hover:bg-transparent">
-                            <TableHead className="w-[100px] py-4">Id</TableHead>
+                            <TableHead className="w-[100px] py-4">ID</TableHead>
                             <TableHead className="py-4">Name of Customer</TableHead>
                             <TableHead className="py-4">Company Name</TableHead>
                             <TableHead className="py-4">Emai Id</TableHead>

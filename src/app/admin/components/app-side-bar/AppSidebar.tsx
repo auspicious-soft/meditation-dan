@@ -52,6 +52,11 @@ const data = {
       url: "/admin/analytics",
       icon: SubscriptionIcon,
     },
+    {
+      title: "Company Requests",
+      url: "/admin/requests",
+      icon: BellNotifactionIcon,
+    },
     
   ],
 };
