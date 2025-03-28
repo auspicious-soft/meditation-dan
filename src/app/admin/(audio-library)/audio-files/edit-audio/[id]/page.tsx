@@ -160,7 +160,9 @@ const GetAudio = () => {
 
   const selectedLevels = watch("levels") || [];
   const selectedBestFor = watch("bestFor") || "";
+  
   const selectedCollectionType = watch("collectionType") || "";
+  console.log('selectedCollectionType:', selectedCollectionType);
   const audioFile = watch("audioFile");
   const imageFile = watch("imageFile");
 
