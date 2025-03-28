@@ -1,9 +1,10 @@
 import React from "react";
 import SubscriptionReminderTable from "../components/(dasboard)/SubscriptionReminderTable";
-
 import RecentNewUsers from "../components/(dasboard)/RecentNewUsers";
+import { auth } from "@/auth";
 
-export default function Page() {
+export default async function Page() {
+  const session = await auth()
   return (
     <div className="flex flex-1 flex-col gap-4">
       <h1 className="text-2xl font-bold block md:hidden">Dashboard</h1>

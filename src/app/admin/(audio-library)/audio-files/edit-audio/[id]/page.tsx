@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 import { useEffect, useState, useRef } from "react";
-import { useParams, useRouter } from "next/navigation"; // Import useRouter for navigation and getting params
+import { useParams, useRouter } from "next/navigation";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -28,12 +28,11 @@ import { toast } from "sonner";
 import {
   generateSignedUrlForAudioImage,
   generateSignedUrlForAudios,
-  getImageUrlOfS3,
 } from "@/actions";
-import { getAllCollectionStats, getBestForStats, getlevelsStats, uploadAudioStats, deleteAudio, getAudioDataById } from "@/services/admin-services";
+import { getAllCollectionStats, getBestForStats, getlevelsStats, deleteAudio, getAudioDataById } from "@/services/admin-services";
 import { AxiosError } from "axios";
 
-// Interface for the collection data from the backend
+// Interfaces
 interface Collection {
   _id: string;
   name: string;
@@ -54,14 +53,13 @@ interface CollectionsResponse {
   };
 }
 
-// Interface for the audio data from the backend
 interface Audio {
   _id: string;
   songName: string;
   description: string;
   collectionType: { _id: string; name: string };
   levels: { _id: string; name: string }[];
-  bestFor: { _id: string; name: string };
+  bestFor: { _id: string; name: string }[];
   audioUrl: string;
   imageUrl: string;
   duration: string;
@@ -73,7 +71,6 @@ interface AudioResponse {
   data: Audio;
 }
 
-// Define FormValues type
 type FormValues = {
   collectionType: string;
   songName: string;
@@ -82,11 +79,10 @@ type FormValues = {
   bestFor: string;
   audioFile?: FileList | null | undefined;
   imageFile?: FileList | null | undefined;
-  audioUrl?: string; // Add audioUrl to the type
-  imageUrl?: string; // Add imageUrl to the type
+  audioUrl?: string;
+  imageUrl?: string;
 };
 
-// Define schema
 const schema = yup.object().shape({
   collectionType: yup.string().required("Collection type is required"),
   songName: yup.string().required("Song name is required"),
@@ -112,13 +108,13 @@ interface BestForOption {
 }
 
 const GetAudio = () => {
-  const params = useParams();
-  const [audioId, setAudioId] = useState<string | null>(null); // Store the audio ID from URL
+  const { id } = useParams();
+  const [audioId, setAudioId] = useState<string | null>(null);
   const [collections, setCollections] = useState<Collection[]>([]);
   const [audioPreview, setAudioPreview] = useState<string | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [existingAudioUrl, setExistingAudioUrl] = useState<string | null>(null); // Store existing audio URL
-  const [existingImageUrl, setExistingImageUrl] = useState<string | null>(null); // Store existing image URL
+  const [existingAudioUrl, setExistingAudioUrl] = useState<string | null>(null);
+  const [existingImageUrl, setExistingImageUrl] = useState<string | null>(null);
   const [loadingCollections, setLoadingCollections] = useState<boolean>(true);
   const [isLoadingLevels, setIsLoadingLevels] = useState(false);
   const [levelsError, setLevelsError] = useState<string | null>(null);
@@ -126,10 +122,10 @@ const GetAudio = () => {
   const [bestForOptions, setBestForOptions] = useState<BestForOption[]>([]);
   const [isLoadingBestFor, setIsLoadingBestFor] = useState(false);
   const [bestForError, setBestForError] = useState<string | null>(null);
-  const [popoverWidth, setPopoverWidth] = useState("auto");
   const audioInputRef = useRef<HTMLInputElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const [popoverWidth, setPopoverWidth] = useState("auto");
 
   const {
     register,
@@ -137,7 +133,6 @@ const GetAudio = () => {
     control,
     watch,
     setValue,
-    setError,
     reset,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
@@ -153,44 +148,47 @@ const GetAudio = () => {
     },
   });
 
+  const getS3Url = (subPath: string) => {
+    return `${process.env.NEXT_PUBLIC_AWS_BUCKET_PATH}${subPath}`;
+  };
+
   const selectedLevels = watch("levels") || [];
   const selectedBestFor = watch("bestFor") || "";
   const audioFile = watch("audioFile");
   const imageFile = watch("imageFile");
 
-  // Fetch audio data based on ID
   useEffect(() => {
     const fetchAudioData = async () => {
-      const id = Array.isArray(params.id) ? params.id[0] : params.id; // Ensure id is a string
-      if (!id) return;
+      const audioIdParam = Array.isArray(id) ? id[0] : id;
+      if (!audioIdParam) return;
 
-      setAudioId(id);
+      setAudioId(audioIdParam);
       try {
-        const response = await getAudioDataById(`/api/audio/${id}`); // Replace with your actual API endpoint to fetch audio
+        const response = await getAudioDataById(`/audio/${audioIdParam}`);
         const data: AudioResponse = await response.data;
 
         if (data.success) {
           const audioData = data.data;
-          // Pre-fill form with fetched data
           reset({
             collectionType: audioData.collectionType._id,
             songName: audioData.songName,
             description: audioData.description,
             levels: audioData.levels.map((level) => level._id),
-            bestFor: audioData.bestFor._id,
+            bestFor: audioData.bestFor[0]?._id || "", // Since bestFor is an array, take the first item
             audioFile: null,
             imageFile: null,
+            audioUrl: audioData.audioUrl,
+            imageUrl: audioData.imageUrl,
           });
 
-          // Resolve S3 URLs for audio and image
           if (audioData.audioUrl) {
-            const audioUrl = await getImageUrlOfS3(audioData.audioUrl);
-            setExistingAudioUrl(audioUrl);
+            const audioUrl = getS3Url(audioData.audioUrl);
+            setExistingAudioUrl(audioData.audioUrl);
             setAudioPreview(audioUrl);
           }
           if (audioData.imageUrl) {
-            const imageUrl = await getImageUrlOfS3(audioData.imageUrl);
-            setExistingImageUrl(imageUrl);
+            const imageUrl = getS3Url(audioData.imageUrl);
+            setExistingImageUrl(audioData.imageUrl);
             setImagePreview(imageUrl);
           }
         } else {
@@ -277,35 +275,32 @@ const GetAudio = () => {
     fetchCollections();
   }, [reset]);
 
-  // Update audio preview
   useEffect(() => {
     if (audioFile && audioFile.length > 0) {
       const audioUrl = URL.createObjectURL(audioFile[0]);
       setAudioPreview(audioUrl);
-      setExistingAudioUrl(null); // Clear existing audio URL since a new file is selected
+      setExistingAudioUrl(null);
       return () => URL.revokeObjectURL(audioUrl);
     } else if (existingAudioUrl) {
-      setAudioPreview(existingAudioUrl);
+      setAudioPreview(getS3Url(existingAudioUrl));
     } else {
       setAudioPreview(null);
     }
   }, [audioFile, existingAudioUrl]);
 
-  // Update image preview
   useEffect(() => {
     if (imageFile && imageFile.length > 0) {
       const imageUrl = URL.createObjectURL(imageFile[0]);
       setImagePreview(imageUrl);
-      setExistingImageUrl(null); // Clear existing image URL since a new file is selected
+      setExistingImageUrl(null);
       return () => URL.revokeObjectURL(imageUrl);
     } else if (existingImageUrl) {
-      setImagePreview(existingImageUrl);
+      setImagePreview(getS3Url(existingImageUrl));
     } else {
       setImagePreview(null);
     }
   }, [imageFile, existingImageUrl]);
 
-  // Remove handlers
   const handleRemoveAudio = () => {
     if (audioInputRef.current) {
       audioInputRef.current.value = "";
@@ -350,19 +345,17 @@ const GetAudio = () => {
     return () => window.removeEventListener("resize", debouncedUpdateWidth);
   }, []);
 
-  // Form submission handler (Update Audio)
   const onSubmit = async (data: FormValues) => {
     if (!audioId) return;
 
     try {
-      let audioKey = existingAudioUrl ? data.audioUrl : null;
-      let imageKey = existingImageUrl ? data.imageUrl : null;
+      let audioKey = existingAudioUrl || null;
+      let imageKey = existingImageUrl || null;
       let formattedDuration = null;
 
       if (data.audioFile && data.audioFile.length > 0) {
         const audio = data.audioFile[0];
         const duration = await getAudioDuration(audio);
-        console.log("duration:", duration);
 
         const selectedCollection = collections.find((col) => col._id === data.collectionType);
         if (!selectedCollection) {
@@ -373,7 +366,6 @@ const GetAudio = () => {
         const songName = data.songName.toLowerCase();
 
         formattedDuration = formatDuration(duration);
-        console.log("formattedDuration:", formattedDuration);
 
         const audioFileName = `${audio.name}`;
         const { signedUrl, key } = await generateSignedUrlForAudios(
@@ -390,11 +382,6 @@ const GetAudio = () => {
 
         if (!audioUploadResponse.ok) {
           const errorText = await audioUploadResponse.text();
-          console.error("Upload failed:", {
-            status: audioUploadResponse.status,
-            statusText: audioUploadResponse.statusText,
-            body: errorText,
-          });
           throw new Error(`Failed to upload audio: ${errorText}`);
         }
         audioKey = key;
@@ -428,7 +415,6 @@ const GetAudio = () => {
         imageKey = key;
       }
 
-      console.log("imageKey:", imageKey);
       const payload = {
         songName: data.songName,
         collectionType: data.collectionType,
@@ -439,9 +425,7 @@ const GetAudio = () => {
         levels: data.levels,
         bestFor: data.bestFor,
       };
-      console.log("payload:", payload);
 
-      // Update audio on backend
       const response = await fetch(`/api/audio/${audioId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -467,7 +451,6 @@ const GetAudio = () => {
     }
   };
 
-  // Delete audio handler
   const handleDelete = async () => {
     if (!audioId) return;
 
@@ -511,10 +494,8 @@ const GetAudio = () => {
     >
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold">Edit Audio</h2>
-        
       </div>
 
-      {/* Collection Type */}
       <Label className="text-gray-300 mb-3 block">Collection Type</Label>
       <Controller
         name="collectionType"
@@ -526,7 +507,7 @@ const GetAudio = () => {
             </SelectTrigger>
             <SelectContent className="bg-[#0B132B] border-gray-700 text-white">
               {loadingCollections ? (
-                <SelectItem value="loading">Loading collections...</SelectItem>
+                <SelectItem value="loading" key="loading">Loading collections...</SelectItem>
               ) : collections.length > 0 ? (
                 collections.map((collection) => (
                   <SelectItem key={collection._id} value={collection._id}>
@@ -534,7 +515,7 @@ const GetAudio = () => {
                   </SelectItem>
                 ))
               ) : (
-                <SelectItem value="no-collections">No collections available</SelectItem>
+                <SelectItem value="no-collections" key="no-collections">No collections available</SelectItem>
               )}
             </SelectContent>
           </Select>
@@ -544,7 +525,6 @@ const GetAudio = () => {
         <p className="text-red-500 text-xs mb-4">{errors.collectionType.message}</p>
       )}
 
-      {/* Song Name */}
       <Label className="text-gray-300 mb-3 block">Song Name</Label>
       <Input
         {...register("songName")}
@@ -590,11 +570,11 @@ const GetAudio = () => {
           style={{ width: popoverWidth }}
         >
           {isLoadingLevels ? (
-            <div className="p-2 text-gray-500">Loading levels...</div>
+            <div className="p-2 text-gray-500" key="loading">Loading levels...</div>
           ) : levelsError ? (
-            <div className="p-2 text-red-500">{levelsError}</div>
+            <div className="p-2 text-red-500" key="error">{levelsError}</div>
           ) : levelOptions.length === 0 ? (
-            <div className="p-2 text-gray-500">No levels available</div>
+            <div className="p-2 text-gray-500" key="no-levels">No levels available</div>
           ) : (
             levelOptions.map((level) => (
               <div
@@ -635,13 +615,11 @@ const GetAudio = () => {
         </SelectTrigger>
         <SelectContent className="bg-[#0B132B] border-gray-700 text-white">
           {isLoadingBestFor ? (
-            <div className="p-2 text-gray-500">Loading best for options...</div>
+            <SelectItem value="loading" key="loading">Loading best for options...</SelectItem>
           ) : bestForError ? (
-            <div className="p-2 text-red-500">{bestForError}</div>
+            <SelectItem value="error" key="error">{bestForError}</SelectItem>
           ) : bestForOptions.length === 0 ? (
-            <div className="p-2 text-gray-500">
-              No best for options available
-            </div>
+            <SelectItem value="no-options" key="no-options">No best for options available</SelectItem>
           ) : (
             bestForOptions.map((option) => (
               <SelectItem key={option.id} value={option.id}>
@@ -655,7 +633,6 @@ const GetAudio = () => {
         <p className="text-red-500 text-sm">{errors.bestFor.message}</p>
       )}
 
-      {/* Description */}
       <Label className="text-gray-300 mb-3 block">Description</Label>
       <Textarea
         {...register("description")}
@@ -666,37 +643,37 @@ const GetAudio = () => {
         <p className="text-red-500 text-xs mb-4">{errors.description.message}</p>
       )}
 
-      {/* File Upload Section */}
       <div className="flex flex-wrap items-center space-x-16">
-        {/* Upload Audio */}
-        <div>
+        <div key="audio-upload-section">
           <Label className="text-gray-300 mb-3 block">Upload Song</Label>
           <div className="flex flex-wrap items-end gap-4 mb-4">
-            <Card className="w-44 h-44 flex items-center justify-center bg-[#0B132B] border-none rounded-lg relative">
-              {audioPreview ? (
-                <>
-                  <audio
-                    src={audioPreview}
-                    controls
-                    className="w-full h-full object-contain"
-                  />
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="absolute top-0 hover:bg-[#373f57] right-0 text-zinc-500"
-                    onClick={handleRemoveAudio}
-                  >
-                    <Trash2
-                      size={16}
-                      className="text-white hover:cursor-pointer"
+            <div key="audio-card">
+              <Card className="w-44 h-44 flex items-center justify-center bg-[#0B132B] border-none rounded-lg relative">
+                {audioPreview ? (
+                  <div key="audio-preview">
+                    <audio
+                      src={audioPreview}
+                      controls
+                      className="w-full h-full object-contain"
                     />
-                  </Button>
-                </>
-              ) : (
-                <Upload size={32} className="text-gray-400" />
-              )}
-            </Card>
-            <div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="absolute top-0 hover:bg-[#373f57] right-0 text-zinc-500"
+                      onClick={handleRemoveAudio}
+                    >
+                      <Trash2
+                        size={16}
+                        className="text-white hover:cursor-pointer"
+                      />
+                    </Button>
+                  </div>
+                ) : (
+                  <Upload size={32} className="text-gray-400" key="audio-upload-icon" />
+                )}
+              </Card>
+            </div>
+            <div key="audio-input">
               <label htmlFor="audio-upload">
                 <input
                   type="file"
@@ -718,43 +695,44 @@ const GetAudio = () => {
               </label>
             </div>
           </div>
-          <p className="text-xs text-gray-500 mb-4">Max size: 30 MB</p>
+          <p className="text-xs text-gray-500 mb-4" key="audio-max-size">Max size: 30 MB</p>
           {errors.audioFile && (
-            <p className="text-red-500 text-xs mb-4">{errors.audioFile.message}</p>
+            <p className="text-red-500 text-xs mb-4" key="audio-error">{errors.audioFile.message}</p>
           )}
         </div>
 
-        {/* Upload Image */}
-        <div>
+        <div key="image-upload-section">
           <Label className="text-gray-300 mb-3 block">Upload Audio Image</Label>
           <div className="flex flex-wrap items-end gap-4 mb-4">
-            <Card className="w-44 h-44 flex items-center justify-center bg-[#0B132B] border-none rounded-lg relative">
-              {imagePreview ? (
-                <>
-                  <Image
-                    src={imagePreview}
-                    alt="Preview"
-                    width={170}
-                    height={220}
-                    className="rounded-lg w-full h-full object-cover"
-                  />
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="absolute top-0 hover:bg-[#373f57] right-0 text-zinc-500"
-                    onClick={handleRemoveImage}
-                  >
-                    <Trash2
-                      size={16}
-                      className="text-white hover:cursor-pointer"
+            <div key="image-card">
+              <Card className="w-44 h-44 flex items-center justify-center bg-[#0B132B] border-none rounded-lg relative">
+                {imagePreview ? (
+                  <div key="image-preview">
+                    <Image
+                      src={imagePreview}
+                      alt="Preview"
+                      width={170}
+                      height={220}
+                      className="rounded-lg w-full h-full object-cover"
                     />
-                  </Button>
-                </>
-              ) : (
-                <Upload size={32} className="text-gray-400" />
-              )}
-            </Card>
-            <div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="absolute top-0 hover:bg-[#373f57] right-0 text-zinc-500"
+                      onClick={handleRemoveImage}
+                    >
+                      <Trash2
+                        size={16}
+                        className="text-white hover:cursor-pointer"
+                      />
+                    </Button>
+                  </div>
+                ) : (
+                  <Upload size={32} className="text-gray-400" key="image-upload-icon" />
+                )}
+              </Card>
+            </div>
+            <div key="image-input">
               <label htmlFor="image-upload">
                 <input
                   type="file"
@@ -776,23 +754,24 @@ const GetAudio = () => {
               </label>
             </div>
           </div>
-          <p className="text-xs text-gray-500 mb-4">Size: 170x170 pixels</p>
+          <p className="text-xs text-gray-500 mb-4" key="image-size">Size: 170x170 pixels</p>
           {errors.imageFile && (
-            <p className="text-red-500 text-xs mb-4">{errors.imageFile.message}</p>
+            <p className="text-red-500 text-xs mb-4" key="image-error">{errors.imageFile.message}</p>
           )}
         </div>
       </div>
 
-      {/* Submit Button */}
       <div className="flex flex-wrap justify-start items-center gap-2">
-      <Button
-        type="submit"
-        className="bg-[#1A3F70] hover:cursor-pointer hover:bg-[#1A3F70] w-52"
-        disabled={isSubmitting}
-      >
-        {isSubmitting ? "Saving..." : "Save"}
-      </Button>
-      <Button
+        <Button
+          key="save-button"
+          type="submit"
+          className="bg-[#1A3F70] hover:cursor-pointer hover:bg-[#1A3F70] w-52"
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? "Saving..." : "Save"}
+        </Button>
+        <Button
+          key="delete-button"
           type="button"
           variant="destructive"
           onClick={handleDelete}

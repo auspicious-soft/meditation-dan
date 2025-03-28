@@ -1,5 +1,5 @@
 "use client";
-import React, { startTransition, useState } from "react"; // Added useState
+import React, { useState } from "react"; // Added useState
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import LogoAuth from "../components/LogoAuth";
@@ -10,36 +10,36 @@ import { toast } from "sonner"; // Optional: for user feedback
 import { sendOtpService } from "@/services/admin-services";
 
 export default function Home() {
- interface FormElements extends HTMLFormControlsCollection {
-  otp: HTMLInputElement; // Adjusted for OTP input
- }
-
- interface SignInFormElement extends HTMLFormElement {
-  readonly elements: FormElements;
- }
-
- const [otpValue, setOtpValue] = useState("");
- const router = useRouter();
-
- const handleSubmit = (e: React.FormEvent<SignInFormElement>) => {
-  e.preventDefault();
-
-  if (!otpValue || otpValue.length < 4) {
-   toast.error("Please enter a valid OTP.");
-   return;
+  interface FormElements extends HTMLFormControlsCollection {
+    otp: HTMLInputElement; // Adjusted for OTP input
   }
-  startTransition(async () => {
+  const [isPending, startTransition] = React.useTransition();
+
+  interface SignInFormElement extends HTMLFormElement {
+    readonly elements: FormElements;
+  }
+
+  const [otpValue, setOtpValue] = useState("");
+  const router = useRouter();
+
+  const handleSubmit = (e: React.FormEvent<SignInFormElement>) => {
+    e.preventDefault();
+
+    if (!otpValue || otpValue.length < 4) {
+      toast.error("Please enter a valid OTP.");
+      return;
+    }
+    startTransition(async () => {
       try {
         const response = await sendOtpService({ otp: otpValue });
 
-        if ( response.data.success) {
+        if (response.data.success) {
           toast.success(response.data.message);
           router.push(`/new-password?otp=${encodeURIComponent(otpValue)}`);
         } else {
           toast.error(response.data.message || "Invalid OTP.");
         }
       } catch (error) {
-        console.error("Error updating password:", error);
         if ((error as any)?.response?.data?.message) {
           toast.error((error as any)?.response?.data?.message);
         } else {
@@ -47,45 +47,46 @@ export default function Home() {
         }
       }
     });
- };
- return (
-  <div className="grid grid-cols-12 h-screen">
-   <div className="col-span-12 md:col-span-5 w-full space-y-1 flex justify-center items-center flex-col p-4 md:p-8">
-    <LogoAuth />
-    <div className="flex justify-center items-center max-w-[400px] w-full">
-     <Card className="w-full max-w-md bg-navy-950 gap-8 text-white border-none shadow-none md:pt-20">
-      <CardHeader className="p-0">
-       <CardTitle className="justify-start text-white text-[30px] md:text-[36px]">Enter OTP</CardTitle>
-       <p className="text-[#959595] text-base md:text-lg font-normal">Enter the OTP received in your email.</p>
-      </CardHeader>
-      <CardContent className="p-0">
-       <form onSubmit={handleSubmit}>
-        <div className="space-y-6">
-         <InputOTP
-          maxLength={4}
-          value={otpValue} // Bind OTP value to state
-          onChange={(value) => setOtpValue(value)} // Update state on change
-          className="border-none justify-between flex !gap-10"
-         >
-          {[...Array(4)].map((_, index) => (
-           <div key={index} className="w-12 h-12 flex items-center justify-center border border-[#ffffff] rounded-full bg-transparent text-white text-lg">
-            <InputOTPSlot index={index} className="w-full h-full text-center bg-transparent border-none rounded-full !text-lg !ring-0" />
-           </div>
-          ))}
-         </InputOTP>
-         <Button type="submit" className="px-3 py-1.5 bg-[#1a3f70] h-auto rounded-lg text-white text-lg font w 전에w-full leading-[30px] cursor-pointer hover:bg-[#1a3f70]">
-          Sign in
-         </Button>
+  };
+  return (
+    <div className="grid grid-cols-12 h-screen">
+      <div className="col-span-12 md:col-span-5 w-full space-y-1 flex justify-center items-center flex-col p-4 md:p-8">
+        <LogoAuth />
+        <div className="flex justify-center items-center max-w-[400px] w-full">
+          <Card className="w-full max-w-md bg-navy-950 gap-8 text-white border-none shadow-none md:pt-20">
+            <CardHeader className="p-0">
+              <CardTitle className="justify-start text-white text-[30px] md:text-[36px]">Enter OTP</CardTitle>
+              <p className="text-[#959595] text-base md:text-lg font-normal">Enter the OTP received in your email.</p>
+            </CardHeader>
+            <CardContent className="p-0">
+              <form onSubmit={handleSubmit}>
+                <div className="space-y-6">
+                  <InputOTP
+                    maxLength={4}
+                    value={otpValue} // Bind OTP value to state
+                    onChange={(value) => setOtpValue(value)} // Update state on change
+                    className="border-none justify-between flex !gap-10"
+                  >
+                    {[...Array(4)].map((_, index) => (
+                      <div key={index} className="w-12 h-12 flex items-center justify-center border border-[#ffffff] rounded-full bg-transparent text-white text-lg">
+                        <InputOTPSlot index={index} className="w-full h-full text-center bg-transparent border-none rounded-full !text-lg !ring-0" />
+                      </div>
+                    ))}
+                  </InputOTP>
+                  <Button type="submit" className="px-3 py-1.5 bg-[#1a3f70] h-auto rounded-lg text-white text-lg font w 전에w-full leading-[30px] cursor-pointer hover:bg-[#1a3f70]">
+                    {isPending ? "Signing in..."
+                      : "Sign in"}
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
         </div>
-       </form>
-      </CardContent>
-     </Card>
+      </div>
+      <div className="col-span-12 md:col-span-7 w-full space-y-1 rounded-3xl">
+        <BannerImage />
+      </div>
     </div>
-   </div>
-   <div className="col-span-12 md:col-span-7 w-full space-y-1 rounded-3xl">
-    <BannerImage />
-   </div>
-  </div>
- );
+  );
 }
 
