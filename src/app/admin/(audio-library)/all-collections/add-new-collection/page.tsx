@@ -319,7 +319,7 @@ const AddCollectionForm = () => {
         className="mb-2 bg-[#0B132B] border-none h-12 text-white autofill-fix"
       />
       {errors.collectionName && (
-        <p className="text-red-500 text-sm">{errors.collectionName.message}</p>
+        <p className="text-red-500 text-sm mt-[-7px]">{errors.collectionName.message}</p>
       )}
 
       <Label className="text-gray-300 mb-3 block">Level</Label>
@@ -387,7 +387,7 @@ const AddCollectionForm = () => {
         </PopoverContent>
       </Popover>
       {errors.levels && (
-        <p className="text-red-500 text-sm">{errors.levels.message}</p>
+        <p className="text-red-500 text-sm mt-[-7px]">{errors.levels.message}</p>
       )}
 
       <Label className="text-gray-300 mb-3 block">Best for</Label>
@@ -455,7 +455,7 @@ const AddCollectionForm = () => {
         </PopoverContent>
       </Popover>
       {errors.bestFor && (
-        <p className="text-red-500 text-sm">{errors.bestFor.message}</p>
+        <p className="text-red-500 text-sm mt-[-7px]">{errors.bestFor.message}</p>
       )}
 
       <Label className="text-gray-300 mb-3 block">Description</Label>
@@ -465,7 +465,7 @@ const AddCollectionForm = () => {
         className="mb-2 bg-[#0B132B] border-none text-white"
       />
       {errors.description && (
-        <p className="text-red-500 text-sm">{errors.description.message}</p>
+        <p className="text-red-500 text-sm mt-[-7px]">{errors.description.message}</p>
       )}
 
       <Label className="text-gray-300 mb-3 block">Upload Collection Image</Label>
@@ -510,7 +510,7 @@ const AddCollectionForm = () => {
         </div>
       </div>
       {errors.imageFile && (
-        <p className="text-red-500 text-sm">{errors.imageFile.message}</p>
+        <p className="text-red-500 text-sm mt-[-7px]">{errors.imageFile.message}</p>
       )}
 
       <p className="text-xs text-gray-500 mb-4">
