@@ -10,6 +10,7 @@ import LogoAuth from "../components/LogoAuth";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { resetUserPassword } from "@/services/admin-services";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function NewPasswordPage() {
   const [showNewPassword, setShowNewPassword] = useState(false);
@@ -28,7 +29,7 @@ export default function NewPasswordPage() {
     }
   }, [router, searchParams]);
 
-  const handleSubmit = async (e:any) => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
     const otp = searchParams.get("otp");
 
@@ -118,7 +119,8 @@ export default function NewPasswordPage() {
                     disabled={isPending}
                     className="px-3 py-1.5 bg-[#1a3f70] h-auto rounded-lg text-white text-lg font w-full leading-[30px] cursor-pointer hover:bg-[#1a3f70]"
                   >
-                    {isPending ? "Updating..." : "Update Password"}
+                    {isPending ? <Spinner size="medium" />
+                      : "Update Password"}
                   </Button>
                 </div>
               </form>

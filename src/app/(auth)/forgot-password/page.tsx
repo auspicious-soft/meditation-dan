@@ -95,7 +95,7 @@ import LogoAuth from "../components/LogoAuth";
 import BannerImage from "../components/BannerImage";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-
+import { Spinner } from '@/components/ui/spinner';
 export default function Home() {
   interface FormElements extends HTMLFormControlsCollection {
     email: HTMLInputElement;
@@ -161,15 +161,10 @@ export default function Home() {
                   <Button
                     type="submit"
                     className="px-3 py-1.5 bg-[#1a3f70] h-auto rounded-lg text-white text-lg font w-full leading-[30px] cursor-pointer hover:bg-[#1a3f70]"
-                    disabled={loading} // Disable button when loading
+                    disabled={loading} 
                   >
                     {loading ? (
-                      <div className="flex justify-center items-center space-x-2">
-                        {/* SDCN-like Pulse loader */}
-                        <div className="w-4 h-4 rounded-full bg-white animate-ping"></div>
-                        <div className="w-4 h-4 rounded-full bg-white animate-ping animation-delay-200"></div>
-                        <div className="w-4 h-4 rounded-full bg-white animate-ping animation-delay-400"></div>
-                      </div>
+                      <Spinner size="medium" />
                     ) : (
                       "Continue"
                     )}
