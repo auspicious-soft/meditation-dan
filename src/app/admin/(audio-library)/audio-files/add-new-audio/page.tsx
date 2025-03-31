@@ -21,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ChevronDown, Loader2, Trash2, Upload } from "lucide-react";
+import { ChevronDown, Loader2, Trash2, Upload, X } from "lucide-react"; // Added X
 import Image from "next/image";
 import { toast } from "sonner";
 import {
@@ -30,6 +30,7 @@ import {
 } from "@/actions";
 import { getAllCollectionStats, getBestForStats, getlevelsStats, uploadAudioStats } from "@/services/admin-services";
 import { AxiosError } from "axios";
+import { timeStamp } from "console";
 
 // Interface for the collection data from the backend
 interface Collection {
@@ -55,8 +56,8 @@ type FormValues = {
   collectionType: string;
   songName: string;
   description: string;
-  levels: string[]; // Added levels property
-  bestFor: string;  // Added bestFor property
+  levels: string[];
+  bestFor: string;
   audioFile: FileList;
   imageFile: FileList;
 };
@@ -67,11 +68,11 @@ const schema = yup.object().shape({
   songName: yup.string().required("Song name is required"),
   description: yup.string().required("Description is required"),
   levels: yup
-        .array()
-        .of(yup.string().required("Each level must be a valid string"))
-        .min(1, "At least one level is required")
-        .required("Levels field is required"),
-      bestFor: yup.string().required("Best for is required"),
+    .array()
+    .of(yup.string().required("Each level must be a valid string"))
+    .min(1, "At least one level is required")
+    .required("Levels field is required"),
+  bestFor: yup.string().required("Best for is required"),
   audioFile: yup
     .mixed<FileList>()
     .nullable()
@@ -81,6 +82,7 @@ const schema = yup.object().shape({
     .nullable()
     .required("Image file is required"),
 });
+
 interface LevelOption {
   id: string;
   name: string;
@@ -95,11 +97,11 @@ const AddNewAudio = () => {
   const [collections, setCollections] = useState<Collection[]>([]);
   const [audioPreview, setAudioPreview] = useState<string | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [loadingCollections, setLoadingCollections] = useState<boolean>(true)
+  const [loadingCollections, setLoadingCollections] = useState<boolean>(true);
   const [isLoadingLevels, setIsLoadingLevels] = useState(false);
   const [levelsError, setLevelsError] = useState<string | null>(null);
-    const [levelOptions, setLevelOptions] = useState<LevelOption[]>([]);
-    const [bestForOptions, setBestForOptions] = useState<BestForOption[]>([]);
+  const [levelOptions, setLevelOptions] = useState<LevelOption[]>([]);
+  const [bestForOptions, setBestForOptions] = useState<BestForOption[]>([]);
   const [isLoadingBestFor, setIsLoadingBestFor] = useState(false);
   const [bestForError, setBestForError] = useState<string | null>(null);
   const [popoverWidth, setPopoverWidth] = useState("auto");
@@ -113,7 +115,7 @@ const AddNewAudio = () => {
     control,
     watch,
     setValue,
-    setError, 
+    setError,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
     resolver: yupResolver(schema),
@@ -125,13 +127,11 @@ const AddNewAudio = () => {
       imageFile: undefined,
       levels: [] as string[],
       bestFor: "",
-     
     },
   });
 
   const selectedLevels = watch("levels") || [];
   const selectedBestFor = watch("bestFor") || "";
-
 
   const getAudioDuration = async (file: File) => {
     const audioContext = new (window.AudioContext ||
@@ -140,16 +140,17 @@ const AddNewAudio = () => {
     const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
     return audioBuffer.duration;
   };
+
   const formatDuration = (seconds: number): string => {
-    const hours = Math.floor(seconds / 3600); // Calculate hours (3600 seconds = 1 hour)
-    const minutes = Math.floor((seconds % 3600) / 60); // Calculate minutes from remaining seconds
-    const secs = Math.floor(seconds % 60); // Calculate seconds
-    const formattedHours = String(hours).padStart(2, "0"); // Ensure 2 digits (e.g., "00")
-    const formattedMinutes = String(minutes).padStart(2, "0"); // Ensure 2 digits (e.g., "05")
-    const formattedSeconds = String(secs).padStart(2, "0"); // Ensure 2 digits (e.g., "30")
-    return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`; // Return "HH:MM:SS"
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = Math.floor(seconds % 60);
+    const formattedHours = String(hours).padStart(2, "0");
+    const formattedMinutes = String(minutes).padStart(2, "0");
+    const formattedSeconds = String(secs).padStart(2, "0");
+    return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
   };
-  // Watch file inputs for preview updates
+
   const audioFile = watch("audioFile");
   const imageFile = watch("imageFile");
 
@@ -157,7 +158,7 @@ const AddNewAudio = () => {
     const fetchCollections = async () => {
       try {
         setLoadingCollections(true);
-        const response = await getAllCollectionStats("/collection"); // Replace with your actual API endpoint
+        const response = await getAllCollectionStats("/collection");
         const data: CollectionsResponse = await response.data;
 
         if (data.success) {
@@ -172,65 +173,62 @@ const AddNewAudio = () => {
         setLoadingCollections(false);
       }
     };
+
     const fetchLevels = async () => {
-          setIsLoadingLevels(true);
-          setLevelsError(null);
-          try {
-            const response = await getlevelsStats("/level", {});
-          
-    
-            if (response?.data?.success && Array.isArray(response?.data?.data)) {
-              const transformedLevels = response.data.data
-                .filter((level: any) => level.isActive)
-                .map((level: any) => ({
-                  id: level._id,
-                  name: level.name,
-                }));
-              setLevelOptions(transformedLevels);
-            } else {
-              setLevelsError(response?.data?.message || "Failed to load levels");
-            }
-          } catch (error) {
-            console.error("Error fetching levels:", error);
-            setLevelsError("An error occurred while fetching levels");
-          } finally {
-            setIsLoadingLevels(false);
-          }
-        };
-    
-        const fetchBestForOptions = async () => {
-          setIsLoadingBestFor(true);
-          setBestForError(null);
-          try {
-            const response = await getBestForStats("/bestfor", {});
-    
-            if (response?.data?.success && Array.isArray(response?.data?.data)) {
-              const transformedOptions = response.data.data
-                .filter((option: any) => option.isActive)
-                .map((option: any) => ({
-                  id: option._id,
-                  name: option.name,
-                }));
-              setBestForOptions(transformedOptions);
-            } else {
-              setBestForError(
-                response?.data?.message || "Failed to load best for options"
-              );
-            }
-          } catch (error) {
-            console.error("Error fetching best for options:", error);
-            setBestForError("An error occurred while fetching best for options");
-          } finally {
-            setIsLoadingBestFor(false);
-          }
-        };
-    
-        fetchLevels();
-        fetchBestForOptions();
+      setIsLoadingLevels(true);
+      setLevelsError(null);
+      try {
+        const response = await getlevelsStats("/level", {});
+        if (response?.data?.success && Array.isArray(response?.data?.data)) {
+          const transformedLevels = response.data.data
+            .filter((level: any) => level.isActive)
+            .map((level: any) => ({
+              id: level._id,
+              name: level.name,
+            }));
+          setLevelOptions(transformedLevels);
+        } else {
+          setLevelsError(response?.data?.message || "Failed to load levels");
+        }
+      } catch (error) {
+        console.error("Error fetching levels:", error);
+        setLevelsError("An error occurred while fetching levels");
+      } finally {
+        setIsLoadingLevels(false);
+      }
+    };
+
+    const fetchBestForOptions = async () => {
+      setIsLoadingBestFor(true);
+      setBestForError(null);
+      try {
+        const response = await getBestForStats("/bestfor", {});
+        if (response?.data?.success && Array.isArray(response?.data?.data)) {
+          const transformedOptions = response.data.data
+            .filter((option: any) => option.isActive)
+            .map((option: any) => ({
+              id: option._id,
+              name: option.name,
+            }));
+          setBestForOptions(transformedOptions);
+        } else {
+          setBestForError(
+            response?.data?.message || "Failed to load best for options"
+          );
+        }
+      } catch (error) {
+        console.error("Error fetching best for options:", error);
+        setBestForError("An error occurred while fetching best for options");
+      } finally {
+        setIsLoadingBestFor(false);
+      }
+    };
+
+    fetchLevels();
+    fetchBestForOptions();
     fetchCollections();
   }, []);
 
-  // Update audio preview
   useEffect(() => {
     if (audioFile && audioFile.length > 0) {
       const audioUrl = URL.createObjectURL(audioFile[0]);
@@ -241,7 +239,6 @@ const AddNewAudio = () => {
     }
   }, [audioFile]);
 
-  // Update image preview
   useEffect(() => {
     if (imageFile && imageFile.length > 0) {
       const imageUrl = URL.createObjectURL(imageFile[0]);
@@ -252,13 +249,12 @@ const AddNewAudio = () => {
     }
   }, [imageFile]);
 
-  // Remove handlers
   const handleRemoveAudio = () => {
     if (audioInputRef.current) {
       audioInputRef.current.value = "";
     }
     setAudioPreview(null);
-    setValue("audioFile", new DataTransfer().files); // Clear form state
+    setValue("audioFile", new DataTransfer().files);
   };
 
   const handleRemoveImage = () => {
@@ -266,8 +262,9 @@ const AddNewAudio = () => {
       imageInputRef.current.value = "";
     }
     setImagePreview(null);
-    setValue("imageFile", new DataTransfer().files); // Clear form state
+    setValue("imageFile", new DataTransfer().files);
   };
+
   const debounce = (
     func: (...args: unknown[]) => void,
     delay: number
@@ -279,7 +276,6 @@ const AddNewAudio = () => {
     };
   };
 
-  // Function to update the popover width
   const updateWidth = () => {
     if (triggerRef.current) {
       const width = triggerRef.current.getBoundingClientRect().width;
@@ -287,26 +283,25 @@ const AddNewAudio = () => {
     }
   };
 
-  // Debounced version of updateWidth
-  const debouncedUpdateWidth = debounce(updateWidth, 0); // 100ms delay
+  const debouncedUpdateWidth = debounce(updateWidth, 0);
 
   useEffect(() => {
-    updateWidth(); // Set the initial width
-
-    // Add resize event listener with debouncing
+    updateWidth();
     window.addEventListener("resize", debouncedUpdateWidth);
-
-    // Cleanup
     return () => window.removeEventListener("resize", debouncedUpdateWidth);
   }, []);
 
-  // Form submission handler
+  const removeLevel = (levelId: string) => {
+    const newLevels = selectedLevels.filter((id) => id !== levelId);
+    setValue("levels", newLevels);
+  };
+
   const onSubmit = async (data: FormValues) => {
     try {
       let audioKey = null;
       let imageKey = null;
       let formattedDuration = null;
-      // Upload audio to S3
+
       if (!data.audioFile || data.audioFile.length === 0) {
         setError("audioFile", { type: "manual", message: "Please upload audio file" });
         return;
@@ -318,25 +313,23 @@ const AddNewAudio = () => {
 
       if (data.audioFile && data.audioFile.length > 0) {
         const audio = data.audioFile[0];
-        const duration = await getAudioDuration(audio); // Returns a number, e.g., 330
+        const duration = await getAudioDuration(audio);
         console.log("duration:", duration);
-       
-        
+
         const selectedCollection = collections.find((col) => col._id === data.collectionType);
-      if (!selectedCollection) {
-        toast.error("Selected collection not found");
-        return;
-      }
-      const collectionNameForAWS = selectedCollection.name.toLowerCase(); // e.g., "fds"
-      const songName = data.songName.toLowerCase();
-        // Convert to "HH:MM:SS" format
+        if (!selectedCollection) {
+          toast.error("Selected collection not found");
+          return;
+        }
+        const collectionNameForAWS = selectedCollection.name.toLowerCase();
+        const songName = data.songName.toLowerCase();
+
         formattedDuration = formatDuration(duration);
         console.log("formattedDuration:", formattedDuration);
-       
-      
+
         const audioFileName = `${audio.name}`;
         const { signedUrl, key } = await generateSignedUrlForAudios(
-          collectionNameForAWS,
+          new Date().toISOString(),
           songName,
           audioFileName,
           audio.type
@@ -359,20 +352,18 @@ const AddNewAudio = () => {
         audioKey = key;
       }
 
-      
-      // Upload image to S3
       if (data.imageFile && data.imageFile.length > 0) {
         const image = data.imageFile[0];
         const selectedCollection = collections.find((col) => col._id === data.collectionType);
-      if (!selectedCollection) {
-        toast.error("Selected collection not found");
-        return;
-      }
-      const collectionNameForAWS = selectedCollection.name.toLowerCase(); // e.g., "fds"
-      const songName = data.songName.toLowerCase();
+        if (!selectedCollection) {
+          toast.error("Selected collection not found");
+          return;
+        }
+        const collectionNameForAWS = selectedCollection.name.toLowerCase();
+        const songName = data.songName.toLowerCase();
         const imageFileName = `${image.name}`;
         const { signedUrl, key } = await generateSignedUrlForAudioImage(
-          collectionNameForAWS,
+          new Date().toISOString(),
           songName,
           imageFileName,
           image.type
@@ -390,7 +381,6 @@ const AddNewAudio = () => {
       }
 
       console.log("imageKey:", imageKey);
-      // Prepare payload for backend
       const payload = {
         songName: data.songName,
         collectionType: data.collectionType,
@@ -403,25 +393,24 @@ const AddNewAudio = () => {
       };
       console.log('payload:', payload);
 
-      // Send to backend
       const response = await uploadAudioStats("/admin/upload-audio", payload);
 
       if (response?.status === 201) {
         toast.success("Audio added successfully");
         setTimeout(() => {
-        window.location.href = "/admin/audio-files"
-      }, 1000);
+          window.location.href = "/admin/audio-files";
+        }, 1000);
       } else {
         toast.error(response?.data?.message || "Failed to add audio");
       }
     } catch (error) {
       console.log("Error while uploading audio:", error);
-      // Check if it's an AxiosError with a response
       if (error instanceof AxiosError && error.response?.data?.message) {
-        toast.error(error.response.data.message); // Display backend message
+        toast.error(error.response.data.message);
       } else {
         toast.error(error instanceof Error ? error.message : "An error occurred while adding audio");
-      }}
+      }
+    }
   };
 
   return (
@@ -431,7 +420,6 @@ const AddNewAudio = () => {
     >
       <h2 className="text-xl font-semibold mb-4">Add New Audio</h2>
 
-      {/* Collection Type */}
       <Label className="text-gray-300 mb-3 block">Collection Type</Label>
       <Controller
         name="collectionType"
@@ -439,21 +427,21 @@ const AddNewAudio = () => {
         render={({ field }) => (
           <Select onValueChange={field.onChange} value={field.value}>
             <SelectTrigger className="mb-4 w-full bg-[#0B132B] h-12 border-none text-white">
-            <SelectValue
-            placeholder={
-              loadingCollections
-                ? <Loader2 size={24} className="animate-spin text-white" />
-                : "Select Collection Type"
-            }
-          />
+              <SelectValue
+                placeholder={
+                  loadingCollections
+                    ? <Loader2 size={24} className="animate-spin text-white" />
+                    : "Select Collection Type"
+                }
+              />
             </SelectTrigger>
             <SelectContent className="bg-[#0B132B] border-gray-700 text-white">
-            {loadingCollections ? (
+              {loadingCollections ? (
                 <SelectItem value="loading"><Loader2 size={24} className="animate-spin text-black" /></SelectItem>
               ) : collections.length > 0 ? (
                 collections.map((collection) => (
                   <SelectItem key={collection._id} value={collection._id}>
-                    {collection.name} 
+                    {collection.name}
                   </SelectItem>
                 ))
               ) : (
@@ -469,7 +457,6 @@ const AddNewAudio = () => {
         </p>
       )}
 
-      {/* Song Name */}
       <Label className="text-gray-300 mb-3 block">Song Name</Label>
       <Input
         {...register("songName")}
@@ -480,7 +467,7 @@ const AddNewAudio = () => {
         <p className="text-red-500 text-xs mb-4">{errors.songName.message}</p>
       )}
 
-<Label className="text-gray-300 mb-3 block">Level</Label>
+      <Label className="text-gray-300 mb-3 block">Level</Label>
       <Popover>
         <PopoverTrigger asChild>
           <Button
@@ -491,15 +478,24 @@ const AddNewAudio = () => {
             {isLoadingLevels ? (
               <span><Loader2 size={24} className="animate-spin text-white" /></span>
             ) : selectedLevels.length > 0 ? (
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2 items-center">
                 {selectedLevels.map((levelId) => {
                   const level = levelOptions.find((l) => l.id === levelId);
                   return (
                     <span
                       key={levelId}
-                      className="bg-[#334155] py-1 px-2 rounded-md text-white"
+                      className="bg-[#334155] py-1 px-2 rounded-md text-white flex items-center"
                     >
                       {level?.name || levelId}
+                      <span
+                        className="ml-1 h-4 w-4 flex items-center justify-center cursor-pointer text-gray-400 hover:text-white"
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevent Popover from closing
+                          removeLevel(levelId);
+                        }}
+                      >
+                        <X size={12} />
+                      </span>
                     </span>
                   );
                 })}
@@ -544,7 +540,7 @@ const AddNewAudio = () => {
         <p className="text-red-500 text-sm">{errors.levels.message}</p>
       )}
 
-<Label className="text-gray-300 mb-3 block">Best for</Label>
+      <Label className="text-gray-300 mb-3 block">Best for</Label>
       <Select
         onValueChange={(value) => setValue("bestFor", value)}
         value={selectedBestFor}
@@ -580,7 +576,6 @@ const AddNewAudio = () => {
         <p className="text-red-500 text-sm">{errors.bestFor.message}</p>
       )}
 
-      {/* Description */}
       <Label className="text-gray-300 mb-3 block">Description</Label>
       <Textarea
         {...register("description")}
@@ -593,9 +588,7 @@ const AddNewAudio = () => {
         </p>
       )}
 
-      {/* File Upload Section */}
       <div className="flex flex-wrap items-center space-x-16">
-        {/* Upload Audio */}
         <div>
           <Label className="text-gray-300 mb-3 block">Upload Song</Label>
           <div className="flex flex-wrap items-end gap-4 mb-4">
@@ -632,7 +625,7 @@ const AddNewAudio = () => {
                   accept=".mp3,.aac,.ogg,.wav"
                   onChange={(e) => {
                     const file = e.target.files?.[0] || null;
-                    setValue("audioFile", e.target.files as FileList); // Manually update form state
+                    setValue("audioFile", e.target.files as FileList);
                     if (file) {
                       setAudioPreview(URL.createObjectURL(file));
                     }
@@ -640,20 +633,19 @@ const AddNewAudio = () => {
                   ref={audioInputRef}
                 />
                 <div className="border p-1 px-4 rounded-sm border-white text-gray-300 cursor-pointer">
-                  Choose Audio File
+                 {audioPreview ? "Change Audio File": "Choose Audio File"} 
                 </div>
               </label>
             </div>
           </div>
           <p className="text-xs text-gray-500 mb-4">Max size: 30 MB</p>
           {errors.audioFile && (
-  <p className="text-red-500 text-xs mb-4">
-    {errors.audioFile.message}
-  </p>
-)}
+            <p className="text-red-500 text-xs mb-4">
+              {errors.audioFile.message}
+            </p>
+          )}
         </div>
 
-        {/* Upload Image */}
         <div>
           <Label className="text-gray-300 mb-3 block">Upload Audio Image</Label>
           <div className="flex flex-wrap items-end gap-4 mb-4">
@@ -692,7 +684,7 @@ const AddNewAudio = () => {
                   accept="image/jpeg,image/png"
                   onChange={(e) => {
                     const file = e.target.files?.[0] || null;
-                    setValue("imageFile", e.target.files as FileList); // Manually update form state
+                    setValue("imageFile", e.target.files as FileList);
                     if (file) {
                       setImagePreview(URL.createObjectURL(file));
                     }
@@ -700,7 +692,7 @@ const AddNewAudio = () => {
                   ref={imageInputRef}
                 />
                 <div className="border p-1 px-4 rounded-sm border-white text-gray-300 cursor-pointer">
-                  Choose Image
+                  {imagePreview ? "Change Image":"Choose Image"}
                 </div>
               </label>
             </div>
@@ -714,7 +706,6 @@ const AddNewAudio = () => {
         </div>
       </div>
 
-      {/* Submit Button */}
       <Button
         type="submit"
         className="bg-[#1A3F70] hover:cursor-pointer hover:bg-[#1A3F70] max-w-52"
