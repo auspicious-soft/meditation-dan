@@ -1,11 +1,10 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Clock, Trash2, Play, Pause, MoreVertical, Pencil, AlertCircle } from "lucide-react";
+import { Clock, Trash2, Play, Pause, MoreVertical, Pencil, AlertCircle, Loader2 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { getAllAudiosStats } from "@/services/admin-services";
-import { deleteAudio } from "@/services/admin-services";
+import { getAllAudiosStats, deleteAudio } from "@/services/admin-services";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import {
   Dialog,
@@ -16,7 +15,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import Skeleton, { SkeletonTheme } from 'react-loading-skeleton'
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 
 interface Audio {
   _id: string;
@@ -55,10 +54,12 @@ const AudioList = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(0);
   const [playingAudioId, setPlayingAudioId] = useState<string | null>(null);
+  const [loadingAudioId, setLoadingAudioId] = useState<string | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [audioToDelete, setAudioToDelete] = useState<string | null>(null);
   const limit = 10;
 
+  // Create a ref to store all active audio elements
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
@@ -87,13 +88,21 @@ const AudioList = () => {
 
     fetchAudios();
 
+    // Cleanup function to stop any playing audio when component unmounts
     return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
-      }
+      stopCurrentAudio();
     };
   }, [currentPage]);
+
+  // Function to stop the currently playing audio
+  const stopCurrentAudio = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0; // Reset position
+      audioRef.current = null;
+      setPlayingAudioId(null);
+    }
+  };
 
   const getS3Url = (subPath: string) => {
     return `${process.env.NEXT_PUBLIC_AWS_BUCKET_PATH}${subPath}`;
@@ -104,33 +113,45 @@ const AudioList = () => {
 
     const audioUrl = getS3Url(audio.audioUrl);
 
+    // Case 1: This audio is already playing - pause it
     if (playingAudioId === audio._id) {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        setPlayingAudioId(null);
-        audioRef.current = null;
-      }
-    } else {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
-      }
-
+      stopCurrentAudio();
+      return;
+    }
+    
+    // Case 2: A different audio is playing or no audio is playing
+    // First, stop any currently playing audio
+    stopCurrentAudio();
+    
+    // Then start playing the new audio
+    setLoadingAudioId(audio._id);
+    
+    try {
       const newAudio = new Audio(audioUrl);
       audioRef.current = newAudio;
-
-      try {
-        await newAudio.play();
-        setPlayingAudioId(audio._id);
-        newAudio.onended = () => {
-          setPlayingAudioId(null);
-          audioRef.current = null;
-        };
-      } catch (err) {
-        console.error("Playback failed:", err);
+      
+      // Set up event handlers before playing
+      newAudio.onended = () => {
         setPlayingAudioId(null);
         audioRef.current = null;
-      }
+      };
+      
+      newAudio.onerror = (e) => {
+        console.error("Audio playback error:", e);
+        setPlayingAudioId(null);
+        setLoadingAudioId(null);
+        audioRef.current = null;
+        toast.error("Failed to play audio");
+      };
+      
+      // Start playback
+      await newAudio.play();
+      setPlayingAudioId(audio._id);
+    } catch (err) {
+      console.error("Playback failed:", err);
+      toast.error("Failed to play audio");
+    } finally {
+      setLoadingAudioId(null);
     }
   };
 
@@ -159,6 +180,8 @@ const AudioList = () => {
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages && newPage !== currentPage) {
+      // Stop any playing audio when changing pages
+      stopCurrentAudio();
       setCurrentPage(newPage);
     }
   };
@@ -173,7 +196,6 @@ const AudioList = () => {
     setIsDialogOpen(false);
   };
 
-  // if (loading) return <div className="text-white">Loading...</div>;
   if (error) return <div className="text-red-500">{error}</div>;
 
   return (
@@ -188,11 +210,13 @@ const AudioList = () => {
         </Button>
       </div>
 
-      {!loading ? <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-red-600">
-        {audios.map((audio) => {
-          return (
-            <div key={audio._id}
-              className="flex flex-col md:flex-row items-center justify-between w-full min-h-[100px] relative bg-slate-900 p-4 rounded">
+      {!loading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-red-600">
+          {audios.map((audio) => (
+            <div
+              key={audio._id}
+              className="flex flex-col md:flex-row items-center justify-between w-full min-h-[100px] relative bg-slate-900 p-4 rounded"
+            >
               <div className="rounded bg-slate-800 overflow-hidden flex-shrink-0">
                 <Image
                   src={audio?.imageUrl ? getS3Url(audio?.imageUrl) : "/default-placeholder.png"}
@@ -219,16 +243,24 @@ const AudioList = () => {
 
               <div className="text-center flex-1 min-w-0 mx-3">
                 <div className="text-sm text-center text-slate-400">Collection</div>
-                <div className="text-white text-center border-0 truncate">{audio?.collectionType?.name || "Unknown Collection"}</div>
+                <div className="text-white text-center border-0 truncate">
+                  {audio?.collectionType?.name || "Unknown Collection"}
+                </div>
               </div>
 
-              <div>
+              <div className="flex items-center gap-2">
                 <button
-                  className="text-slate-400 hover:cursor-pointer rounded-md bg-[#1B2236] p-2 hover:text-white"
+                  className="text-slate-400 hover:cursor-pointer rounded-md bg-[#1B2236] p-2 hover:text-white relative"
                   onClick={() => handlePlayPause(audio)}
-                  disabled={!audio?.audioUrl}
+                  disabled={!audio?.audioUrl || loadingAudioId === audio._id}
                 >
-                  {playingAudioId === audio._id ? <Pause size={25} /> : <Play size={24} color="white" fill="white" />}
+                  {loadingAudioId === audio._id ? (
+                    <Loader2 size={24} className="animate-spin text-white" />
+                  ) : playingAudioId === audio._id ? (
+                    <Pause size={25} />
+                  ) : (
+                    <Play size={24} color="white" fill="white" />
+                  )}
                 </button>
 
                 <DropdownMenu>
@@ -249,29 +281,27 @@ const AudioList = () => {
                       className="hover:bg-[#1B2236] cursor-pointer"
                       onClick={() => openDeleteDialog(audio._id)}
                     >
-                      <Trash2 size={16} className="mr-2 hover:text-black" />
+                      <Trash2 size={16} className="mr- h-4 w-4 mr-2 hover:text-black" />
                       Delete
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
             </div>
-          )
-        })
-        }
-      </div>
-        :
-        <div >
+          ))}
+        </div>
+      ) : (
+        <div>
           <SkeletonTheme baseColor="#ebebeb" highlightColor="#1b2236" borderRadius={10}>
             <Skeleton count={5} height={100} />
           </SkeletonTheme>
         </div>
-      }
+      )}
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="bg-[#1B2236] text-center w-96 flex flex-col justify-center items-center text-white border border-[#334155]">
           <DialogHeader className="flex flex-col items-center">
-            <div className="mb-4">
+            <div className="mb-4 p-3 bg-[#FEF3F2] rounded-full">
               <AlertCircle size={40} className="text-red-500" />
             </div>
             <DialogTitle className="text-xl font-semibold">
@@ -282,9 +312,9 @@ const AudioList = () => {
               This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter className="flex  items-center justify-center gap-4">
+          <DialogFooter className="flex items-center justify-center gap-4">
             <Button
-              className="bg-[#1A3F70] border-none hover:cursor-pointer text-white hover:bg-#1A3F70] w-42"
+              className="bg-[#1A3F70] border-none hover:cursor-pointer text-white hover:bg-[#1A3F70] w-42"
               onClick={cancelDelete}
             >
               Cancel

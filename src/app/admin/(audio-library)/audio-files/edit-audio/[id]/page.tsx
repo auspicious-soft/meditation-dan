@@ -814,7 +814,7 @@ const GetAudio = () => {
           </DialogTrigger>
           <DialogContent className="bg-[#1B2236] text-center w-96 flex flex-col justify-center items-center text-white border border-[#334155]">
           <DialogHeader className="flex flex-col items-center">
-            <div className="mb-4">
+            <div className="mb-4 p-3 bg-[#FEF3F2] rounded-full">
               <AlertCircle size={40} className="text-red-500" />
             </div>
             <DialogTitle className="text-xl font-semibold">
@@ -828,7 +828,7 @@ const GetAudio = () => {
             <DialogFooter className="flex  items-center justify-center gap-4">
               <Button
                 variant="outline"
-                className="bg-[#1A3F70] border-none hover:cursor-pointer text-white hover:bg-#1A3F70] w-42"
+                className="bg-[#1A3F70] border-none hover:cursor-pointer hover:text-white hover:bg-#1A3F70] w-42"
                 onClick={() => setIsDialogOpen(false)}
               >
                 Cancel
