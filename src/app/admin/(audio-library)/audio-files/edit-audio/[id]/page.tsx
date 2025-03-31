@@ -30,11 +30,12 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"; // Added Dialog components
+} from "@/components/ui/dialog";
 import { AlertCircle, ChevronDown, Trash2, Upload, X } from "lucide-react";
 import Image from "next/image";
 import { toast } from "sonner";
 import {
+  deleteFileFromS3,
   generateSignedUrlForAudioImage,
   generateSignedUrlForAudios,
 } from "@/actions";
@@ -45,7 +46,7 @@ import {
   deleteAudio,
   getAudioDataById,
   updateAudioStats,
-} from "@/services/admin-services";
+} from "@/services/admin-services"; // Replace with actual path
 import { AxiosError } from "axios";
 
 // Interfaces for type safety
@@ -140,7 +141,7 @@ const GetAudio = () => {
   const [bestForError, setBestForError] = useState<string | null>(null);
   const [bestForOptions, setBestForOptions] = useState<BestForOption[]>([]);
   const [isLevelsOpen, setIsLevelsOpen] = useState(false);
-  const [isDialogOpen, setIsDialogOpen] = useState(false); // State for dialog
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const audioInputRef = useRef<HTMLInputElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const levelsTriggerRef = useRef<HTMLButtonElement>(null);
@@ -318,14 +319,32 @@ const GetAudio = () => {
   }, [imageFile, existingImageUrl]);
 
   // Handler functions
-  const handleRemoveAudio = () => {
+  const handleRemoveAudio = async () => {
+    if (existingAudioUrl) {
+      try {
+        await deleteFileFromS3(existingAudioUrl);
+        toast.success("Audio file removed from storage");
+      } catch (error) {
+        console.error("Error deleting audio from S3:", error);
+        toast.error("Failed to remove audio file from storage");
+      }
+    }
     if (audioInputRef.current) audioInputRef.current.value = "";
     setAudioPreview(null);
     setExistingAudioUrl(null);
     setValue("audioFile", null);
   };
 
-  const handleRemoveImage = () => {
+  const handleRemoveImage = async () => {
+    if (existingImageUrl) {
+      try {
+        await deleteFileFromS3(existingImageUrl);
+        toast.success("Image file removed from storage");
+      } catch (error) {
+        console.error("Error deleting image from S3:", error);
+        toast.error("Failed to remove image file from storage");
+      }
+    }
     if (imageInputRef.current) imageInputRef.current.value = "";
     setImagePreview(null);
     setExistingImageUrl(null);
@@ -377,15 +396,14 @@ const GetAudio = () => {
     try {
       let audioKey = existingAudioUrl || null;
       let imageKey = existingImageUrl || null;
-      let formattedDuration = null;
+      let formattedDuration = existingDuration || null;
 
       // Handle audio file
-      if (!data.audioFile || data.audioFile.length === 0) {
-        if (!existingAudioUrl) {
-          setError("audioFile", { type: "manual", message: "Please upload audio file" });
-          return;
+      if (data.audioFile && data.audioFile.length > 0) {
+        if (existingAudioUrl) {
+          await deleteFileFromS3(existingAudioUrl);
         }
-      } else {
+
         const audio = data.audioFile[0];
         const duration = await getAudioDuration(audio);
 
@@ -418,15 +436,17 @@ const GetAudio = () => {
           throw new Error(`Failed to upload audio: ${errorText}`);
         }
         audioKey = key;
+      } else if (!existingAudioUrl) {
+        setError("audioFile", { type: "manual", message: "Please upload audio file" });
+        return;
       }
 
       // Handle image file
-      if (!data.imageFile || data.imageFile.length === 0) {
-        if (!existingImageUrl) {
-          setError("imageFile", { type: "manual", message: "Please upload Image file" });
-          return;
+      if (data.imageFile && data.imageFile.length > 0) {
+        if (existingImageUrl) {
+          await deleteFileFromS3(existingImageUrl);
         }
-      } else {
+
         const image = data.imageFile[0];
         const selectedCollection = collections.find(
           (col) => col._id === data.collectionType
@@ -453,9 +473,12 @@ const GetAudio = () => {
           throw new Error("Failed to upload image to S3");
         }
         imageKey = key;
+      } else if (!existingImageUrl) {
+        setError("imageFile", { type: "manual", message: "Please upload Image file" });
+        return;
       }
 
-      // Prepare payload with bestFor as an array of strings
+      // Prepare payload
       const payload = {
         songName: data.songName,
         collectionType: data.collectionType,
@@ -464,24 +487,22 @@ const GetAudio = () => {
         imageUrl: imageKey,
         duration: formattedDuration || existingDuration,
         levels: data.levels,
-        bestFor: [data.bestFor], // Send bestFor as an array
+        bestFor: [data.bestFor],
       };
 
       const response = await updateAudioStats(`/admin/update/audio/${audioId}`, payload);
 
       if (response?.status === 200) {
-        toast.success("Collection updated successfully");
-        setImagePreview(null);
-        setExistingAudioUrl(null);
+        toast.success("Audio updated successfully");
         setTimeout(() => {
           window.location.href = "/admin/audio-files";
         }, 1000);
       } else {
-        toast.error(response?.data?.message || "Failed to update collection");
+        toast.error(response?.data?.message || "Failed to update audio");
       }
     } catch (error) {
-      console.log("error while updating collection:", error);
-      toast.error("An error occurred while updating collection");
+      console.log("Error while updating audio:", error);
+      toast.error("An error occurred while updating audio");
     }
   };
 
@@ -490,10 +511,17 @@ const GetAudio = () => {
     if (!audioId) return;
 
     try {
-      const response = await deleteAudio(`/admin/delete-audio/${id}`);
+      if (existingAudioUrl) {
+        await deleteFileFromS3(existingAudioUrl);
+      }
+      if (existingImageUrl) {
+        await deleteFileFromS3(existingImageUrl);
+      }
+
+      const response = await deleteAudio(`/admin/delete-audio/${audioId}`);
       if (response?.data?.success) {
         toast.success("Audio deleted successfully");
-        setIsDialogOpen(false); // Close dialog on success
+        setIsDialogOpen(false);
         setTimeout(() => {
           window.location.href = "/admin/audio-files";
         }, 1000);
@@ -503,7 +531,7 @@ const GetAudio = () => {
     } catch (error) {
       console.error("Error deleting audio:", error);
       toast.error("Failed to delete audio");
-      setIsDialogOpen(false); // Close dialog on error
+      setIsDialogOpen(false);
     }
   };
 
@@ -813,22 +841,22 @@ const GetAudio = () => {
             </Button>
           </DialogTrigger>
           <DialogContent className="bg-[#1B2236] text-center w-96 flex flex-col justify-center items-center text-white border border-[#334155]">
-          <DialogHeader className="flex flex-col items-center">
-            <div className="mb-4 p-3 bg-[#FEF3F2] rounded-full">
-              <AlertCircle size={40} className="text-red-500" />
-            </div>
-            <DialogTitle className="text-xl font-semibold">
-              Delete Audio?
-            </DialogTitle>
-            <DialogDescription className="text-gray-400 text-center">
-              Are you sure you want to delete this audio? <br />
-              This action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-            <DialogFooter className="flex  items-center justify-center gap-4">
+            <DialogHeader className="flex flex-col items-center">
+              <div className="mb-4 p-3 bg-[#FEF3F2] rounded-full">
+                <AlertCircle size={40} className="text-red-500" />
+              </div>
+              <DialogTitle className="text-xl font-semibold">
+                Delete Audio?
+              </DialogTitle>
+              <DialogDescription className="text-gray-400 text-center">
+                Are you sure you want to delete this audio? <br />
+                This action cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="flex items-center justify-center gap-4">
               <Button
                 variant="outline"
-                className="bg-[#1A3F70] border-none hover:cursor-pointer hover:text-white hover:bg-#1A3F70] w-42"
+                className="bg-[#1A3F70] border-none hover:cursor-pointer hover:text-white hover:bg-[#1A3F70] w-42"
                 onClick={() => setIsDialogOpen(false)}
               >
                 Cancel

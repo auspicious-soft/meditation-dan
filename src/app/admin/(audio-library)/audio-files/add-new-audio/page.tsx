@@ -21,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ChevronDown, Loader2, Trash2, Upload, X } from "lucide-react"; // Added X
+import { ChevronDown, Loader2, Trash2, Upload, X } from "lucide-react";
 import Image from "next/image";
 import { toast } from "sonner";
 import {
@@ -30,7 +30,6 @@ import {
 } from "@/actions";
 import { getAllCollectionStats, getBestForStats, getlevelsStats, uploadAudioStats } from "@/services/admin-services";
 import { AxiosError } from "axios";
-import { timeStamp } from "console";
 
 // Interface for the collection data from the backend
 interface Collection {
@@ -58,8 +57,8 @@ type FormValues = {
   description: string;
   levels: string[];
   bestFor: string;
-  audioFile: FileList;
-  imageFile: FileList;
+  audioFile?: FileList;
+  imageFile?: FileList;
 };
 
 // Define schema
@@ -75,12 +74,10 @@ const schema = yup.object().shape({
   bestFor: yup.string().required("Best for is required"),
   audioFile: yup
     .mixed<FileList>()
-    .nullable()
-    .required("Audio file is required"),
+    .test("fileList", "Audio file is required", (value) => value instanceof FileList && value.length > 0),
   imageFile: yup
     .mixed<FileList>()
-    .nullable()
-    .required("Image file is required"),
+    .test("fileList", "Image file is required", (value) => value instanceof FileList && value.length > 0),
 });
 
 interface LevelOption {
@@ -116,9 +113,11 @@ const AddNewAudio = () => {
     watch,
     setValue,
     setError,
+    clearErrors, // Added clearErrors
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
     resolver: yupResolver(schema),
+    mode: "onChange", // Changed to onChange for real-time validation
     defaultValues: {
       collectionType: "",
       songName: "",
@@ -132,6 +131,8 @@ const AddNewAudio = () => {
 
   const selectedLevels = watch("levels") || [];
   const selectedBestFor = watch("bestFor") || "";
+  const audioFile = watch("audioFile");
+  const imageFile = watch("imageFile");
 
   const getAudioDuration = async (file: File) => {
     const audioContext = new (window.AudioContext ||
@@ -150,9 +151,6 @@ const AddNewAudio = () => {
     const formattedSeconds = String(secs).padStart(2, "0");
     return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
   };
-
-  const audioFile = watch("audioFile");
-  const imageFile = watch("imageFile");
 
   useEffect(() => {
     const fetchCollections = async () => {
@@ -233,28 +231,31 @@ const AddNewAudio = () => {
     if (audioFile && audioFile.length > 0) {
       const audioUrl = URL.createObjectURL(audioFile[0]);
       setAudioPreview(audioUrl);
+      clearErrors("audioFile"); // Clear error when file is selected
       return () => URL.revokeObjectURL(audioUrl);
     } else {
       setAudioPreview(null);
     }
-  }, [audioFile]);
+  }, [audioFile, clearErrors]);
 
   useEffect(() => {
     if (imageFile && imageFile.length > 0) {
       const imageUrl = URL.createObjectURL(imageFile[0]);
       setImagePreview(imageUrl);
+      clearErrors("imageFile"); // Clear error when file is selected
       return () => URL.revokeObjectURL(imageUrl);
     } else {
       setImagePreview(null);
     }
-  }, [imageFile]);
+  }, [imageFile, clearErrors]);
 
   const handleRemoveAudio = () => {
     if (audioInputRef.current) {
       audioInputRef.current.value = "";
     }
     setAudioPreview(null);
-    setValue("audioFile", new DataTransfer().files);
+    setValue("audioFile", undefined); // Clear form state
+    setError("audioFile", { type: "manual", message: "Audio file is required" }); // Re-set error if required
   };
 
   const handleRemoveImage = () => {
@@ -262,7 +263,8 @@ const AddNewAudio = () => {
       imageInputRef.current.value = "";
     }
     setImagePreview(null);
-    setValue("imageFile", new DataTransfer().files);
+    setValue("imageFile", undefined); // Clear form state
+    setError("imageFile", { type: "manual", message: "Image file is required" }); // Re-set error if required
   };
 
   const debounce = (
@@ -293,7 +295,7 @@ const AddNewAudio = () => {
 
   const removeLevel = (levelId: string) => {
     const newLevels = selectedLevels.filter((id) => id !== levelId);
-    setValue("levels", newLevels);
+    setValue("levels", newLevels, { shouldValidate: true }); // Trigger validation
   };
 
   const onSubmit = async (data: FormValues) => {
@@ -460,7 +462,7 @@ const AddNewAudio = () => {
       <Label className="text-gray-300 mb-3 block">Song Name</Label>
       <Input
         {...register("songName")}
-        placeholder="Enter Collection Name"
+        placeholder="Enter Song Name"
         className="mb-4 bg-[#0B132B] border-none h-12 placeholder:text-white text-white autofill-fix"
       />
       {errors.songName && (
@@ -490,7 +492,7 @@ const AddNewAudio = () => {
                       <span
                         className="ml-1 h-4 w-4 flex items-center justify-center cursor-pointer text-gray-400 hover:text-white"
                         onClick={(e) => {
-                          e.stopPropagation(); // Prevent Popover from closing
+                          e.stopPropagation();
                           removeLevel(levelId);
                         }}
                       >
@@ -527,7 +529,7 @@ const AddNewAudio = () => {
                   const newLevels = selectedLevels.includes(level.id)
                     ? selectedLevels.filter((l) => l !== level.id)
                     : [...selectedLevels, level.id];
-                  setValue("levels", newLevels);
+                  setValue("levels", newLevels, { shouldValidate: true });
                 }}
               >
                 {level.name}
@@ -542,7 +544,7 @@ const AddNewAudio = () => {
 
       <Label className="text-gray-300 mb-3 block">Best for</Label>
       <Select
-        onValueChange={(value) => setValue("bestFor", value)}
+        onValueChange={(value) => setValue("bestFor", value, { shouldValidate: true })}
         value={selectedBestFor}
       >
         <SelectTrigger className="mb-2 w-full bg-[#0B132B] h-12 border-none text-white">
@@ -624,16 +626,16 @@ const AddNewAudio = () => {
                   id="audio-upload"
                   accept=".mp3,.aac,.ogg,.wav"
                   onChange={(e) => {
-                    const file = e.target.files?.[0] || null;
-                    setValue("audioFile", e.target.files as FileList);
-                    if (file) {
-                      setAudioPreview(URL.createObjectURL(file));
+                    const files = e.target.files;
+                    if (files) {
+                      setValue("audioFile", files, { shouldValidate: true });
+                      setAudioPreview(URL.createObjectURL(files[0]));
                     }
                   }}
                   ref={audioInputRef}
                 />
                 <div className="border p-1 px-4 rounded-sm border-white text-gray-300 cursor-pointer">
-                 {audioPreview ? "Change Audio File": "Choose Audio File"} 
+                  {audioPreview ? "Change Audio File" : "Choose Audio File"}
                 </div>
               </label>
             </div>
@@ -683,16 +685,16 @@ const AddNewAudio = () => {
                   id="image-upload"
                   accept="image/jpeg,image/png"
                   onChange={(e) => {
-                    const file = e.target.files?.[0] || null;
-                    setValue("imageFile", e.target.files as FileList);
-                    if (file) {
-                      setImagePreview(URL.createObjectURL(file));
+                    const files = e.target.files;
+                    if (files) {
+                      setValue("imageFile", files, { shouldValidate: true });
+                      setImagePreview(URL.createObjectURL(files[0]));
                     }
                   }}
                   ref={imageInputRef}
                 />
                 <div className="border p-1 px-4 rounded-sm border-white text-gray-300 cursor-pointer">
-                  {imagePreview ? "Change Image":"Choose Image"}
+                  {imagePreview ? "Change Image" : "Choose Image"}
                 </div>
               </label>
             </div>

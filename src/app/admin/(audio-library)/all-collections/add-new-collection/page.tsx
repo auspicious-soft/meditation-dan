@@ -40,10 +40,11 @@ const schema = yup.object({
     .required("Best for field is required"),
   imageFile: yup
     .mixed<File>()
+    .nullable()
+    .nullable()
     .test("fileRequired", "Image file is required", (value) => {
       return value instanceof File && value.size > 0;
-    })
-    .required("Image file is required"),
+    }),
 });
 
 interface LevelOption {
@@ -78,19 +79,23 @@ const AddCollectionForm = () => {
     setValue,
     watch,
     setError,
+    clearErrors,
     formState: { errors, isSubmitting },
-  } = useForm({
+  } = useForm<FormData>({
     resolver: yupResolver(schema),
+    mode: "onChange", // Enable real-time validation
     defaultValues: {
       collectionName: "",
       description: "",
       levels: [] as string[],
       bestFor: [] as string[],
+      imageFile: null, // Explicitly set to null
     },
   });
 
   const selectedLevels = watch("levels") || [];
   const selectedBestFor = watch("bestFor") || [];
+  const imageFile = watch("imageFile");
 
   useEffect(() => {
     const fetchLevels = async () => {
@@ -190,38 +195,38 @@ const AddCollectionForm = () => {
     if (file) {
       const imageUrl = URL.createObjectURL(file);
       setImagePreview(imageUrl);
-      setValue("imageFile", file);
+      setValue("imageFile", file, { shouldValidate: true }); // Trigger validation
     }
   };
 
   const handleRemoveImage = () => {
     setImagePreview(null);
-    setValue("imageFile", new File([], ""));
+    setValue("imageFile", null, { shouldValidate: true }); // Trigger validation
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const removeLevel = (levelId: string) => {
     const newLevels = selectedLevels.filter((id) => id !== levelId);
-    setValue("levels", newLevels);
+    setValue("levels", newLevels, { shouldValidate: true }); // Trigger validation
   };
 
   const removeBestFor = (bestForId: string) => {
     const newBestFor = selectedBestFor.filter((id) => id !== bestForId);
-    setValue("bestFor", newBestFor);
+    setValue("bestFor", newBestFor, { shouldValidate: true }); // Trigger validation
   };
 
   const addLevel = (levelId: string) => {
     if (!selectedLevels.includes(levelId)) {
-      setValue("levels", [...selectedLevels, levelId]);
+      setValue("levels", [...selectedLevels, levelId], { shouldValidate: true }); // Trigger validation
     }
-    setIsLevelsOpen(false); // Optional: Close dropdown after selection
+    setIsLevelsOpen(false);
   };
 
   const addBestFor = (bestForId: string) => {
     if (!selectedBestFor.includes(bestForId)) {
-      setValue("bestFor", [...selectedBestFor, bestForId]);
+      setValue("bestFor", [...selectedBestFor, bestForId], { shouldValidate: true }); // Trigger validation
     }
-    setIsBestForOpen(false); // Optional: Close dropdown after selection
+    setIsBestForOpen(false);
   };
 
   interface FormData {
@@ -229,7 +234,7 @@ const AddCollectionForm = () => {
     description: string;
     levels: string[];
     bestFor: string[];
-    imageFile: File;
+    imageFile?: File | null; // Allow undefined
   }
 
   const onSubmit = async (data: FormData) => {
@@ -287,7 +292,7 @@ const AddCollectionForm = () => {
       console.log('collectionData:', collectionData);
 
       const response = await uploadCollectionStats(
-        "/	admin/upload-collection",
+        "/admin/upload-collection",
         collectionData
       );
 
@@ -486,7 +491,7 @@ const AddCollectionForm = () => {
                 className="absolute top-0 right-0 hover:bg-[#373f57] text-zinc-500"
                 onClick={handleRemoveImage}
               >
-                <Trash2 size={16} className="text-white " />
+                <Trash2 size={16} className="text-white" />
               </Button>
             </>
           ) : (
