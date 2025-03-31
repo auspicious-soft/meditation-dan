@@ -23,6 +23,7 @@ import {
   uploadCollectionStats,
 } from "@/services/admin-services";
 import { toast } from "sonner";
+import { timeStamp } from "console";
 
 // Validation Schema
 const schema = yup.object({
@@ -262,7 +263,7 @@ const AddCollectionForm = () => {
         const imageFileName = `${imageFile.name}`;
 
         const { signedUrl, key } = await generateSignedUrlForCollectionImage(
-          bestForNames,
+          new Date().toISOString(),
           collectionName,
           imageFileName,
           image.type
@@ -508,7 +509,7 @@ const AddCollectionForm = () => {
               onChange={handleImageUpload}
               ref={fileInputRef}
             />
-            <div className="top-183 rounded-sm border p-1 px-4 border-white text-gray-300">
+            <div className="top-183 rounded-sm border p-1 px-4 hover:cursor-pointer border-white text-gray-300">
               {imagePreview ? "Change Image" : "Choose Image"}
             </div>
           </label>
