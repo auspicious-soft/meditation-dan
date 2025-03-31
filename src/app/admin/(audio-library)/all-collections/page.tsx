@@ -126,7 +126,7 @@ const AllCollection: React.FC = () => {
             <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
             {Array(10).fill(null).map((_, index) => (
               <SkeletonTheme key={index} baseColor="#ebebeb" highlightColor="#1b2236"  borderRadius={10}>
-              <Skeleton height={250} width={260} />
+              <Skeleton height={250} width={240} />
               </SkeletonTheme>
             ))}
             </div>

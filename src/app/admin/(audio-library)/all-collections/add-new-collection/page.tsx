@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { ChevronDown, Trash2, Upload, X } from "lucide-react";
+import { ChevronDown, Loader2, Trash2, Upload, X } from "lucide-react";
 import Image from "next/image";
 import {
   Popover,
@@ -332,7 +332,7 @@ const AddCollectionForm = () => {
           >
             <div className="flex flex-wrap gap-2 items-center">
               {isLoadingLevels ? (
-                <span>Loading levels...</span>
+                <span><Loader2 size={24} className="animate-spin text-white" /></span>
               ) : selectedLevels.length > 0 ? (
                 selectedLevels.map((levelId) => {
                   const level = levelOptions.find((l) => l.id === levelId);
@@ -366,7 +366,7 @@ const AddCollectionForm = () => {
           style={{ width: levelsPopoverWidth }}
         >
           {isLoadingLevels ? (
-            <div className="p-2 text-gray-500">Loading levels...</div>
+            <div className="p-2 text-gray-500"><Loader2 size={24} className="animate-spin text-white" /></div>
           ) : levelsError ? (
             <div className="p-2 text-red-500">{levelsError}</div>
           ) : levelOptions.length === 0 ? (
@@ -400,7 +400,7 @@ const AddCollectionForm = () => {
           >
             <div className="flex flex-wrap gap-2 items-center">
               {isLoadingBestFor ? (
-                <span>Loading best for options...</span>
+                <span><Loader2 size={24} className="animate-spin text-white" /></span>
               ) : selectedBestFor.length > 0 ? (
                 selectedBestFor.map((bestForId) => {
                   const bestFor = bestForOptions.find((b) => b.id === bestForId);
@@ -434,7 +434,7 @@ const AddCollectionForm = () => {
           style={{ width: bestForPopoverWidth }}
         >
           {isLoadingBestFor ? (
-            <div className="p-2 text-gray-500">Loading best for options...</div>
+            <div className="p-2 text-gray-500"><Loader2 size={24} className="animate-spin text-white" /></div>
           ) : bestForError ? (
             <div className="p-2 text-red-500">{bestForError}</div>
           ) : bestForOptions.length === 0 ? (

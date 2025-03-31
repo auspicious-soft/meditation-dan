@@ -21,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ChevronDown, Trash2, Upload } from "lucide-react";
+import { ChevronDown, Loader2, Trash2, Upload } from "lucide-react";
 import Image from "next/image";
 import { toast } from "sonner";
 import {
@@ -439,11 +439,17 @@ const AddNewAudio = () => {
         render={({ field }) => (
           <Select onValueChange={field.onChange} value={field.value}>
             <SelectTrigger className="mb-4 w-full bg-[#0B132B] h-12 border-none text-white">
-              <SelectValue placeholder="Select Collection Type" />
+            <SelectValue
+            placeholder={
+              loadingCollections
+                ? <Loader2 size={24} className="animate-spin text-white" />
+                : "Select Collection Type"
+            }
+          />
             </SelectTrigger>
             <SelectContent className="bg-[#0B132B] border-gray-700 text-white">
             {loadingCollections ? (
-                <SelectItem value="loading">Loading collections...</SelectItem>
+                <SelectItem value="loading"><Loader2 size={24} className="animate-spin text-black" /></SelectItem>
               ) : collections.length > 0 ? (
                 collections.map((collection) => (
                   <SelectItem key={collection._id} value={collection._id}>
@@ -483,7 +489,7 @@ const AddNewAudio = () => {
             className="w-full justify-between text-left h-12 text-gray-300 hover:bg-[#0B132B] hover:text-white border-none mb-2"
           >
             {isLoadingLevels ? (
-              <span>Loading levels...</span>
+              <span><Loader2 size={24} className="animate-spin text-white" /></span>
             ) : selectedLevels.length > 0 ? (
               <div className="flex flex-wrap gap-2">
                 {selectedLevels.map((levelId) => {
@@ -509,7 +515,7 @@ const AddNewAudio = () => {
           style={{ width: popoverWidth }}
         >
           {isLoadingLevels ? (
-            <div className="p-2 text-gray-500">Loading levels...</div>
+            <div className="p-2 text-gray-500"><Loader2 size={24} className="animate-spin text-white" /></div>
           ) : levelsError ? (
             <div className="p-2 text-red-500">{levelsError}</div>
           ) : levelOptions.length === 0 ? (
@@ -547,14 +553,14 @@ const AddNewAudio = () => {
           <SelectValue
             placeholder={
               isLoadingBestFor
-                ? "Loading best for options..."
+                ? <Loader2 size={24} className="animate-spin text-white" />
                 : "Select Best For"
             }
           />
         </SelectTrigger>
         <SelectContent className="bg-[#0B132B] border-gray-700 text-white">
           {isLoadingBestFor ? (
-            <div className="p-2 text-gray-500">Loading best for options...</div>
+            <div className="p-2 text-gray-500"><Loader2 size={24} className="animate-spin text-white" /></div>
           ) : bestForError ? (
             <div className="p-2 text-red-500">{bestForError}</div>
           ) : bestForOptions.length === 0 ? (
