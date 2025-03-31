@@ -72,7 +72,7 @@ const Page = () => {
 
     return (
 
-
+<>
         <div className="grid grid-cols-12 gap-4 h-screen w-full">
     <div className="col-span-12 space-y-6 bg-[#1b2236] rounded-[12px] md:rounded-[20px] py-4 px-4 md:py-8 md:px-9">
         <h2 className="text-white text-[20px] md:text-2xl font-bold mb-3">
@@ -122,25 +122,6 @@ const Page = () => {
         </Table>
 
         {/* Pagination Controls */}
-        {/* <div className="flex justify-end items-center gap-2 mt-4">
-            <Button 
-                className="bg-[#0B132B]" 
-                onClick={() => handlePageChange(currentPage - 1)} 
-                disabled={currentPage === 1 || totalPages === 1}
-            >
-                Previous
-            </Button>
-            <span className="text-white text-sm">
-                Page {currentPage} of {totalPages}
-            </span>
-            <Button 
-                className="bg-[#0B132B]" 
-                onClick={() => handlePageChange(currentPage + 1)} 
-                disabled={currentPage === totalPages || totalPages === 1}
-            >
-                Next
-            </Button>
-        </div> */}
 
 <div className="flex justify-end items-center gap-2 mt-4">
           <Button
@@ -168,7 +149,7 @@ const Page = () => {
 
 
 
-
+</>
     );
 };
 
