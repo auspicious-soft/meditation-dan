@@ -166,7 +166,7 @@ export const generateSignedUrlToUploadOn = async (fileName: string, fileType: st
 export const generateSignedUrlForAudios = async (songName:string,collectionName:string, fileName: string, fileType: string) => {
   const uploadParams = {
     Bucket: process.env.AWS_BUCKET_NAME,
-    Key: `${collectionName}/${songName}/audio/${fileName}`,
+    Key: `${songName}/${collectionName}/audio/${fileName}`,
     ContentType: fileType,
     acl: "public-read",
   };
@@ -182,7 +182,7 @@ export const generateSignedUrlForAudios = async (songName:string,collectionName:
 export const generateSignedUrlForAudioImage = async (songName:string, collectionName:string,fileName: string, fileType: string) => {
   const uploadParams = {
     Bucket: process.env.AWS_BUCKET_NAME,
-    Key: `${collectionName}/${songName}/image/${fileName}`,
+    Key: `${songName}/${collectionName}/image/${fileName}`,
     ContentType: fileType,
     acl: "public-read",
   };
