@@ -163,7 +163,7 @@ export const generateSignedUrlToUploadOn = async (fileName: string, fileType: st
     throw error;
   }
 };
-export const generateSignedUrlForAudios = async (collectionName:string,songName:string, fileName: string, fileType: string) => {
+export const generateSignedUrlForAudios = async (songName:string,collectionName:string, fileName: string, fileType: string) => {
   const uploadParams = {
     Bucket: process.env.AWS_BUCKET_NAME,
     Key: `${collectionName}/${songName}/audio/${fileName}`,
@@ -179,7 +179,7 @@ export const generateSignedUrlForAudios = async (collectionName:string,songName:
     throw error;
   }
 };
-export const generateSignedUrlForAudioImage = async (collectionName:string,songName:string, fileName: string, fileType: string) => {
+export const generateSignedUrlForAudioImage = async (songName:string, collectionName:string,fileName: string, fileType: string) => {
   const uploadParams = {
     Bucket: process.env.AWS_BUCKET_NAME,
     Key: `${collectionName}/${songName}/image/${fileName}`,
@@ -248,3 +248,5 @@ export const deleteFileFromS3 = async (imageKey: string) => {
     throw error;
   }
 };
+
+

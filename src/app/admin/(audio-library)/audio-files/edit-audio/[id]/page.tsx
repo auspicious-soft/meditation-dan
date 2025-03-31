@@ -402,8 +402,8 @@ const GetAudio = () => {
 
         const audioFileName = `${audio.name}`;
         const { signedUrl, key } = await generateSignedUrlForAudios(
-          new Date().toISOString(),
           songName,
+          new Date().toISOString(),
           audioFileName,
           audio.type
         );
@@ -438,8 +438,8 @@ const GetAudio = () => {
         const songName = data.songName.toLowerCase();
         const imageFileName = `${image.name}`;
         const { signedUrl, key } = await generateSignedUrlForAudioImage(
-          new Date().toISOString(),
           songName,
+          new Date().toISOString(),
           imageFileName,
           image.type
         );
