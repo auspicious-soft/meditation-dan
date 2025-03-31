@@ -7,7 +7,7 @@ import BannerImage from "../components/BannerImage";
 import { InputOTP, InputOTPSlot } from "@/components/ui/input-otp";
 import { useRouter } from "next/navigation"; // Added for programmatic navigation
 import { toast } from "sonner"; // Optional: for user feedback
-import { sendOtpService } from "@/services/admin-services";
+import { sendOtpService, verifySignupOtpService } from "@/services/admin-services";
 
 export default function Home() {
  interface FormElements extends HTMLFormControlsCollection {
@@ -31,7 +31,7 @@ export default function Home() {
   }
   startTransition(async () => {
    try {
-    const response = await sendOtpService({ otp: otpValue });
+    const response = await verifySignupOtpService({ otp: otpValue });
 
     if (response.data.success) {
      toast.success(response.data.message);
