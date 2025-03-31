@@ -56,6 +56,11 @@ const PageTitle = () => {
     pageTitle = "Join Requests";
   }
 
+  const frequentlyAQ = /^\/admin\/faqs$/;
+  if (frequentlyAQ.test(pathname)) {
+    pageTitle = "Frequently Asked Questions";
+  }
+
 
   return <h1 className="text-2xl font-bold hidden md:block">{pageTitle}</h1>;
 };
