@@ -68,3 +68,7 @@ export const deleteCollectionByID = async (route: string,params: any = {} ) => {
     const axiosInstance = await getAxiosInstance()
     return axiosInstance.delete(route,{ params })
 }
+export const updateAudioStats = async (route: string, payload: any) => {
+    const axiosInstance = await getAxiosInstance()
+    return axiosInstance.put(route,payload)
+}
