@@ -183,7 +183,7 @@ const currentRecent = Recent.slice(indexOfFirstInvoice, indexOfLastInvoice);
 {/* bottom last  */}
 <div className="mt-[25px] grid grid-cols-12 h-auto w-full">
     <div className="col-span-12  space-y-6 bg-[#1b2236] rounded-[12px] md:rounded-[20px] py-4 px-4 md:py-8 md:px-9">
-     <h2 className="text-white text-[20px] md:text-2xl font-bold mb-3">Subscription Expire Today</h2>
+     <h2 className="text-white text-[20px] md:text-2xl font-bold mb-3">Recent Payments</h2>
      <div>
       <Table>
        <TableHeader>

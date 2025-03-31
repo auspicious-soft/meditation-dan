@@ -57,6 +57,11 @@ const data = {
       url: "/admin/requests",
       icon: BellNotifactionIcon,
     },
+    {
+      title: "FAQs",
+      url: "/admin/faqs",
+      icon: BellNotifactionIcon,
+    },
     
   ],
 };

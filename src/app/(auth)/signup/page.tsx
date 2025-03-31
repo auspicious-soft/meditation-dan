@@ -80,7 +80,6 @@ export default function SignupPage() {
 
     if (response?.success) {
      toast.success("Account created successfully");
-//   router.push("/admin/dashboard");
      router.push("/verifyotp");
     } else {
      toast.error(response?.message || "Signup failed. Please try again.");
