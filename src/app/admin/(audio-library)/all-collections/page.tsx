@@ -38,7 +38,7 @@ const AllCollection: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(0);
-  const limit = 10;
+  const limit = 12;
 
   // Fetch collections with pagination
   useEffect(() => {
@@ -124,7 +124,7 @@ const AllCollection: React.FC = () => {
           </div>
           :
             <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
-            {Array(10).fill(null).map((_, index) => (
+            {Array(12).fill(null).map((_, index) => (
               <SkeletonTheme key={index} baseColor="#ebebeb" highlightColor="#1b2236"  borderRadius={10}>
               <Skeleton height={250} width={240} />
               </SkeletonTheme>
