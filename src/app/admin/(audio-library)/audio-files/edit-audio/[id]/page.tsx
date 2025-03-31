@@ -573,7 +573,7 @@ const GetAudio = () => {
       <Input
         {...register("songName")}
         placeholder="Enter Song Name"
-        className="mb-4 bg-[#0B132B] border-none h-12 placeholder:text-white text-white autofill-fix"
+        className="mb-4 bg-[#0B132B] border-none h-12 placeholder:text-white text-white"
       />
       {errors.songName && (
         <p className="text-red-500 text-xs mb-4">{errors.songName.message}</p>

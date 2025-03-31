@@ -205,13 +205,3 @@ input:-moz-placeholder {
 .scroll-container::-webkit-scrollbar-track {
   background-color: #0B132B; /* Track color */
 }
-.autofill-fix:-webkit-autofill,
-.autofill-fix:-webkit-autofill:hover,
-.autofill-fix:-webkit-autofill:focus,
-.autofill-fix:-webkit-autofill:active {
-  -webkit-box-shadow: 0 0 0 1000px #0B132B inset !important;
-  -webkit-text-fill-color: white !important;
-  background-color: transparent !important;
-  color: white !important;
-  border: none !important;
-}
