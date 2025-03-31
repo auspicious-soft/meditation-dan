@@ -154,6 +154,7 @@ const GetAudio = () => {
     reset,
     setError,
     formState: { errors, isSubmitting },
+    clearErrors,
   } = useForm<FormValues>({
     resolver: yupResolver(schema),
     defaultValues: {
@@ -322,14 +323,16 @@ const GetAudio = () => {
     if (audioInputRef.current) audioInputRef.current.value = "";
     setAudioPreview(null);
     setExistingAudioUrl(null);
-    setValue("audioFile", null);
+    setValue("audioFile", null); // Clear the form value
+    setError("audioFile", { type: "manual", message: "Audio file is required" }); // Show validation error
   };
-
+  
   const handleRemoveImage = () => {
     if (imageInputRef.current) imageInputRef.current.value = "";
     setImagePreview(null);
     setExistingImageUrl(null);
-    setValue("imageFile", null);
+    setValue("imageFile", null); // Clear the form value
+    setError("imageFile", { type: "manual", message: "Image file is required" }); // Show validation error
   };
 
   const removeLevel = (levelId: string) => {
@@ -718,23 +721,26 @@ const GetAudio = () => {
               )}
             </Card>
             <label htmlFor="audio-upload">
-              <input
-                type="file"
-                className="hidden"
-                id="audio-upload"
-                accept=".mp3,.aac,.ogg,.wav"
-                onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                  const files = e.target.files;
-                  if (files) {
-                    setValue("audioFile", files);
-                  }
-                }}
-                ref={audioInputRef}
-              />
-              <div className="border p-1 px-4 rounded-sm border-white text-gray-300 cursor-pointer">
-                {audioPreview ? "Change Audio File" : "Choose Audio File"}
-              </div>
-            </label>
+  <input
+    type="file"
+    className="hidden"
+    id="audio-upload"
+    accept=".mp3,.aac,.ogg,.wav"
+    onChange={(e: ChangeEvent<HTMLInputElement>) => {
+      const files = e.target.files;
+      if (files) {
+        setValue("audioFile", files); // Update the form value
+        const audioUrl = URL.createObjectURL(files[0]);
+        setAudioPreview(audioUrl); // Update the preview
+        clearErrors("audioFile"); // Clear validation error
+      }
+    }}
+    ref={audioInputRef}
+  />
+  <div className="border p-1 px-4 rounded-sm border-white text-gray-300 cursor-pointer">
+    {audioPreview ? "Change Audio File" : "Choose Audio File"}
+  </div>
+</label>
           </div>
           <p className="text-xs text-gray-500 mb-4">Max size: 30 MB</p>
           {errors.audioFile && (
@@ -769,23 +775,26 @@ const GetAudio = () => {
               )}
             </Card>
             <label htmlFor="image-upload">
-              <input
-                type="file"
-                className="hidden"
-                id="image-upload"
-                accept="image/jpeg,image/png"
-                onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                  const files = e.target.files;
-                  if (files) {
-                    setValue("imageFile", files);
-                  }
-                }}
-                ref={imageInputRef}
-              />
-              <div className="border p-1 px-4 rounded-sm border-white text-gray-300 cursor-pointer">
-                {imagePreview ? "Change Image" : "Choose Image"}
-              </div>
-            </label>
+  <input
+    type="file"
+    className="hidden"
+    id="image-upload"
+    accept="image/jpeg,image/png"
+    onChange={(e: ChangeEvent<HTMLInputElement>) => {
+      const files = e.target.files;
+      if (files) {
+        setValue("imageFile", files); // Update the form value
+        const imageUrl = URL.createObjectURL(files[0]);
+        setImagePreview(imageUrl); // Update the preview
+        clearErrors("imageFile"); // Clear validation error
+      }
+    }}
+    ref={imageInputRef}
+  />
+  <div className="border p-1 px-4 rounded-sm border-white text-gray-300 cursor-pointer">
+    {imagePreview ? "Change Image" : "Choose Image"}
+  </div>
+</label>
           </div>
           <p className="text-xs text-gray-500 mb-4">Size: 170x170 pixels</p>
           {errors.imageFile && (
