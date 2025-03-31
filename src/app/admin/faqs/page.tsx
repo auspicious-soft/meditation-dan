@@ -96,7 +96,7 @@ export default function Page() {
   return (
     <>
       <div className="mb-[20px] bg-[#1A3F70] rounded py-[8px] px-[18px] inline-flex justify-center items-center gap-2.5 cursor-pointer ml-auto w-fit">
-          <div  onClick={() => setIsAddOpen(true)} className="text-white text-sm font-normal"> + Add New User </div>
+          <div  onClick={() => setIsAddOpen(true)} className="text-white text-sm font-normal"> + Add New </div>
       </div>
 
       <div className="flex flex-col gap-4">
