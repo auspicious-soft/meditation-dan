@@ -75,23 +75,19 @@ export const updateAudioStats = async (route: string, payload: any) => {
 }
 
 
-// export const updateCollectionStats = async (route: string, payload: any) => {
-//     const axiosInstance = await getAxiosInstance();
-//     return axiosInstance.put(route, payload);
-// };
-
-// export const deleteCollectionByID = async (route: string, params: any = {}) => {
-//     const axiosInstance = await getAxiosInstance();
-//     return axiosInstance.delete(route, { params });
-// };
-
-// export const updateAudioStats = async (route: string, payload: any) => {
-//     const axiosInstance = await getAxiosInstance();
-//     return axiosInstance.put(route, payload);
-// };
 
 // New function to get all users
 export const getAllUsers = async (route: string) => {
     const axiosInstance = await getAxiosInstance();
     return axiosInstance.get(route);
 };
+
+
+export const getSingleUser = async (route: string,params: any = {}) => {
+    const axiosInstance = await getAxiosInstance();
+    return axiosInstance.get(route,{ params });
+};
+
+
+
+
