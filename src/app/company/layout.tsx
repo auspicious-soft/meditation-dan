@@ -27,7 +27,6 @@ export default async function RootLayout({
     }
   
     const userRole = (session as any)?.user?.role;
-    console.log('userRole: ', userRole);
     const restrictedRoles = ['user', 'admin']; 
     
     //Check if user has restricted role
