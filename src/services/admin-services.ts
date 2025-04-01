@@ -106,3 +106,7 @@ export const getAnalytics = async (route: string) => {
     const axiosInstance = await getAxiosInstance();
     return axiosInstance.get(route);
 };
+export const getCompanyJoinRequest = async (route: string) => {
+    const axiosInstance = await getAxiosInstance();
+    return axiosInstance.get(route);
+};
