@@ -1,234 +1,332 @@
 "use client";
-import React from "react";
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { toast } from "sonner";
+import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css"; // Import CSS for skeleton
+import { getAnalytics } from "@/services/admin-services";
 
-
-const stats = [
-   { label: "Total Users", value: "1245" },
-   { label: "Active Users", value: "52" },
-   { label: "Total Downloads", value: "12524" },
-   { label: "Audio Plays", value: "55654" },
- ];
-
-interface Invoice {
- Id: string;
- CompanyName: string;
- NameofCustomer: string;
+// Define interfaces based on backend response
+interface User {
+  _id: string;
+  identifier: string;
+  firstName: string;
+  lastName: string;
+  companyName: string;
 }
 
-const invoices: Invoice[] = [
- { Id: "#0032", NameofCustomer: "Rakesh Choudhary", CompanyName: "Innovative Tech Solutions Inc."},
- { Id: "#0033", NameofCustomer: "Ravi Pandit", CompanyName: "Creative Minds Software Co." },
- { Id: "#0034", NameofCustomer: "Harsh Bhatia", CompanyName: "NextGen Digital Services Ltd." },
- { Id: "#0035", NameofCustomer: "Gautam Patial", CompanyName: "Pioneering Software Innovations LLC." },
- { Id: "#0036", NameofCustomer: "Gurnam Singh", CompanyName: "Visionary Apps Corp." },
- { Id: "#0037", NameofCustomer: "Rajat Kumar", CompanyName: "Synergy Software Group." },
- { Id: "#0038", NameofCustomer: "Vijay Pathania", CompanyName: "Dynamic Code Labs." },
- { Id: "#0039", NameofCustomer: "Gautam Patial", CompanyName: "TechWave Solutions." },
- { Id: "#0040", NameofCustomer: "Harsh Bhatia", CompanyName: "FutureTech Systems" },
- { Id: "#0041", NameofCustomer: "Gautam Patial", CompanyName: "Smart Solutions Technologies." },
- { Id: "#0042", NameofCustomer: "Harsh Bhatia", CompanyName: "FutureWave Enterprises." },
-];
-
-
-// bottom 
 interface Subscription {
- Id: string;
- CompanyName: string;
- RegisterDate: string;
- Action: string;
+  Id: string;
+  CompanyName: string;
+  RegisterDate: string;
+  Action: string;
 }
 
-const invoicees: Subscription[] = [
- { Id: "#0032", RegisterDate: "08/01/2025", CompanyName: "Elite Software Enterprises", Action: "View"},
- { Id: "#0033", RegisterDate: "08/01/2025", CompanyName: "Quantum Innovations Ltd.",  Action: "View"},
- { Id: "#0034", RegisterDate: "08/01/2025", CompanyName: "Digital Dreamers Inc.", Action: "View" },
-];
-
-// bottom last 
-interface Payments {
- Id: string;
- CompanyName: string;
- Plan: string;
- Transaction: string;
+interface Payment {
+  Id: string;
+  CompanyName: string;
+  Plan: string;
+  Transaction: string;
 }
 
-const Recent : Payments[] = [
- { Id: "#0032", Plan: "Monthly", CompanyName: "Elite Software Enterprises", Transaction: "$125"},
- { Id: "#0033", Plan: "Monthly", CompanyName: "Quantum Innovations Ltd.", Transaction: "$321"},
- { Id: "#0034", Plan: "Monthly", CompanyName: "Digital Dreamers Inc.", Transaction: "$321" },
-];
-
-
-
-
+interface AnalyticsData {
+  totalUser: number;
+  activeUsers: number;
+  totalDownload: number;
+  totalAudioPlays: number;
+  newUser: User[];
+  subscriptionExpireToday: Subscription[];
+  paymentToday: Payment[];
+}
 
 const PAGE_SIZE = 20;
 
 const Page = () => {
- const router = useRouter();
- const [currentPage, setCurrentPage] = useState<number>(1);
+  const router = useRouter();
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
 
- const indexOfLastInvoice = currentPage * PAGE_SIZE;
- const indexOfFirstInvoice = indexOfLastInvoice - PAGE_SIZE;
- const currentInvoices = invoices.slice(indexOfFirstInvoice, indexOfLastInvoice);
-const currentInvoicees = invoicees.slice(indexOfFirstInvoice, indexOfLastInvoice);
-const totalPages = Math.ceil(invoices.length / PAGE_SIZE);
-const currentRecent = Recent.slice(indexOfFirstInvoice, indexOfLastInvoice);
+  // Fetch data from the backend on component mount
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await getAnalytics("/admin/analysis");
+        if (response.data.success) {
+          setAnalyticsData(response.data.data);
+        } else {
+          toast.error("Failed to fetch analytics data");
+        }
+      } catch (error) {
+        console.error("Error fetching analytics:", error);
+        toast.error("Failed to fetch analytics data");
+      }
+    };
+    fetchData();
+  }, []);
 
-//  const handlePageChange = (newPage: number) => {
-//   if (newPage >= 1 && newPage <= totalPages) {
-//    setCurrentPage(newPage);
-//   }
-//  };
- const handleViewClick = () => {
-    router.push(`/company/users/details`);
-   };
- 
-
- return (
-  <>
-
-{/* top  */}
-<div className="p-4">
-      <div className="mb-8  text-white text-2xl font-bold">
-        Track and measure user engagement and app performance.
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {stats.map((stat, index) => (
-          <div key={index} className="bg-[#1b2236] rounded-lg p-4 text-white">
-            <div className="text-sm font-normal mb-2">{stat.label}</div>
-            <div className="text-2xl font-bold">{stat.value}</div>
+  // Skeleton loader while data is being fetched
+  if (!analyticsData) {
+    return (
+      <SkeletonTheme baseColor="#0B132B" highlightColor="#1B2236" borderRadius="0.5rem">
+        <div className="py-4">
+          {/* Stats Skeleton */}
+          <div className="mb-8 text-white text-2xl font-bold">
+            Track and measure user engagement and app performance.
           </div>
-        ))}
-      </div>
-    </div>
-  
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {[...Array(4)].map((_, index) => (
+              <div key={index} className="bg-[#1b2236] rounded-lg p-4">
+                <Skeleton height={20} width={100} />
+                <Skeleton height={32} width={60} style={{ marginTop: "8px" }} />
+              </div>
+            ))}
+          </div>
 
-<div className="flex flex-col  md:flex-row justify-between  mx-0 margin-[10px]">
+          {/* Tables Skeleton */}
+          <div className="grid grid-cols-12 gap-4 mt-6">
+            {/* Recent New Users Skeleton */}
+            <div className="col-span-12 lg:col-span-6 w-full">
+              <div className="space-y-6 bg-[#1b2236] rounded-[12px] md:rounded-[20px] py-4 px-4 md:py-8 md:px-9">
+                <Skeleton height={28} width={200} />
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="border-0 border-b border-[#666666]">
+                        <TableHead className="w-[100px] py-4"><Skeleton height={20} /></TableHead>
+                        <TableHead className="py-4"><Skeleton height={20} /></TableHead>
+                        <TableHead className="py-4"><Skeleton height={20} /></TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {[...Array(5)].map((_, index) => (
+                        <TableRow key={index} className="border-0">
+                          <TableCell className="py-4"><Skeleton height={20} /></TableCell>
+                          <TableCell className="py-4"><Skeleton height={20} /></TableCell>
+                          <TableCell className="py-4"><Skeleton height={20} /></TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+            </div>
 
-{/* bottom left  */}
-<div className="grid grid-cols-12 mr-[25px] mb-[25px] h-screen w-full md:w-[80%] lg:w-[60%] px-4 sm:px-6">
-  <div className="col-span-12 space-y-6 bg-[#1b2236] rounded-[12px] md:rounded-[20px] py-4 px-4 md:py-8 md:px-9">
-    <h2 className="text-white text-[20px] md:text-2xl font-bold mb-3">Recent New Users</h2>
-    <div className="overflow-x-auto">
-      <Table>
-        <TableHeader>
-          <TableRow className="text-white text-sm font-bold dm-sans border-0 border-b border-[#666666] hover:bg-transparent">
-            <TableHead className="w-[100px] py-4">Id</TableHead>
-            <TableHead className="py-4">Name of Customer</TableHead>
-            <TableHead className="py-4">Company Name</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {currentInvoices.map((invoice) => (
-            <TableRow key={invoice.Id} className="border-0 text-sm font-normal hover:bg-transparent">
-              <TableCell className="py-4">{invoice.Id}</TableCell>
-              <TableCell className="py-4">{invoice.NameofCustomer}</TableCell>
-              <TableCell className="py-4">{invoice.CompanyName}</TableCell>
-            </TableRow>
+            {/* Right Side Skeleton */}
+            <div className="col-span-12 lg:col-span-6 space-y-4">
+              {/* Subscription Expire Today Skeleton */}
+              <div className="col-span-full h-auto w-full">
+                <div className="space-y-6 bg-[#1b2236] rounded-[12px] md:rounded-[20px] py-4 px-4 md:py-8 md:px-9">
+                  <Skeleton height={28} width={200} />
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="border-0 border-b border-[#666666]">
+                        <TableHead className="w-[100px] py-4"><Skeleton height={20} /></TableHead>
+                        <TableHead className="py-4"><Skeleton height={20} /></TableHead>
+                        <TableHead className="py-4"><Skeleton height={20} /></TableHead>
+                        <TableHead className="py-4"><Skeleton height={20} /></TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {[...Array(3)].map((_, index) => (
+                        <TableRow key={index} className="border-0">
+                          <TableCell className="py-4"><Skeleton height={20} /></TableCell>
+                          <TableCell className="py-4"><Skeleton height={20} /></TableCell>
+                          <TableCell className="py-4"><Skeleton height={20} /></TableCell>
+                          <TableCell className="py-4"><Skeleton height={20} width={60} /></TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+
+              {/* Recent Payments Skeleton */}
+              <div className="col-span-full">
+                <div className="space-y-6 bg-[#1b2236] rounded-[12px] md:rounded-[20px] py-4 px-4 md:py-8 md:px-9">
+                  <Skeleton height={28} width={200} />
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="border-0 border-b border-[#666666]">
+                        <TableHead className="w-[100px] py-4"><Skeleton height={20} /></TableHead>
+                        <TableHead className="py-4"><Skeleton height={20} /></TableHead>
+                        <TableHead className="py-4"><Skeleton height={20} /></TableHead>
+                        <TableHead className="py-4"><Skeleton height={20} /></TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {[...Array(3)].map((_, index) => (
+                        <TableRow key={index} className="border-0">
+                          <TableCell className="py-4"><Skeleton height={20} /></TableCell>
+                          <TableCell className="py-4"><Skeleton height={20} /></TableCell>
+                          <TableCell className="py-4"><Skeleton height={20} /></TableCell>
+                          <TableCell className="py-4"><Skeleton height={20} /></TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </SkeletonTheme>
+    );
+  }
+
+  // Map analytics data to stats for the top section
+  const stats = [
+    { label: "Total Users", value: analyticsData.totalUser.toString() },
+    { label: "Active Users", value: analyticsData.activeUsers.toString() },
+    { label: "Total Downloads", value: analyticsData.totalDownload.toString() },
+    { label: "Audio Plays", value: analyticsData.totalAudioPlays.toString() },
+  ];
+
+  // Pagination for Recent New Users table
+  const indexOfLastInvoice = currentPage * PAGE_SIZE;
+  const indexOfFirstInvoice = indexOfLastInvoice - PAGE_SIZE;
+  const recentUsers = analyticsData.newUser.slice(indexOfFirstInvoice, indexOfLastInvoice);
+
+  // No pagination for Subscription Expire Today and Recent Payments (show all items)
+  const subscriptionExpiringToday = analyticsData.subscriptionExpireToday;
+  const currentRecent = analyticsData.paymentToday;
+
+  const handleViewClick = () => {
+    router.push(`/company/users/details`);
+  };
+
+  return (
+    <SkeletonTheme baseColor="#0B132B" highlightColor="#1B2236" borderRadius="0.5rem">
+      {/* Top Section: Stats */}
+      <div className="py-4">
+        <div className="mb-8 text-white text-2xl font-bold">
+          Track and measure user engagement and app performance.
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {stats.map((stat, index) => (
+            <div key={index} className="bg-[#1b2236] rounded-lg p-4 text-white">
+              <div className="text-sm font-normal mb-2">{stat.label}</div>
+              <div className="text-2xl font-bold">{stat.value}</div>
+            </div>
           ))}
-        </TableBody>
-      </Table>
-    </div>
-  </div>
-</div>
+        </div>
+      </div>
 
+      <div className="grid grid-cols-12 gap-4">
+        {/* Bottom Left: Recent New Users */}
+        <div className="col-span-12 lg:col-span-6 w-full">
+          <div className="col-span-12 space-y-6 bg-[#1b2236] rounded-[12px] md:rounded-[20px] py-4 px-4 md:py-8 md:px-9">
+            <h2 className="text-white text-[20px] md:text-2xl font-bold mb-3">Recent New Users</h2>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="text-white text-sm font-bold dm-sans border-0 border-b border-[#666666] hover:bg-transparent">
+                    <TableHead className="w-[100px] py-4">Id</TableHead>
+                    <TableHead className="py-4">Name of Customer</TableHead>
+                    <TableHead className="py-4">Company Name</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {recentUsers.map((user) => (
+                    <TableRow key={user._id} className="border-0 text-sm font-normal hover:bg-transparent">
+                      <TableCell className="py-4">{user.identifier}</TableCell>
+                      <TableCell className="py-4">{`${user.firstName} ${user.lastName}`}</TableCell>
+                      <TableCell className="py-4">{user.companyName}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
+        </div>
 
-{/* bottom right  */}
-<div className="">
-<div className=" grid grid-cols-12  h-auto w-full">
-    <div className="col-span-12  space-y-6 bg-[#1b2236] rounded-[12px] md:rounded-[20px] py-4 px-4 md:py-8 md:px-9">
-     <h2 className="text-white text-[20px] md:text-2xl font-bold mb-3">Subscription Expire Today</h2>
-     <div>
-      <Table>
-       <TableHeader>
-        <TableRow className="text-white text-sm font-bold dm-sans border-0 border-b border-[#666666] hover:bg-transparent">
-         <TableHead className="w-[100px] py-4">Id</TableHead>
-         <TableHead className="py-4">Company Name</TableHead>
-         <TableHead className="py-4">Register Date</TableHead>
-         <TableHead className="py-4">Action</TableHead>
+        {/* Bottom Right */}
+        <div className="col-span-12 lg:col-span-6 space-y-4">
+          {/* Subscription Expire Today */}
+          <div className="col-span-full h-auto w-full">
+            <div className="space-y-6 bg-[#1b2236] rounded-[12px] md:rounded-[20px] py-4 px-4 md:py-8 md:px-9">
+              <h2 className="text-white text-[20px] md:text-2xl font-bold mb-3">Subscription Expire Today</h2>
+              <div>
+                <Table>
+                  <TableHeader>
+                    <TableRow className="text-white text-sm font-bold dm-sans border-0 border-b border-[#666666] hover:bg-transparent">
+                      <TableHead className="w-[100px] py-4">Id</TableHead>
+                      <TableHead className="py-4">Company Name</TableHead>
+                      <TableHead className="py-4">Register Date</TableHead>
+                      <TableHead className="py-4">Action</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {subscriptionExpiringToday.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={4} className="text-center py-4 text-white">
+                          No subscriptions expiring today
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      subscriptionExpiringToday.map((subscription) => (
+                        <TableRow key={subscription.Id} className="border-0 text-sm font-normal hover:bg-transparent">
+                          <TableCell className="py-4">{subscription.Id}</TableCell>
+                          <TableCell className="py-4">{subscription.CompanyName}</TableCell>
+                          <TableCell className="py-4">{subscription.RegisterDate}</TableCell>
+                          <TableCell className="text-right py-4">
+                            <Button
+                              className="px-3 !py-0 h-6 !bg-[#1a3f70] rounded inline-flex justify-center items-center text-white text-sm !font-normal !leading-tight !tracking-tight"
+                              onClick={handleViewClick}
+                            >
+                              {subscription.Action}
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
+          </div>
 
-        </TableRow>
-       </TableHeader>
-       <TableBody>
-        {currentInvoicees.map((Subscription) => (
-         <TableRow key={Subscription.Id} className="border-0 text-sm font-normal hover:bg-transparent">
-          <TableCell className="py-4">{Subscription.Id}</TableCell>
-          <TableCell className="py-4">{Subscription.CompanyName}</TableCell>
-          <TableCell className="py-4">{Subscription.RegisterDate}</TableCell>
-          <TableCell className="text-right py-4">
-          <Button className="px-3 !py-0 h-6 !bg-[#1a3f70] rounded inline-flex justify-center items-center text-white text-sm !font-normal !leading-tight !tracking-tight" onClick={() => handleViewClick()}>
-            {Subscription.Action}
-           </Button>
-           </TableCell>
-
-       
-          
-         </TableRow>
-        ))}
-       </TableBody>
-      </Table>
-
-
-     </div>
-
-    </div>
-   </div>
-
-
-{/* bottom last  */}
-<div className="mt-[25px] grid grid-cols-12 h-auto w-full">
-    <div className="col-span-12  space-y-6 bg-[#1b2236] rounded-[12px] md:rounded-[20px] py-4 px-4 md:py-8 md:px-9">
-     <h2 className="text-white text-[20px] md:text-2xl font-bold mb-3">Recent Payments</h2>
-     <div>
-      <Table>
-       <TableHeader>
-        <TableRow className="text-white text-sm font-bold dm-sans border-0 border-b border-[#666666] hover:bg-transparent">
-         <TableHead className="w-[100px] py-4">Id</TableHead>
-         <TableHead className="py-4">Company Name</TableHead>
-         <TableHead className="py-4">Plan</TableHead>
-         <TableHead className="py-4">Transcation</TableHead>
-
-        </TableRow>
-       </TableHeader>
-       <TableBody>
-        {currentRecent.map((Payments) => (
-         <TableRow key={Payments.Id} className="border-0 text-sm font-normal hover:bg-transparent">
-          <TableCell className="py-4">{Payments.Id}</TableCell>
-          <TableCell className="py-4">{Payments.CompanyName}</TableCell>
-          <TableCell className="py-4">{Payments.Plan}</TableCell>
-          <TableCell className="py-4">{Payments.Transaction}</TableCell>
-          <TableCell className="text-right py-4">
-          {/* <Button className="px-3 !py-0 h-6 !bg-[#1a3f70] rounded inline-flex justify-center items-center text-white text-sm !font-normal !leading-tight !tracking-tight" onClick={() => handleViewClick()}>
-            {Payments.Action}
-           </Button> */}
-           </TableCell>
-
-       
-          
-         </TableRow>
-        ))}
-       </TableBody>
-      </Table>
-
-
-     </div>
-
-    </div>
-   </div>
-
-
-   </div>
-   </div>
-
-
-
-  </>
- );
+          {/* Recent Payments */}
+          <div className="col-span-full">
+            <div className="space-y-6 bg-[#1b2236] rounded-[12px] md:rounded-[20px] py-4 px-4 md:py-8 md:px-9">
+              <h2 className="text-white text-[20px] md:text-2xl font-bold mb-3">Recent Payments</h2>
+              <div>
+                <Table>
+                  <TableHeader>
+                    <TableRow className="text-white text-sm font-bold dm-sans border-0 border-b border-[#666666] hover:bg-transparent">
+                      <TableHead className="w-[100px] py-4">Id</TableHead>
+                      <TableHead className="py-4">Company Name</TableHead>
+                      <TableHead className="py-4">Plan</TableHead>
+                      <TableHead className="py-4">Transaction</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {currentRecent.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={4} className="text-center py-4 text-white">
+                          No recent payments
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      currentRecent.map((payment) => (
+                        <TableRow key={payment.Id} className="border-0 text-sm font-normal hover:bg-transparent">
+                          <TableCell className="py-4">{payment.Id}</TableCell>
+                          <TableCell className="py-4">{payment.CompanyName}</TableCell>
+                          <TableCell className="py-4">{payment.Plan}</TableCell>
+                          <TableCell className="py-4">{payment.Transaction}</TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </SkeletonTheme>
+  );
 };
 
 export default Page;

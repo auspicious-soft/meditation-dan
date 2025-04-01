@@ -73,25 +73,36 @@ export const updateAudioStats = async (route: string, payload: any) => {
     const axiosInstance = await getAxiosInstance()
     return axiosInstance.put(route,payload)
 }
-
-
-// export const updateCollectionStats = async (route: string, payload: any) => {
-//     const axiosInstance = await getAxiosInstance();
-//     return axiosInstance.put(route, payload);
-// };
-
-// export const deleteCollectionByID = async (route: string, params: any = {}) => {
-//     const axiosInstance = await getAxiosInstance();
-//     return axiosInstance.delete(route, { params });
-// };
-
-// export const updateAudioStats = async (route: string, payload: any) => {
-//     const axiosInstance = await getAxiosInstance();
-//     return axiosInstance.put(route, payload);
-// };
-
 // New function to get all users
 export const getAllUsers = async (route: string) => {
+    const axiosInstance = await getAxiosInstance();
+    return axiosInstance.get(route);
+};
+export const createLevels = async (route: string , payload: any) => {
+    const axiosInstance = await getAxiosInstance()
+    return axiosInstance.post(route, payload)
+}
+export const createBestFor = async (route: string , payload: any) => {
+    const axiosInstance = await getAxiosInstance()
+    return axiosInstance.post(route, payload)
+}
+export const updateBestFor = async (route: string, payload: any) => {
+    const axiosInstance = await getAxiosInstance()
+    return axiosInstance.patch(route,payload)
+}
+export const updateLevels = async (route: string, payload: any) => {
+    const axiosInstance = await getAxiosInstance()
+    return axiosInstance.patch(route,payload)
+}
+export const deleteLevels = async (route: string) => {
+    const axiosInstance = await getAxiosInstance()
+    return axiosInstance.delete(route)
+}
+export const deleteBestFor = async (route: string) => {
+    const axiosInstance = await getAxiosInstance()
+    return axiosInstance.delete(route)
+}
+export const getAnalytics = async (route: string) => {
     const axiosInstance = await getAxiosInstance();
     return axiosInstance.get(route);
 };
