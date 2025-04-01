@@ -16,7 +16,8 @@ const PageTitle = () => {
     pageTitle = "Company Detail";
   }
   const userprofileEditPattern =
-    /^\/admin\/user-lists\/user-profile-edit\/\d+$/;
+    // /^\/admin\/user-lists\/user-profile-edit\/\d+$/;
+       /^\/admin\/user-lists\/user-profile-edit\/[0-9a-zA-Z]{24}$/;
   if (userprofileEditPattern.test(pathname)) {
     pageTitle = "User Profile Edit";
   }

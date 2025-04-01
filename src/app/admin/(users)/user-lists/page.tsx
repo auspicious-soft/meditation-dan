@@ -38,6 +38,7 @@ const Page = () => {
         refreshInterval: 0
     });
 
+
     console.log("Fetched Users:", data);
 
     const users = data?.data && Array.isArray(data?.data?.data) ? data?.data?.data : [];
@@ -56,6 +57,7 @@ const Page = () => {
     const handleViewClick = (id: string) => {
         router.push(`/admin/user-lists/user-profile-edit/${id}`);
     };
+
 
     // const refreshData = () => {
     //     mutate();
@@ -102,10 +104,8 @@ const Page = () => {
     </tr>
 </TableHeader>
 
-
             <TableBody>
               
-
                 {currentUsers.map((user: User) => (
                     <TableRow key={user._id} className="border-none">
                         <TableCell>{user.identifier}</TableCell>
@@ -114,7 +114,7 @@ const Page = () => {
                         <TableCell>{user.gender}</TableCell>
                         <TableCell>{user.email}</TableCell>
                         <TableCell>
-                            <Button onClick={() => handleViewClick(user._id)} className="!bg-[#1a3f70]">View</Button>
+                            <Button onClick={() => handleViewClick(user._id)} className="cursor-pointer !bg-[#1a3f70]">View</Button>
                         </TableCell>
                     </TableRow>
                 ))}
@@ -150,10 +150,13 @@ const Page = () => {
 
 
 </>
-    );
+);
 };
 
 export default Page;
+
+
+
 
 
 
