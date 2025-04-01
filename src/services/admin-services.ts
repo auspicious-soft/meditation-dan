@@ -112,5 +112,5 @@ export const getCompanyJoinRequest = async (route: string) => {
 };
 export const updateCompanyJoinRequest = async (route: string) => {
     const axiosInstance = await getAxiosInstance();
-    return axiosInstance.get(route);
+    return axiosInstance.put(route);
 };
