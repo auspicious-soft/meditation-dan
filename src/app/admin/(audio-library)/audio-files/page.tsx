@@ -1,11 +1,25 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Clock, Trash2, Play, Pause, MoreVertical, Pencil, AlertCircle, Loader2 } from "lucide-react";
+import {
+  Clock,
+  Trash2,
+  Play,
+  Pause,
+  MoreVertical,
+  Pencil,
+  AlertCircle,
+  Loader2,
+} from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { getAllAudiosStats, deleteAudio } from "@/services/admin-services";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Dialog,
   DialogContent,
@@ -15,7 +29,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
+import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
 
 interface Audio {
   _id: string;
@@ -118,24 +132,24 @@ const AudioList = () => {
       stopCurrentAudio();
       return;
     }
-    
+
     // Case 2: A different audio is playing or no audio is playing
     // First, stop any currently playing audio
     stopCurrentAudio();
-    
+
     // Then start playing the new audio
     setLoadingAudioId(audio._id);
-    
+
     try {
       const newAudio = new Audio(audioUrl);
       audioRef.current = newAudio;
-      
+
       // Set up event handlers before playing
       newAudio.onended = () => {
         setPlayingAudioId(null);
         audioRef.current = null;
       };
-      
+
       newAudio.onerror = (e) => {
         console.error("Audio playback error:", e);
         setPlayingAudioId(null);
@@ -143,7 +157,7 @@ const AudioList = () => {
         audioRef.current = null;
         toast.error("Failed to play audio");
       };
-      
+
       // Start playback
       await newAudio.play();
       setPlayingAudioId(audio._id);
@@ -199,7 +213,7 @@ const AudioList = () => {
   if (error) return <div className="text-red-500">{error}</div>;
 
   return (
-    <div className="p-6 bg-[#1B2236] flex flex-col text-white rounded-lg shadow-md">
+    <div className="px-4 py-5 lg:p-6 bg-[#1B2236] flex flex-col text-white rounded-lg shadow-md">
       <div className="flex justify-between items-center flex-wrap mb-4">
         <h2 className="text-xl font-semibold">All Audios</h2>
         <Button
@@ -211,15 +225,19 @@ const AudioList = () => {
       </div>
 
       {!loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-red-600">
+        <div className="grid grid-cols-2 gap-4 border-red-600">
           {audios.map((audio) => (
             <div
               key={audio._id}
-              className="flex flex-col md:flex-row items-center justify-between w-full min-h-[100px] relative bg-slate-900 p-4 rounded"
+              className="flex flex-col lg:flex-row items-center space-y-2 justify-between w-full min-h-[100px] relative bg-slate-900 p-4 rounded"
             >
               <div className="rounded bg-slate-800 overflow-hidden flex-shrink-0">
                 <Image
-                  src={audio?.imageUrl ? getS3Url(audio?.imageUrl) : "/default-placeholder.png"}
+                  src={
+                    audio?.imageUrl
+                      ? getS3Url(audio?.imageUrl)
+                      : "/default-placeholder.png"
+                  }
                   alt={audio?.songName}
                   className="object-cover"
                   width={60}
@@ -229,21 +247,29 @@ const AudioList = () => {
               </div>
 
               <div className="flex-1 min-w-0 mx-3">
-                <div className="text-sm text-center text-slate-400">Music Name:</div>
-                <div className="text-white text-center font-medium truncate">{audio?.songName}</div>
+                <div className="text-sm text-center text-slate-400">
+                  Music Name:
+                </div>
+                <div className="text-white text-center text-sm font-medium truncate">
+                  {audio?.songName}
+                </div>
               </div>
 
               <div className="text-center flex-1 min-w-0 mx-3">
-                <div className="text-sm text-center text-slate-400">Duration</div>
-                <div className="flex text-center items-center justify-center text-white">
+                <div className="text-sm text-center text-slate-400">
+                  Duration
+                </div>
+                <div className="flex text-center items-center text-sm justify-center text-white">
                   <Clock size={14} className="mr-1" />
                   <span>{audio?.duration}</span>
                 </div>
               </div>
 
               <div className="text-center flex-1 min-w-0 mx-3">
-                <div className="text-sm text-center text-slate-400">Collection</div>
-                <div className="text-white text-center border-0 truncate">
+                <div className="text-sm text-center text-slate-400">
+                  Collection
+                </div>
+                <div className="text-white text-sm text-center border-0 truncate">
                   {audio?.collectionType?.name || "Unknown Collection"}
                 </div>
               </div>
@@ -281,7 +307,10 @@ const AudioList = () => {
                       className="hover:bg-[#1B2236] cursor-pointer"
                       onClick={() => openDeleteDialog(audio._id)}
                     >
-                      <Trash2 size={16} className="mr- h-4 w-4 mr-2 hover:text-black" />
+                      <Trash2
+                        size={16}
+                        className="mr- h-4 w-4 mr-2 hover:text-black"
+                      />
                       Delete
                     </DropdownMenuItem>
                   </DropdownMenuContent>
@@ -292,7 +321,11 @@ const AudioList = () => {
         </div>
       ) : (
         <div>
-          <SkeletonTheme baseColor="#ebebeb" highlightColor="#1b2236" borderRadius={10}>
+          <SkeletonTheme
+            baseColor="#ebebeb"
+            highlightColor="#1b2236"
+            borderRadius={10}
+          >
             <Skeleton count={5} height={100} />
           </SkeletonTheme>
         </div>

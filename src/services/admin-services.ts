@@ -73,25 +73,74 @@ export const updateAudioStats = async (route: string, payload: any) => {
     const axiosInstance = await getAxiosInstance()
     return axiosInstance.put(route,payload)
 }
-
-
-// export const updateCollectionStats = async (route: string, payload: any) => {
-//     const axiosInstance = await getAxiosInstance();
-//     return axiosInstance.put(route, payload);
-// };
-
-// export const deleteCollectionByID = async (route: string, params: any = {}) => {
-//     const axiosInstance = await getAxiosInstance();
-//     return axiosInstance.delete(route, { params });
-// };
-
-// export const updateAudioStats = async (route: string, payload: any) => {
-//     const axiosInstance = await getAxiosInstance();
-//     return axiosInstance.put(route, payload);
-// };
-
 // New function to get all users
 export const getAllUsers = async (route: string) => {
     const axiosInstance = await getAxiosInstance();
     return axiosInstance.get(route);
+};
+export const createLevels = async (route: string , payload: any) => {
+    const axiosInstance = await getAxiosInstance()
+    return axiosInstance.post(route, payload)
+}
+export const createBestFor = async (route: string , payload: any) => {
+    const axiosInstance = await getAxiosInstance()
+    return axiosInstance.post(route, payload)
+}
+export const updateBestFor = async (route: string, payload: any) => {
+    const axiosInstance = await getAxiosInstance()
+    return axiosInstance.patch(route,payload)
+}
+export const updateLevels = async (route: string, payload: any) => {
+    const axiosInstance = await getAxiosInstance()
+    return axiosInstance.patch(route,payload)
+}
+export const deleteLevels = async (route: string) => {
+    const axiosInstance = await getAxiosInstance()
+    return axiosInstance.delete(route)
+}
+export const deleteBestFor = async (route: string) => {
+    const axiosInstance = await getAxiosInstance()
+    return axiosInstance.delete(route)
+}
+export const getAnalytics = async (route: string) => {
+    const axiosInstance = await getAxiosInstance();
+    return axiosInstance.get(route);
+};
+export const getCompanyJoinRequest = async (route: string) => {
+    const axiosInstance = await getAxiosInstance();
+    return axiosInstance.get(route);
+};
+export const updateCompanyJoinRequest = async (route: string) => {
+    const axiosInstance = await getAxiosInstance();
+    return axiosInstance.put(route);
+};
+export const getAllFaq = async (route: string) => {
+    const axiosInstance = await getAxiosInstance();
+    return axiosInstance.get(route);
+};
+export const addFaq = async (route: string,payload: any) => {
+    const axiosInstance = await getAxiosInstance();
+    return axiosInstance.post(route,payload);
+};
+export const updateFaq = async (route: string , payload:any) => {
+    const axiosInstance = await getAxiosInstance();
+    return axiosInstance.put(route, payload);
+};
+export const deleteFaq = async (route: string) => {
+    const axiosInstance = await getAxiosInstance();
+    return axiosInstance.delete(route);
+};
+export const getSingleUser = async (route: string,params: any = {}) => {
+    const axiosInstance = await getAxiosInstance();
+    return axiosInstance.get(route,{ params });
+};
+// Update a user by ID
+export const updateUser = async (route: string, userData: any) => {
+  const axiosInstance = await getAxiosInstance();
+  return axiosInstance.put(route, userData);
+};
+// Delete a user by ID
+export const deleteUser = async (route: string) => {
+  const axiosInstance = await getAxiosInstance();
+  return axiosInstance.delete(route);
 };

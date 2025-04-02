@@ -16,7 +16,7 @@ const PageTitle = () => {
     pageTitle = "Company Detail";
   }
   const userprofileEditPattern =
-    /^\/admin\/user-lists\/user-profile-edit\/\d+$/;
+       /^\/admin\/user-lists\/user-profile-edit\/[0-9a-zA-Z]{24}$/;
   if (userprofileEditPattern.test(pathname)) {
     pageTitle = "User Profile Edit";
   }
@@ -59,6 +59,11 @@ const PageTitle = () => {
   const frequentlyAQ = /^\/admin\/faqs$/;
   if (frequentlyAQ.test(pathname)) {
     pageTitle = "Frequently Asked Questions";
+  }
+
+  const subscription = /^\/admin\/subscription$/;
+  if (subscription.test(pathname)) {
+    pageTitle = "Audio Library";
   }
 
 
