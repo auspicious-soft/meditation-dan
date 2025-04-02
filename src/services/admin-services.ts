@@ -1,6 +1,9 @@
 // import { axiosInstance } from "@/config/axios";
 
 import { axiosInstance, getAxiosInstance } from "@/config/axios"
+interface BlockCompanyPayload {
+    isBlocked: boolean;
+  }
 
 export const loginService = async (payload: any) => await axiosInstance.post(`/login`, { email: payload.email, password: payload.password });
 export const signupService = async (payload: any) => await axiosInstance.post(`/company/signup`, payload);
@@ -41,6 +44,14 @@ export const addNewCompanyStats = async (route: string,payload: any ) => {
     const axiosInstance = await getAxiosInstance()
     return axiosInstance.post(route,payload)
 }
+export const deleteCompany = async (route: string,params: any = {} ) => {
+    const axiosInstance = await getAxiosInstance()
+    return axiosInstance.delete(route,{params})
+}
+export const toggleBlockCompany = async (route: string, data: BlockCompanyPayload) => {
+    const axiosInstance = await getAxiosInstance();
+    return axiosInstance.put(route, data);
+  };
 export const getAllCollectionStats = async (route: string,params: any = {} ) => {
     const axiosInstance = await getAxiosInstance()
     return axiosInstance.get(route,{ params })
@@ -144,3 +155,7 @@ export const deleteUser = async (route: string) => {
   const axiosInstance = await getAxiosInstance();
   return axiosInstance.delete(route);
 };
+export const getAdminDashboardStats = async (route: string,params:any = {}) => {
+  const axiosInstance = await getAxiosInstance();
+  return axiosInstance.get(route,{params});
+};      
