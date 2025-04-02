@@ -35,3 +35,21 @@ export const createUserAccount = async (route: string ,payload: any) => {
     const axiosInstance = await getCompanyAxiosInstance()
     return axiosInstance.post(route,payload)
 }
+
+//subscription
+export const getAllSubcriptionPlans = async (route: string ,params: any = {}) => {
+    const axiosInstance = await getCompanyAxiosInstance()
+    return axiosInstance.get(route)
+}
+export const getAllTransactionsPlans = async (route: string ,params: any = {}) => {
+    const axiosInstance = await getCompanyAxiosInstance()
+    return axiosInstance.get(route)
+}
+export const getUserInfo = async (route: string ,params: any = {}) => {
+    const axiosInstance = await getCompanyAxiosInstance()
+    return axiosInstance.get(route)
+}
+export const buyPlan = async (route: string ,payload: any ) => {
+    const axiosInstance = await getCompanyAxiosInstance()
+    return axiosInstance.post(route,payload)
+}

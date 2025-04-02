@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import useSWR from "swr";
 import { getAllPendingJoinRequests, getApproveOrDeclinePendingJoinRequest } from "@/services/company-services";
 import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
 
 const Page = () => {
   const router = useRouter();
@@ -45,12 +46,26 @@ const Page = () => {
    console.log("Delete account requested");
    const response = await getApproveOrDeclinePendingJoinRequest(`/company/join-requests/${id}?status=approve`);
    console.log('response: ', response);
+   if(response?.data?.success){
+    toast.success("Account approved successfully");
     mutate();
+   }
+   else{
+    toast.error(response?.data?.message || "Failed to approve account");
+   }
   };
 
   const handleDeleteAccount = async(id:string) => {
     console.log("Delete account requested");
     const response = await getApproveOrDeclinePendingJoinRequest(`/company/join-requests/${id}?status=deny`);
+    console.log('response: ', response);
+    if(response?.data?.success){
+      toast.success("Request declined successfully");
+      mutate();
+     }
+     else{
+      toast.error(response?.data?.message || "Failed to declined request");
+     }
     setIsDialogOpen(false);
     // Add your delete logic here
   };
@@ -205,7 +220,7 @@ const Page = () => {
           </Dialog> */}
         </div>
       </div>
-    </div>
+    </div> 
   );
 };
 
