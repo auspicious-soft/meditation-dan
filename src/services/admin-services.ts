@@ -114,3 +114,19 @@ export const updateCompanyJoinRequest = async (route: string) => {
     const axiosInstance = await getAxiosInstance();
     return axiosInstance.put(route);
 };
+export const getAllFaq = async (route: string) => {
+    const axiosInstance = await getAxiosInstance();
+    return axiosInstance.get(route);
+};
+export const addFaq = async (route: string,payload: any) => {
+    const axiosInstance = await getAxiosInstance();
+    return axiosInstance.post(route,payload);
+};
+export const updateFaq = async (route: string , payload:any) => {
+    const axiosInstance = await getAxiosInstance();
+    return axiosInstance.put(route, payload);
+};
+export const deleteFaq = async (route: string) => {
+    const axiosInstance = await getAxiosInstance();
+    return axiosInstance.delete(route);
+};
