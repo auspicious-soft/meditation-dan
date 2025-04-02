@@ -130,48 +130,17 @@ export const deleteFaq = async (route: string) => {
     const axiosInstance = await getAxiosInstance();
     return axiosInstance.delete(route);
 };
-
-
 export const getSingleUser = async (route: string,params: any = {}) => {
     const axiosInstance = await getAxiosInstance();
     return axiosInstance.get(route,{ params });
 };
-
-
-
-
-
-// Fetch all users
-// export const getAllUsers = async (route: string) => {
-//   const axiosInstance = await getAxiosInstance();
-//   return axiosInstance.get(route);
-// };
-
-// Fetch a single user by ID
-// export const getSingleUser = async (route: string) => {
-//   const axiosInstance = await getAxiosInstance();
-//   return axiosInstance.get(route);
-// };
-
 // Update a user by ID
 export const updateUser = async (route: string, userData: any) => {
   const axiosInstance = await getAxiosInstance();
   return axiosInstance.put(route, userData);
 };
-
 // Delete a user by ID
 export const deleteUser = async (route: string) => {
   const axiosInstance = await getAxiosInstance();
   return axiosInstance.delete(route);
 };
-
-// Existing functions
-// export const updateCompanyJoinRequest = async (route: string) => {
-//   const axiosInstance = await getAxiosInstance();
-//   return axiosInstance.put(route);
-// };
-
-// export const deleteBestFor = async (route: string) => {
-//   const axiosInstance = await getAxiosInstance();
-//   return axiosInstance.delete(route);
-// };
