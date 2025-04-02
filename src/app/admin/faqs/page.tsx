@@ -196,7 +196,7 @@ export default function Page() {
               {(currentPage - 1) * PAGE_SIZE + index + 1}.
             </div>
             <div className="flex-1">
-              <div className="text-white text-sm font-bold">{faq.question}</div>
+              <div className="text-white text-sm font-normal">{faq.question}</div>
               <div className="mt-1 text-white text-sm font-normal">{faq.answer}</div>
             </div>
             <div className="flex gap-4 ml-auto items-center">
