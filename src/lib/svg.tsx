@@ -173,3 +173,14 @@ export const CustomCrossIcon = () => (
 );
 
 
+export const FAQIcon = () => (
+<svg width="19" height="20" viewBox="0 0 19 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M7.125 7.35499C7.125 4.58413 11.4792 4.58416 11.4792 7.35499C11.4792 9.33416 9.5 8.93824 9.5 11.3132" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+<path d="M9.5 14.488L9.50792 14.4792" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+<path d="M9.50004 17.6466C13.8723 17.6466 17.4167 14.1021 17.4167 9.7299C17.4167 5.35764 13.8723 1.81323 9.50004 1.81323C5.12778 1.81323 1.58337 5.35764 1.58337 9.7299C1.58337 11.1718 1.96889 12.5238 2.64248 13.6882L1.97921 17.2507L5.54171 16.5875C6.70615 17.261 8.0581 17.6466 9.50004 17.6466Z" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+</svg>
+
+);
+
+
+

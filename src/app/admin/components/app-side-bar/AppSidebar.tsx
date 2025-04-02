@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/sidebar";
 import LogoCard from "./LogoCard";
 import { NavMain } from "./NavMain";
-import { AudioTagesIcon, BellNotifactionIcon, CompassIcon, SecurityIcon, SubscriptionIcon, UsersIcon } from "@/lib/svg";
+import { AudioTagesIcon, BellNotifactionIcon, CompassIcon, FAQIcon, SecurityIcon, SubscriptionIcon, UsersIcon } from "@/lib/svg";
 import { useRouter } from "next/navigation";
 // Sample data for the sidebar menu
 const data = {
@@ -60,7 +60,7 @@ const data = {
     {
       title: "FAQs",
       url: "/admin/faqs",
-      icon: BellNotifactionIcon,
+      icon: FAQIcon,
     },
     
   ],
