@@ -134,6 +134,7 @@ export const getSingleUser = async (route: string,params: any = {}) => {
     const axiosInstance = await getAxiosInstance();
     return axiosInstance.get(route,{ params });
 };
+
 // Update a user by ID
 export const updateUser = async (route: string, userData: any) => {
   const axiosInstance = await getAxiosInstance();
@@ -143,4 +144,22 @@ export const updateUser = async (route: string, userData: any) => {
 export const deleteUser = async (route: string) => {
   const axiosInstance = await getAxiosInstance();
   return axiosInstance.delete(route);
+};
+
+
+// Get all blocked users
+export const getBlockedUsers = async (route: string) => {
+    const axiosInstance = await getAxiosInstance();
+    return axiosInstance.get(route);
+  };
+  
+  // Get single user by ID
+  export const getUserById = async (route: string) => {
+    const axiosInstance = await getAxiosInstance();
+    return axiosInstance.get(route);
+  };
+
+  export const getUserList = async (params: any = {}) => {
+    const axiosInstance = await getAxiosInstance();
+    return axiosInstance.get('/admin/user-lists', { params });
 };
