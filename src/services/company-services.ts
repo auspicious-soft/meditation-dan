@@ -53,3 +53,7 @@ export const buyPlan = async (route: string ,payload: any ) => {
     const axiosInstance = await getCompanyAxiosInstance()
     return axiosInstance.post(route,payload)
 }
+export const cancelSubscription = async (route: string  ) => {
+    const axiosInstance = await getCompanyAxiosInstance()
+    return axiosInstance.post(route)
+}

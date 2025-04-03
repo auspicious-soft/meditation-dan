@@ -69,7 +69,7 @@ export const signupAction = async (payload: any) => {
     const user = res?.data?.data?.user;
     console.log('4. Extracted user object:', user); 
 
-    const userName = user?.name; 
+    const userName = user?.firstName ? user.firstName + " " + user.lastName : user.companyName; 
     console.log('5. userName set to:', userName); 
 
     if (res && res?.data?.success) {
@@ -86,7 +86,7 @@ export const signupAction = async (payload: any) => {
 
       await signIn("credentials", {
         email: user.email,
-        // fullName: userName, 
+        fullName: userName, 
         _id: user._id,
         role: user?.role,
         profilePic: user?.image,
@@ -114,7 +114,8 @@ export const loginAction = async (payload: any) => {
   try {
     const res: any = await loginService(payload);
     const user = res?.data?.data?.user;
-    const userName =  user.firstName + " " + user.lastName;
+    const userName = user?.firstName ? user.firstName + " " + user.lastName : user.companyName; 
+    console.log('userName: ', userName);
     if (res && res?.data?.success) {
       await signIn("credentials", {
         email: user.email, 
