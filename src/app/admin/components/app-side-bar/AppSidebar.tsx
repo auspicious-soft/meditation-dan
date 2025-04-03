@@ -19,6 +19,11 @@ const data = {
       icon: CompassIcon 
     },
     {
+      title: "Company Requests",
+      url: "/admin/requests",
+      icon: BellNotifactionIcon,
+    },
+    {
       title: "Users",
       url: "#",
       icon: UsersIcon,
@@ -52,11 +57,7 @@ const data = {
       url: "/admin/analytics",
       icon: SubscriptionIcon,
     },
-    {
-      title: "Company Requests",
-      url: "/admin/requests",
-      icon: BellNotifactionIcon,
-    },
+    
     {
       title: "FAQs",
       url: "/admin/faqs",
