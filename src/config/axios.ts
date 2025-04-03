@@ -12,6 +12,7 @@ export const axiosInstance = axios.create({
 const createAuthInstance = async () => {
     try {
         const token = await getTokenCustom();
+        console.log('token: ', token);
         return axios.create({
             baseURL: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`,
             headers: {
@@ -28,6 +29,7 @@ const createAuthInstance = async () => {
 const createCompanyInstance = async () => {
     try {
         const token = await getTokenCustom();
+        console.log('token: ', token);
         return axios.create({
             baseURL: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`,
             headers: {
