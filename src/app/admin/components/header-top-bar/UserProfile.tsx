@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -7,8 +7,16 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem,
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { signOut } from "next-auth/react";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 
 const UserProfile = () => {
+    const { data: session } = useSession();
+       const userName =session?.user?.fullName;
+        useEffect(() => {
+          if(session?.user?.fullName === null || session?.user?.fullName === undefined || session?.user?.fullName === ""){
+           window.location.reload()
+          }
+        }, [session]);
  return (
   <DropdownMenu>
    <DropdownMenuTrigger asChild>
@@ -27,8 +35,8 @@ const UserProfile = () => {
        <AvatarFallback>SS</AvatarFallback>
       </Avatar>
       <div className="ml-2">
-       <p className="text-sm">Stephanie Sharkey</p>
-       <p className="text-[12px]">steph56@gmail.com</p>
+       <p className="text-sm">{userName}</p>
+       <p className="text-[12px]">{session?.user?.email}</p>
       </div>
      </div>
      <DropdownMenuItem className="p-0 !bg-transparent">
@@ -46,7 +54,7 @@ const UserProfile = () => {
       <AlertDialogHeader className="gap-4">
        <AlertDialogTitle className="flex justify-center text-white text-2xl">Logout</AlertDialogTitle>
        <AlertDialogDescription className="opacity-80 text-center justify-start text-white text-base">
-        Hi Alesva Rawles, <br></br>Are you sure you want to log out from Admin Panel?
+        {userName} <br></br>Are you sure you want to log out from Admin Panel?
        </AlertDialogDescription>
       </AlertDialogHeader>
       <AlertDialogFooter className="!justify-center">
