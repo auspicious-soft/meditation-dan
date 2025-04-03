@@ -144,8 +144,7 @@ export const logoutAction = async () => {
 
 export const getTokenCustom = async () => {
   const cookiesOfNextAuth = await cookies();
-  console.log('cookiesOfNextAuth: ', cookiesOfNextAuth);
-  console.log('process.env.JWT_SALT: ', process.env.JWT_SALT);
+ 
   return cookiesOfNextAuth?.get(process.env.JWT_SALT as string)?.value;
 };
 
