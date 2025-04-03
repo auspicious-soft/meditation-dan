@@ -476,7 +476,7 @@ const AddCollectionForm = () => {
 
       <Label className="text-gray-300 mb-3 block">Upload Collection Image</Label>
       <div className="flex flex-wrap items-end gap-4 mb-2">
-        <Card className="w-64 min-h-44 flex items-center justify-center bg-[#0B132B] border-none rounded-lg relative">
+        <Card className="w-64 min-h-40 flex items-center py-0 justify-center bg-[#0B132B] border-none rounded-lg relative">
           {imagePreview ? (
             <>
               <Image
@@ -484,12 +484,12 @@ const AddCollectionForm = () => {
                 alt="Preview"
                 width={300}
                 height={300}
-                className="rounded-lg object-contain"
+                className=" object-cover"
               />
               <Button
                 variant="ghost"
                 size="icon"
-                className="absolute top-0 right-0 hover:bg-[#373f57] text-zinc-500"
+                className="absolute top-0 right-0 hover:bg-[#373f57] hover:cursor-pointer text-zinc-500"
                 onClick={handleRemoveImage}
               >
                 <Trash2 size={16} className="text-white" />
