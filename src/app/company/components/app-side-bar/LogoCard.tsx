@@ -5,7 +5,7 @@ import Image from 'next/image';
 const LogoCard = () => {
     return (
         <div className="flex justify-between items-center gap-2">
-            <Link href="/">
+            <Link href="/company/dashboard">
                <Image
                          src="/images/logo.svg"
                          alt="Logo"

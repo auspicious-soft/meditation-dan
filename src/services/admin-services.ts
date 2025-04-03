@@ -156,7 +156,10 @@ export const deleteUser = async (route: string) => {
   const axiosInstance = await getAxiosInstance();
   return axiosInstance.delete(route);
 };
-
+export const updateCompanyDetails = async (route: string, companyData: any) => {
+    const axiosInstance = await getAxiosInstance();
+    return axiosInstance.put(route, companyData);
+}
 
 // Get all blocked users
 export const getBlockedUsers = async (route: string) => {

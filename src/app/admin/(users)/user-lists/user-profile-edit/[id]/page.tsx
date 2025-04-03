@@ -24,7 +24,7 @@ interface UserData {
   email: string;
   dob: string;
   companyName: string;
-  meditationListen?: string;
+  totalMeditationListen?: number;
 }
 
 // Skeleton Components
@@ -56,6 +56,7 @@ const Page = () => {
     revalidateOnFocus: false,
     refreshInterval: 0,
   });
+  console.log('data:', data);
 
   const [formData, setFormData] = useState<UserData>({
     firstName: "",
@@ -64,7 +65,7 @@ const Page = () => {
     email: "",
     dob: "",
     companyName: "",
-    meditationListen: "",
+    totalMeditationListen: 0,
   });
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -78,6 +79,8 @@ const Page = () => {
   }, [data]);
 
   const handleChange = (field: keyof UserData, value: string) => {
+    // Prevent updating totalMeditationListen
+    if (field === "totalMeditationListen") return;
     setFormData((prevState) => ({
       ...prevState,
       [field]: value,
@@ -86,8 +89,10 @@ const Page = () => {
 
   const handleSave = async () => {
     try {
-      await updateUser(`/admin/user/update/${id}`, formData);
-      console.log("User updated successfully:", formData);
+      // Remove totalMeditationListen from the payload to prevent updating it
+      const { totalMeditationListen, ...updateData } = formData;
+      await updateUser(`/admin/user/update/${id}`, updateData);
+      console.log("User updated successfully:", updateData);
       mutate("/admin/get-all-users");
       toast.success("User updated successfully!");
       setTimeout(() => {
@@ -95,7 +100,7 @@ const Page = () => {
       }, 1000);
     } catch (err) {
       console.error("Error updating user:", err);
-      toast.success("Failed to update user");
+      toast.error("Failed to update user"); // Changed to toast.error for consistency
     }
   };
 
@@ -111,6 +116,7 @@ const Page = () => {
       }, 1000);
     } catch (err) {
       console.error("Error deleting user:", err);
+      toast.error("Failed to delete user"); // Added error toast
     }
   };
 
@@ -121,7 +127,7 @@ const Page = () => {
     { label: "Email Address", field: "email" },
     { label: "Birthday", field: "dob" },
     { label: "Company Name", field: "companyName" },
-    { label: "Total Meditation Listened To", field: "meditationListen" },
+    { label: "Total Meditation Listened To", field: "totalMeditationListen" },
   ];
 
   if (error) return <div className="text-white">Error loading user data: {error.message}</div>;
@@ -159,10 +165,11 @@ const Page = () => {
                   </Label>
                   <Input
                     id={field}
-                    type="text"
+                    type={field === "dob" ? "date" : "text"}
                     value={formData[field as keyof UserData] || ""}
                     onChange={(e) => handleChange(field as keyof UserData, e.target.value)}
-                    className="bg-[#0f172a] h-12 border-none"
+                    className="bg-[#0f172a] h-12 border-none text-white"
+                    disabled={field === "totalMeditationListen"} // Disable totalMeditationListen field
                   />
                 </div>
               ))}
