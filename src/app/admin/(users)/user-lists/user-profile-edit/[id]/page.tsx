@@ -16,7 +16,6 @@ import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
 import useSWR, { mutate } from "swr";
 
-
 // Define the UserData type for form data
 interface UserData {
   firstName: string;
@@ -28,19 +27,36 @@ interface UserData {
   meditationListen?: string;
 }
 
+// Skeleton Components
+const SkeletonHeader = () => (
+  <div className="space-y-2">
+    <div className="h-6 w-48 bg-gray-600 rounded animate-pulse"></div>
+    <div className="h-4 w-64 bg-gray-600 rounded animate-pulse"></div>
+  </div>
+);
+
+const SkeletonField = () => (
+  <div className="space-y-2">
+    <div className="h-4 w-32 bg-gray-600 rounded animate-pulse"></div>
+    <div className="h-12 w-full bg-gray-600 rounded animate-pulse"></div>
+  </div>
+);
+
+const SkeletonButton = () => (
+  <div className="h-11 w-48 bg-gray-600 rounded animate-pulse"></div>
+);
+
 // Fetcher function to get single user details by ID
 const fetcher = (url: string) => getSingleUser(url);
 
 const Page = () => {
-  const { id } = useParams(); // Get the user ID from URL params
+  const { id } = useParams();
 
-  // Fetch user data using SWR
   const { data, error, isLoading } = useSWR(`/admin/user/${id}`, fetcher, {
     revalidateOnFocus: false,
     refreshInterval: 0,
   });
 
-  // Initialize formData with empty values until data is fetched
   const [formData, setFormData] = useState<UserData>({
     firstName: "",
     lastName: "",
@@ -56,13 +72,10 @@ const Page = () => {
     if (data?.data?.data) {
       setFormData({
         ...data.data.data,
-        dob: data.data.data.dob.split("T")[0], // Extract only the date part
+        dob: data.data.data.dob.split("T")[0],
       });
     }
   }, [data]);
-
-  if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error loading user data: {error.message}</div>;
 
   const handleChange = (field: keyof UserData, value: string) => {
     setFormData((prevState) => ({
@@ -71,23 +84,20 @@ const Page = () => {
     }));
   };
 
-
-
   const handleSave = async () => {
     try {
       await updateUser(`/admin/user/update/${id}`, formData);
       console.log("User updated successfully:", formData);
       mutate("/admin/get-all-users");
-      toast.success( "User updated successfully!" );
+      toast.success("User updated successfully!");
       setTimeout(() => {
         window.location.href = "/admin/user-lists";
       }, 1000);
     } catch (err) {
       console.error("Error updating user:", err);
-      toast.success( "Failed to update user");
+      toast.success("Failed to update user");
     }
   };
-
 
   const handleDeleteAccount = async () => {
     try {
@@ -95,10 +105,10 @@ const Page = () => {
       console.log("User deleted successfully");
       setIsDialogOpen(false);
       mutate("/admin/get-all-users");
-      toast.success( "User deleted successfully!" );
+      toast.success("User deleted successfully!");
       setTimeout(() => {
-      window.location.href = "/admin/user-lists"
-    }, 1000);
+        window.location.href = "/admin/user-lists";
+      }, 1000);
     } catch (err) {
       console.error("Error deleting user:", err);
     }
@@ -114,49 +124,68 @@ const Page = () => {
     { label: "Total Meditation Listened To", field: "meditationListen" },
   ];
 
+  if (error) return <div className="text-white">Error loading user data: {error.message}</div>;
+
   return (
     <div className="grid grid-cols-12 gap-4 h-screen w-full">
       <div className="col-span-12 space-y-6 bg-[#1b2236] rounded-[12px] md:rounded-[20px] py-4 px-4 md:py-8 md:px-9">
-        <div>
-          <h2 className="text-white text-xl font-medium">
-            {formData.firstName} {formData.lastName}
-          </h2>
-          <p className="opacity-80">{formData.email}</p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {fields.map(({ label, field }) => (
-            <div className="space-y-2" key={field}>
-              <Label htmlFor={field} className="text-white opacity-80 text-base font-normal">
-                {label}
-              </Label>
-              <Input
-                id={field}
-                type="text"
-                value={formData[field as keyof UserData] || ""}
-                onChange={(e) => handleChange(field as keyof UserData, e.target.value)}
-                className="bg-[#0f172a] h-12 border-none"
-              />
+        {isLoading ? (
+          <>
+            <SkeletonHeader />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {Array(7).fill(0).map((_, index) => (
+                <SkeletonField key={index} />
+              ))}
             </div>
-          ))}
-        </div>
+            <div className="flex flex-wrap gap-4 mt-12">
+              <SkeletonButton />
+              <SkeletonButton />
+            </div>
+          </>
+        ) : (
+          <>
+            <div>
+              <h2 className="text-white text-xl font-medium">
+                {formData.firstName} {formData.lastName}
+              </h2>
+              <p className="opacity-80">{formData.email}</p>
+            </div>
 
-        <div className="flex flex-wrap gap-4 mt-12">
-          <Button
-            variant="destructive"
-            className="bg-[#FF4747] w-48 h-11 hover:bg-[#FF4747] hover:cursor-pointer"
-            onClick={() => setIsDialogOpen(true)}
-          >
-            Delete Account
-          </Button>
-          <Button
-            variant="default"
-            className="bg-[#1A3F70] w-28 h-11 hover:bg-[#1A3F70] hover:cursor-pointer"
-            onClick={handleSave}
-          >
-            Save
-          </Button>
-        </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {fields.map(({ label, field }) => (
+                <div className="space-y-2" key={field}>
+                  <Label htmlFor={field} className="text-white opacity-80 text-base font-normal">
+                    {label}
+                  </Label>
+                  <Input
+                    id={field}
+                    type="text"
+                    value={formData[field as keyof UserData] || ""}
+                    onChange={(e) => handleChange(field as keyof UserData, e.target.value)}
+                    className="bg-[#0f172a] h-12 border-none"
+                  />
+                </div>
+              ))}
+            </div>
+
+            <div className="flex flex-wrap gap-4 mt-12">
+              <Button
+                variant="destructive"
+                className="bg-[#FF4747] w-48 h-11 hover:bg-[#FF4747] hover:cursor-pointer"
+                onClick={() => setIsDialogOpen(true)}
+              >
+                Delete Account
+              </Button>
+              <Button
+                variant="default"
+                className="bg-[#1A3F70] w-28 h-11 hover:bg-[#1A3F70] hover:cursor-pointer"
+                onClick={handleSave}
+              >
+                Save
+              </Button>
+            </div>
+          </>
+        )}
 
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogContent className="bg-[#1b2236] border-[#1F2937] w-[450px] p-6 flex flex-col items-center text-white rounded-lg">
@@ -190,5 +219,3 @@ const Page = () => {
 };
 
 export default Page;
-
-
