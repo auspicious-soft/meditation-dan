@@ -12,6 +12,18 @@ export const sendOtpService = async (otp: any) => await axiosInstance.post(`/ver
 export const verifySignupOtpService = async (otp: any) => await axiosInstance.post(`/company/verify-email`, otp)
 export const resetUserPassword = async (payload: any) => await axiosInstance.patch(`/new-password-otp-verified`, payload)
 
+export const getAdminDetails = async(route:string,params:any={})=>{
+    const axiosInstance = await getAxiosInstance()
+    return axiosInstance.get(route,{ params })
+}
+export const updateAdminDetails = async(route:string,payload:any)=>{
+    const axiosInstance = await getAxiosInstance()
+    return axiosInstance.put(route,payload)
+}
+export const updateAdminProfilePic = async(route:string,payload:any)=>{
+    const axiosInstance = await getAxiosInstance()
+    return axiosInstance.put(route,payload)
+}
 export const uploadAudioStats = async (route: string , payload: any) => {
     const axiosInstance = await getAxiosInstance()
     return axiosInstance.post(route, payload)

@@ -211,6 +211,22 @@ export const generateSignedUrlForCollectionImage = async (bestFor:string,collect
     throw error;
   }
 };
+export const generateSignedUrlForAdminProfile = async (bestFor:string,collectionName:string, fileName: string, fileType: string) => {
+  const uploadParams = {
+    Bucket: process.env.AWS_BUCKET_NAME,
+    Key: `${bestFor}/${collectionName}/image/${fileName}`,
+    ContentType: fileType,
+    acl: "public-read",
+  };
+  try {
+    const command = new PutObjectCommand(uploadParams);
+    const signedUrl = await getSignedUrl(await createS3Client(), command);
+    return { signedUrl, key: uploadParams.Key };
+  } catch (error) {
+    console.error("Error generating signed URL:", error);
+    throw error;
+  }
+};
 export const getImageUrl = async (imageKey: string) => {
   const params = {
       Bucket: process.env.AWS_BUCKET_NAME,
