@@ -1,6 +1,9 @@
 // import { axiosInstance } from "@/config/axios";
 
 import { axiosInstance, getAxiosInstance } from "@/config/axios"
+interface BlockCompanyPayload {
+    isBlocked: boolean;
+  }
 
 export const loginService = async (payload: any) => await axiosInstance.post(`/login`, { email: payload.email, password: payload.password });
 export const signupService = async (payload: any) => await axiosInstance.post(`/company/signup`, payload);
@@ -41,6 +44,14 @@ export const addNewCompanyStats = async (route: string,payload: any ) => {
     const axiosInstance = await getAxiosInstance()
     return axiosInstance.post(route,payload)
 }
+export const deleteCompany = async (route: string,params: any = {} ) => {
+    const axiosInstance = await getAxiosInstance()
+    return axiosInstance.delete(route,{params})
+}
+export const toggleBlockCompany = async (route: string, data: BlockCompanyPayload) => {
+    const axiosInstance = await getAxiosInstance();
+    return axiosInstance.put(route, data);
+  };
 export const getAllCollectionStats = async (route: string,params: any = {} ) => {
     const axiosInstance = await getAxiosInstance()
     return axiosInstance.get(route,{ params })
@@ -134,6 +145,7 @@ export const getSingleUser = async (route: string,params: any = {}) => {
     const axiosInstance = await getAxiosInstance();
     return axiosInstance.get(route,{ params });
 };
+
 // Update a user by ID
 export const updateUser = async (route: string, userData: any) => {
   const axiosInstance = await getAxiosInstance();
@@ -144,3 +156,24 @@ export const deleteUser = async (route: string) => {
   const axiosInstance = await getAxiosInstance();
   return axiosInstance.delete(route);
 };
+
+
+// Get all blocked users
+export const getBlockedUsers = async (route: string) => {
+    const axiosInstance = await getAxiosInstance();
+    return axiosInstance.get(route);
+  };
+  
+  // Get single user by ID
+  export const getUserById = async (route: string) => {
+    const axiosInstance = await getAxiosInstance();
+    return axiosInstance.get(route);
+  };
+
+  export const getUserList = async (params: any = {}) => {
+    const axiosInstance = await getAxiosInstance();
+    return axiosInstance.get('/admin/user-lists', { params });
+};export const getAdminDashboardStats = async (route: string,params:any = {}) => {
+  const axiosInstance = await getAxiosInstance();
+  return axiosInstance.get(route,{params});
+};      

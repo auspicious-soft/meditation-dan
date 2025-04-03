@@ -45,6 +45,8 @@ export default function Home() {
         } else {
           toast.error("An unexpected error occurred.");
         }
+      }finally{
+        setOtpValue(""); // Clear OTP value after successful submission
       }
     });
   };

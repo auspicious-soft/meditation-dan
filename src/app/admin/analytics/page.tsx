@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "sonner";
 import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
-import "react-loading-skeleton/dist/skeleton.css"; // Import CSS for skeleton
+import "react-loading-skeleton/dist/skeleton.css";
 import { getAnalytics } from "@/services/admin-services";
 
 // Define interfaces based on backend response
@@ -25,7 +25,7 @@ interface Subscription {
 }
 
 interface Payment {
-  Id: string;
+  id: string;
   CompanyName: string;
   Plan: string;
   Transaction: string;
@@ -48,11 +48,11 @@ const Page = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
 
-  // Fetch data from the backend on component mount
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await getAnalytics("/admin/analysis");
+        console.log("response:", response);
         if (response.data.success) {
           setAnalyticsData(response.data.data);
         } else {
@@ -66,12 +66,10 @@ const Page = () => {
     fetchData();
   }, []);
 
-  // Skeleton loader while data is being fetched
   if (!analyticsData) {
     return (
       <SkeletonTheme baseColor="#0B132B" highlightColor="#1B2236" borderRadius="0.5rem">
         <div className="py-4">
-          {/* Stats Skeleton */}
           <div className="mb-8 text-white text-2xl font-bold">
             Track and measure user engagement and app performance.
           </div>
@@ -83,10 +81,7 @@ const Page = () => {
               </div>
             ))}
           </div>
-
-          {/* Tables Skeleton */}
           <div className="grid grid-cols-12 gap-4 mt-6">
-            {/* Recent New Users Skeleton */}
             <div className="col-span-12 lg:col-span-6 w-full">
               <div className="space-y-6 bg-[#1b2236] rounded-[12px] md:rounded-[20px] py-4 px-4 md:py-8 md:px-9">
                 <Skeleton height={28} width={200} />
@@ -112,10 +107,7 @@ const Page = () => {
                 </div>
               </div>
             </div>
-
-            {/* Right Side Skeleton */}
             <div className="col-span-12 lg:col-span-6 space-y-4">
-              {/* Subscription Expire Today Skeleton */}
               <div className="col-span-full h-auto w-full">
                 <div className="space-y-6 bg-[#1b2236] rounded-[12px] md:rounded-[20px] py-4 px-4 md:py-8 md:px-9">
                   <Skeleton height={28} width={200} />
@@ -141,8 +133,6 @@ const Page = () => {
                   </Table>
                 </div>
               </div>
-
-              {/* Recent Payments Skeleton */}
               <div className="col-span-full">
                 <div className="space-y-6 bg-[#1b2236] rounded-[12px] md:rounded-[20px] py-4 px-4 md:py-8 md:px-9">
                   <Skeleton height={28} width={200} />
@@ -175,7 +165,6 @@ const Page = () => {
     );
   }
 
-  // Map analytics data to stats for the top section
   const stats = [
     { label: "Total Users", value: analyticsData.totalUser.toString() },
     { label: "Active Users", value: analyticsData.activeUsers.toString() },
@@ -183,14 +172,11 @@ const Page = () => {
     { label: "Audio Plays", value: analyticsData.totalAudioPlays.toString() },
   ];
 
-  // Pagination for Recent New Users table
   const indexOfLastInvoice = currentPage * PAGE_SIZE;
   const indexOfFirstInvoice = indexOfLastInvoice - PAGE_SIZE;
   const recentUsers = analyticsData.newUser.slice(indexOfFirstInvoice, indexOfLastInvoice);
-
-  // No pagination for Subscription Expire Today and Recent Payments (show all items)
   const subscriptionExpiringToday = analyticsData.subscriptionExpireToday;
-  const currentRecent = analyticsData.paymentToday;
+  const paymentToday = analyticsData.paymentToday;
 
   const handleViewClick = () => {
     router.push(`/company/users/details`);
@@ -198,7 +184,6 @@ const Page = () => {
 
   return (
     <SkeletonTheme baseColor="#0B132B" highlightColor="#1B2236" borderRadius="0.5rem">
-      {/* Top Section: Stats */}
       <div className="py-4">
         <div className="mb-8 text-white text-2xl font-bold">
           Track and measure user engagement and app performance.
@@ -214,7 +199,6 @@ const Page = () => {
       </div>
 
       <div className="grid grid-cols-12 gap-4">
-        {/* Bottom Left: Recent New Users */}
         <div className="col-span-12 lg:col-span-6 w-full">
           <div className="col-span-12 space-y-6 bg-[#1b2236] rounded-[12px] md:rounded-[20px] py-4 px-4 md:py-8 md:px-9">
             <h2 className="text-white text-[20px] md:text-2xl font-bold mb-3">Recent New Users</h2>
@@ -241,9 +225,7 @@ const Page = () => {
           </div>
         </div>
 
-        {/* Bottom Right */}
         <div className="col-span-12 lg:col-span-6 space-y-4">
-          {/* Subscription Expire Today */}
           <div className="col-span-full h-auto w-full">
             <div className="space-y-6 bg-[#1b2236] rounded-[12px] md:rounded-[20px] py-4 px-4 md:py-8 md:px-9">
               <h2 className="text-white text-[20px] md:text-2xl font-bold mb-3">Subscription Expire Today</h2>
@@ -259,7 +241,7 @@ const Page = () => {
                   </TableHeader>
                   <TableBody>
                     {subscriptionExpiringToday.length === 0 ? (
-                      <TableRow>
+                      <TableRow key="no-subscriptions">
                         <TableCell colSpan={4} className="text-center py-4 text-white">
                           No subscriptions expiring today
                         </TableCell>
@@ -287,7 +269,6 @@ const Page = () => {
             </div>
           </div>
 
-          {/* Recent Payments */}
           <div className="col-span-full">
             <div className="space-y-6 bg-[#1b2236] rounded-[12px] md:rounded-[20px] py-4 px-4 md:py-8 md:px-9">
               <h2 className="text-white text-[20px] md:text-2xl font-bold mb-3">Recent Payments</h2>
@@ -302,16 +283,16 @@ const Page = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {currentRecent.length === 0 ? (
-                      <TableRow>
+                    {paymentToday.length === 0 ? (
+                      <TableRow key="no-payments">
                         <TableCell colSpan={4} className="text-center py-4 text-white">
                           No recent payments
                         </TableCell>
                       </TableRow>
                     ) : (
-                      currentRecent.map((payment) => (
-                        <TableRow key={payment.Id} className="border-0 text-sm font-normal hover:bg-transparent">
-                          <TableCell className="py-4">{payment.Id}</TableCell>
+                      paymentToday.map((payment) => (
+                        <TableRow key={payment.id} className="border-0 text-sm font-normal hover:bg-transparent">
+                          <TableCell className="py-4">{payment.id}</TableCell>
                           <TableCell className="py-4">{payment.CompanyName}</TableCell>
                           <TableCell className="py-4">{payment.Plan}</TableCell>
                           <TableCell className="py-4">{payment.Transaction}</TableCell>
