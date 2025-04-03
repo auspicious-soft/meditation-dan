@@ -8,30 +8,41 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { getSingleCompanydetailStats, deleteCompany, toggleBlockCompany } from "@/services/admin-services";
+import { getSingleCompanydetailStats, deleteCompany, updateCompanyDetails } from "@/services/admin-services";
 import { useParams } from "next/navigation";
 import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
 import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 
 // Interface based on the actual API response
 interface CompanyData {
   _id: string;
   companyName: string;
   email: string;
-  firstName: string | null;
-  lastName: string | null;
-  gender: string;
-  dob: string | null;
+  identifier: string;
   createdAt: string;
+  updatedAt: string;
   isBlocked: boolean;
   isAccountActive: boolean;
+  emailVerified: boolean;
+  isVerifiedByAdmin: string;
+  role: string;
+  stripeCustomerId: string;
+  subscriptionStatus: string;
+  planType: string | null;
+  planInterval: string | null;
+  subscriptionId: string | null;
+  subscriptionStartDate: string | null;
+  subscriptionExpiryDate: string | null;
 }
 
 interface ApiResponse {
   success: boolean;
   data: CompanyData;
+  users:number;
   statusCode: number;
 }
 
@@ -39,6 +50,12 @@ const Page = () => {
   const { id } = useParams();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [userData, setUserData] = useState<CompanyData | null>(null);
+  const [formData, setFormData] = useState({
+    companyName: "",
+    email: "",
+    password: "", // Assuming you might want to allow password updates
+    numberOfUsers:0,
+  });
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -48,10 +65,18 @@ const Page = () => {
       try {
         setLoading(true);
         const response = await getSingleCompanydetailStats(`/admin/get-company-by-id/${id}`);
+        console.log("response:", response);
         const data: ApiResponse = response.data;
 
         if (data.success) {
           setUserData(data.data);
+          // Initialize form data with fetched values
+          setFormData({
+            companyName: data.data.companyName,
+            email: data.data.email,
+            password: "", // Leave empty initially for security
+            numberOfUsers: data.users,
+          });
         } else {
           throw new Error("API request failed");
         }
@@ -67,6 +92,15 @@ const Page = () => {
       fetchCompanyDetails();
     }
   }, [id]);
+
+  // Handle input changes
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [id]: value,
+    }));
+  };
 
   // Handle delete account
   const handleDeleteAccount = async () => {
@@ -87,23 +121,33 @@ const Page = () => {
     }
   };
 
-  // Handle block/unblock
-  const handleUnblock = async () => {
+  // Handle update company details
+  const handleUpdate = async () => {
     if (!userData) return;
     try {
-      const newBlockStatus = !userData.isBlocked;
-      const response = await toggleBlockCompany(`/admin/companies/${id}/block`, {
-        isBlocked: newBlockStatus,
-      });
+      // Assuming there's an updateCompany service function
+      const updatePayload = {
+        companyName: formData.companyName,
+        email: formData.email,
+        ...(formData.password && { password: formData.password }), // Only include password if provided
+      };
+
+      // You'll need to implement this service function
+      const response = await updateCompanyDetails(`/admin/update-company/${id}`, updatePayload);
+      
       if (response.data.success) {
-        toast.success(`Company ${newBlockStatus ? "blocked" : "unblocked"} successfully`);
-        window.location.reload();
+        setUserData({
+          ...userData,
+          companyName: formData.companyName,
+          email: formData.email,
+        });
+        toast.success("Company details updated successfully");
       } else {
-        toast.error(`Failed to ${newBlockStatus ? "block" : "unblock"} company`);
+        toast.error("Failed to update company details");
       }
     } catch (error) {
-      console.error("Error toggling block status:", error);
-      toast.error(`Failed to ${userData.isBlocked ? "unblock" : "block"} company`);
+      console.error("Error updating company:", error);
+      toast.error("Failed to update company details");
     }
   };
 
@@ -135,56 +179,66 @@ const Page = () => {
 
   return (
     <SkeletonTheme baseColor="#0B132B" highlightColor="#1B2236" borderRadius="0.5rem">
-      <div className="text-white py-6 w-full h-screen">
-        <h1 className="text-xl font-medium mb-6">{userData.companyName} Details</h1>
+      <div className="col-span-12 space-y-6 bg-[#1b2236] rounded-[12px] md:rounded-[20px] py-4 px-4 md:py-8 md:px-9">
+        <h1 className="text-xl font-medium mb-6 text-white">Edit Company</h1>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6">
-          <div>
-            <p className="text-sm text-slate-400 mb-1">First Name</p>
-            <p className="text-white">{userData.firstName || "N/A"}</p>
-          </div>
 
-          <div>
-            <p className="text-sm text-slate-400 mb-1">Last Name</p>
-            <p className="text-white">{userData.lastName || "N/A"}</p>
+          <div className="space-y-2">
+            <Label htmlFor="companyName" className="text-white opacity-80 text-base font-normal">
+              Company Name
+            </Label>
+            <Input
+              id="companyName"
+              type="text"
+              value={formData.companyName}
+              onChange={handleInputChange}
+              className="bg-[#0f172a] h-12 border-none text-white"
+            />
           </div>
-
-          <div>
-            <p className="text-sm text-slate-400 mb-1">Gender</p>
-            <p className="text-white">{userData.gender || "N/A"}</p>
-          </div>
-
-          <div>
-            <p className="text-sm text-slate-400 mb-1">Email Address</p>
-            <p className="text-white">{userData.email || "N/A"}</p>
-          </div>
-
-          <div>
-            <p className="text-sm text-slate-400 mb-1">Birthday</p>
-            <p className="text-white">{userData.dob || "N/A"}</p>
-          </div>
-
-          <div>
-            <p className="text-sm text-slate-400 mb-1">Company Name</p>
-            <p className="text-white">{userData.companyName}</p>
-          </div>
-        </div>
+         
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-6">
+  <div className="border border-[#5c5b5b] rounded">
+    <Label htmlFor="email" className="text-white mt-1 opacity-80 px-2 text-base font-normal">
+      Email Address
+    </Label>
+    <span className="h-12 flex items-center px-2 rounded-md text-[#A1A1A1]">
+      {formData.email || "N/A"}
+    </span>
+  </div>
+  <div className="border border-[#5c5b5b] rounded">
+    <Label htmlFor="password" className="text-white  px-2 mt-1 opacity-80 text-base font-normal">
+      Login Password
+    </Label>
+    <span className=" h-12 flex items-center px-2 rounded-md text-[#A1A1A1]">
+      {"*******"}
+    </span>
+  </div>
+  <div className="border border-[#5c5b5b] rounded">
+    <Label htmlFor="numberOfUsers" className="text-white px-2 mt-1 opacity-80 text-base font-normal">
+      Number of users registered
+    </Label>
+    <span className=" h-12 flex items-center px-2 rounded-md text-[#A1A1A1]">
+      {formData.numberOfUsers || "0"}
+    </span>
+  </div>
+</div>
+          
+        
 
         <div className="flex gap-4 mt-12">
+          <Button
+            variant="default"
+            className="bg-[#1A3F70] hover:bg-[#1A3F70] hover:cursor-pointer"
+            onClick={handleUpdate}
+          >
+            Save
+          </Button>
           <Button
             variant="destructive"
             className="bg-[#FF4747] hover:bg-[#FF4747] hover:cursor-pointer"
             onClick={() => setIsDialogOpen(true)}
           >
             Delete Account
-          </Button>
-
-          <Button
-            variant="default"
-            className="bg-[#1A3F70] hover:bg-[#1A3F70] hover:cursor-pointer"
-            onClick={handleUnblock}
-          >
-            {userData.isBlocked ? "Unblock" : "Block"}
           </Button>
         </div>
 

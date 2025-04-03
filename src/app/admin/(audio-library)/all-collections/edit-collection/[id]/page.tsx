@@ -571,7 +571,7 @@ const EditCollectionForm = () => {
 
       <Label className="text-gray-300 mb-3 block">Upload Collection Image</Label>
       <div className="flex flex-wrap items-end gap-4 mb-2">
-        <Card className="w-64 h-44 flex items-center justify-center bg-[#0B132B] border-none rounded-lg relative">
+        <Card className="w-64 min-w-44 flex items-center justify-center py-0 bg-[#0B132B] border-none rounded-lg relative">
           {imagePreview ? (
             <>
               <Image

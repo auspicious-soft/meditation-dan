@@ -15,7 +15,6 @@ import BannerImage from "../components/BannerImage";
 
 export default function SignupPage() {
  const [email, setEmail] = useState("");
- const [name, setName] = useState("");
  const [companyName, setCompanyName] = useState("");
  const [password, setPassword] = useState("");
  const [confirmPassword, setConfirmPassword] = useState("");
@@ -47,7 +46,6 @@ export default function SignupPage() {
 
   // Console log all user details
   const userDetails = {
-  name,
   email,
   companyName,
   password,
@@ -63,7 +61,7 @@ export default function SignupPage() {
    toast.error("Passwords do not match.");
    return;
   }
-  if (!name || !password ) {
+  if ( !password ) {
    toast.error("Please fill in all required fields.");
    return;
   }
@@ -105,8 +103,7 @@ export default function SignupPage() {
        <form onSubmit={handleSubmit}>
         <div className="space-y-6">
 
-  <Input id="name" type="text" placeholder=" Name" value={name} onChange={(e) => setName(e.target.value)} className="bg-transparent rounded-[10px] border !border-[#d9d9d9] text-lg focus:!border-blue-500 focus:ring-0 leading-[27px] h-[50px]" required />
-
+ 
 
   <Input id="email" type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} className="bg-transparent rounded-[10px] border !border-[#d9d9d9] text-lg focus:!border-blue-500 focus:ring-0 leading-[27px] h-[50px]" required />
 
