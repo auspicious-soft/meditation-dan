@@ -39,7 +39,7 @@ export const createUserAccount = async (route: string ,payload: any) => {
 //subscription
 export const getAllSubcriptionPlans = async (route: string ,params: any = {}) => {
     const axiosInstance = await getCompanyAxiosInstance()
-    return axiosInstance.get(route)
+    return axiosInstance.get(route,params)
 }
 export const getAllTransactionsPlans = async (route: string ,params: any = {}) => {
     const axiosInstance = await getCompanyAxiosInstance()

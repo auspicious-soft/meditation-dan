@@ -76,8 +76,16 @@ export default function SignupPage() {
     console.log('response: ', response);
 
     if (response?.success) {
-     toast.success("Account created successfully");
-     router.push("/verifyotp");
+     toast.success(response.message);
+     if(response?.data?.userData?.isVerifiedByAdmin ==="pending"){
+      router.push("/request-pending");
+     }else if(response?.data?.userData?.isVerifiedByAdmin ==="rejected"){
+      router.push("/request-rejected");
+     }
+     else{
+        router.push("/");
+     }
+//      router.push("/verifyotp");
     } else {
      toast.error(response?.message || "Signup failed. Please try again.");
     }

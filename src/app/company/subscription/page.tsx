@@ -131,8 +131,9 @@ const SubscriptionModal = ({ isOpen, onClose, onContinue, planType, price }: any
 const Page = () => {
   const session = useSession();
   const { data: subscriptionData, error, isLoading, mutate } = useSWR(
-    "/company/products",
-    getAllSubcriptionPlans
+    "/company/products?status=active",
+    getAllSubcriptionPlans,
+  { revalidateOnFocus: false, refreshInterval: 0 }
   );
   const { data: transactionData, error: transactionError, isLoading: transactionLoading } = useSWR(
     "/company/transactions",
@@ -162,7 +163,7 @@ const Page = () => {
           planType: selectedPlanDetails.planType,
           email: session.data?.user?.email,
           name: session.data?.user?.fullName,
-          interval: "month",
+          interval: selectedPlanDetails.planType ==="yearly" ? "year" :selectedPlanDetails.planType ==="monthly" ? "month":"lifetime",
           price: Number(selectedPlanDetails.price) * numberOfUsers,
           numberOfUsers,
         };
@@ -227,7 +228,7 @@ const Page = () => {
               const expiryDate = isCurrentPlan
                 ? new Date(product.currentPlan.expiryDate).toLocaleDateString()
                 : null;
-              const planType = product.name.split(" ")[0].toLowerCase() + "Plan";
+              const planType = product.name.split(" ")[0].toLowerCase();
               const isCardLoading = isPending && selectedPlanId === product.id;
               const isCardCanceling = isCanceling === product.currentPlan?.subscriptionId;
 

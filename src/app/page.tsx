@@ -54,17 +54,25 @@ export default function LoginPage() {
       try {
         const response = await loginAction({ email, password });
         console.log('response: ', response);
+        
         if (response?.success) {
           const userRole = response?.data?.user?.role;
           if (userRole === "user") {
             toast.error("You are not authorized to access this page.");
             return;
-          }
-          toast.success("Logged in successfully");
-          // Redirect based on role
+          } 
+         
+              toast.success("Logged in successfully");
           router.push(userRole === "company" ? "/company/dashboard" : "/admin/dashboard");
         } else {
-          toast.error(response?.message || "Invalid email or password.");
+          if(response?.message ==="Not verified by Admin yet"){
+            router.push("/request-pending");
+          }else if(response?.message ==="Request rejected by Admin"){
+            router.push("/request-rejected");
+          }else{
+
+            toast.error(response?.message || "Invalid email or password.");
+          }
         }
       } catch (error) {
         console.error("Login action error:", error);
