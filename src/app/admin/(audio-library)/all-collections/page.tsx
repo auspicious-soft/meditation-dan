@@ -196,7 +196,7 @@ const AllCollection: React.FC = () => {
       setCurrentPage(newPage);
     }
   };
-
+ 
   if (error) {
     return <div className="text-red-500">{error}</div>;
   }
