@@ -111,7 +111,7 @@ export default function LoginPage() {
                       autoComplete="current-password"
                     />
 
-                    <button type="button" className="absolute right-4 top-5 text-gray-400" onClick={togglePasswordVisibility} aria-label="Toggle password visibility">
+                    <button type="button" className="absolute right-4 top-5 text-gray-400 hover:cursor-pointer" onClick={togglePasswordVisibility} aria-label="Toggle password visibility">
                       {showPassword ? <EyeIcon className="h-5 w-5" /> : <EyeOffIcon className="h-5 w-5" />}
                     </button>
                   </div>

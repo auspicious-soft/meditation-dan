@@ -122,7 +122,7 @@ export default function SignupPage() {
            className="text-[#9a9a9a] bg-transparent rounded-[10px] border !border-[#d9d9d9] text-lg focus:!border-blue-500 focus:ring-0 leading-[27px] h-[50px]"
            required
           />
-          <button type="button" className="text-[#9a9a9a] absolute right-4 top-5" onClick={togglePasswordVisibility} aria-label="Toggle password visibility">
+          <button type="button" className="text-[#9a9a9a] absolute right-4 top-5 hover:cursor-pointer" onClick={togglePasswordVisibility} aria-label="Toggle password visibility">
            {showPassword ? <EyeIcon className="h-5 w-5" /> : <EyeOffIcon className="h-5 w-5" />}
           </button>
   </div>
@@ -137,7 +137,7 @@ export default function SignupPage() {
            className="bg-transparent rounded-[10px] border !border-[#d9d9d9] text-lg focus:!border-blue-500 focus:ring-0 leading-[27px] h-[50px]"
            required
           />
-          <button type="button" className="text-[#9a9a9a] absolute right-4 top-5" onClick={toggleConfirmPasswordVisibility} aria-label="Toggle confirm password visibility">
+          <button type="button" className="text-[#9a9a9a] absolute right-4 top-5 hover:cursor-pointer" onClick={toggleConfirmPasswordVisibility} aria-label="Toggle confirm password visibility">
            {showConfirmPassword ? <EyeIcon className="h-5 w-5" /> : <EyeOffIcon className="h-5 w-5" />}
           </button>
          </div>
