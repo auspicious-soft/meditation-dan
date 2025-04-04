@@ -1,7 +1,5 @@
 import React from "react";
-import SearchBar from "./searchBar";
 import PageTitle from "./PageTitle";
-import NotificationsPanel from "./NotificationCard";
 import UserProfile from "./UserProfile";
 import MobileTrigger from "./MobileTrigger";
 
