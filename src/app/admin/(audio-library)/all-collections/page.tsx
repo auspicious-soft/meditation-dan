@@ -158,7 +158,7 @@ const AllCollection: React.FC = () => {
         setLoading(false);
       }
     };
-
+ 
     fetchCollections();
   }, [currentPage, selectedLevels, selectedBestFor, debouncedSearchQuery]);
 
