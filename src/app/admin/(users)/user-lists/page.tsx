@@ -133,7 +133,7 @@ const Page = () => {
           {!isLoading && (
             <div className="flex justify-end items-center gap-2 mt-4">
               <Button
-                className="bg-[#0B132B]"
+                className="bg-[#0B132B] hover:cursor-pointer"
                 onClick={() => handlePageChange(currentPage - 1)}
                 disabled={currentPage === 1}
               >
@@ -143,7 +143,7 @@ const Page = () => {
                 Page {currentPage} of {totalPages}
               </span>
               <Button
-                className="bg-[#0B132B]"
+                className="bg-[#0B132B] hover:cursor-pointer"
                 onClick={() => handlePageChange(currentPage + 1)}
                 disabled={currentPage === totalPages}
               >

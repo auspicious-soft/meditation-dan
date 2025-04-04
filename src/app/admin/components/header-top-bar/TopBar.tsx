@@ -11,7 +11,6 @@ const TopBar = () => {
       <PageTitle />
       <MobileTrigger />
       <div className="card-bg rounded-lg p-[10px] flex items-center justify-between gap-5"> 
-        <NotificationsPanel />
         <UserProfile />
       </div>
     </div>
