@@ -1,13 +1,14 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import Image from "next/image";
 import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
-import image from "../../../../public/images/pexels.webp";
 import { getAdminDetails, updateAdminDetails, updateAdminProfilePic } from "@/services/admin-services";
-
+import { Upload, Trash2 } from "lucide-react";
+import { generateSignedUrlForAdminProfile, getImageUrlOfS3 } from "@/actions";
+import { Card } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 
 const Page = () => {
   const [formData, setFormData] = useState({
@@ -16,7 +17,9 @@ const Page = () => {
     email: "",
     gender: "",
   });
+  const [adminId, setAdminId] = useState<string>(""); 
   const [profileImage, setProfileImage] = useState<string>("");
+  const [imagePreview, setImagePreview] = useState<string>(""); 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -24,16 +27,23 @@ const Page = () => {
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
-      try { // Replace with your token logic
+      try {
         const response = await getAdminDetails(`/admin`);
-        const adminData = response.data.data; // Adjust based on your API response structure
+        const adminData = response.data.data;
         setFormData({
           firstName: adminData.firstName || "",
           lastName: adminData.lastName || "",
           email: adminData.email || "",
           gender: adminData.gender || "",
         });
-        setProfileImage(adminData.profileImage || ""); // Assuming profileImage is a URL
+        setAdminId(adminData.id || "");
+
+        // Get the full S3 URL for the profile image
+        if (adminData.profilePic) {
+          const s3Url = await getImageUrlOfS3(adminData.profilePic);
+          setProfileImage(adminData.profilePic);
+          setImagePreview(s3Url);
+        }
       } catch (error) {
         console.error("Error fetching admin profile:", error);
         toast.error("Failed to load admin profile");
@@ -56,25 +66,58 @@ const Page = () => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       const imageUrl = URL.createObjectURL(file);
-      setProfileImage(imageUrl);
-      setSelectedFile(file); // Store the file for upload
+      setImagePreview(imageUrl);
+      setSelectedFile(file);
     }
+  };
+
+  const handleRemoveImage = () => {
+    setImagePreview("");
+    setSelectedFile(null);
+    setProfileImage("");
   };
 
   const handleSave = async () => {
     setIsLoading(true);
     try {
-
       // Update profile data
       await updateAdminDetails(`/admin`, formData);
       toast.success("Profile updated successfully");
 
       // Update profile picture if a new image was selected
       if (selectedFile) {
-        const formDataPayload = new FormData();
-        formDataPayload.append("profileImage", selectedFile);
-        await updateAdminProfilePic(`/admin/profile/pic`, formDataPayload);
+        const image = selectedFile;
+        const imageFileName = `${Date.now()}-${image.name}`;
+        const fileType = image.type;
+
+        // Generate signed URL for S3 upload
+        const { signedUrl, key } = await generateSignedUrlForAdminProfile(formData.email, imageFileName, fileType);
+        console.log('key:', key);
+
+        // Upload the image to S3 using the signed URL
+        const imageUploadResponse = await fetch(signedUrl, {
+          method: "PUT",
+          body: image,
+          headers: { "Content-Type": image.type },
+        });
+
+        if (!imageUploadResponse.ok) {
+          throw new Error("Failed to upload image to S3");
+        }
+
+        // Update backend with the new S3 key
+        await updateAdminProfilePic(`/admin/profile/pic`, { profilePic: key });
+        
+        // Update state with the new key
+        setProfileImage(key);
+        
+        // Clear the selected file as it's been uploaded
+        setSelectedFile(null);
+       
         toast.success("Profile picture updated successfully");
+        setTimeout(() =>{
+          window.location.reload();
+        })
       }
     } catch (error) {
       console.error("Error saving profile:", error);
@@ -89,29 +132,47 @@ const Page = () => {
       <div className="space-y-6">
         <div>
           <p className="mb-4 text-zinc-300 text-base SF Pro Display font-normal">Profile Image</p>
-          <div className="flex flex-row flex-wrap items-end gap-3">
-            <Image
-              src={profileImage || image}
-              alt="Profile Image"
-              width={250}
-              height={170}
-            />
-            <label htmlFor="profileImageUpload">
-              <Button
-                variant="outline"
-                className="bg-slate-900 border-[#D7D7D7] h-8 dm-sans text-zinc-300 hover:text-zinc-300 text-sm hover:bg-slate-800"
-                disabled={isLoading}
-              >
-                Change image
-              </Button>
-            </label>
-            <input
-              type="file"
-              id="profileImageUpload"
-              accept="image/*"
-              onChange={handleImageChange}
-              className="hidden"
-            />
+          <div className="flex flex-wrap items-end gap-4 mb-4">
+            <Card className="w-44 h-44 flex items-center justify-center bg-[#0B132B] border-none rounded-lg relative">
+              {imagePreview ? (
+                <>
+                  <Image
+                    src={imagePreview}
+                    alt="Preview"
+                    width={176}
+                    height={176}
+                    className="rounded-lg w-full h-full object-cover"
+                    // Add a key to force React to re-render the image when the URL changes
+                    key={imagePreview}
+                  />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute top-0 hover:bg-[#373f57] right-0 hover:cursor-pointer text-zinc-500"
+                    onClick={handleRemoveImage}
+                    disabled={isLoading}
+                  >
+                    <Trash2 size={16} className="text-white hover:cursor-pointer" />
+                  </Button>
+                </>
+              ) : (
+                <Upload size={32} className="text-gray-400" />
+              )}
+            </Card>
+            <div>
+              <label htmlFor="image-upload">
+                <input
+                  type="file"
+                  className="hidden"
+                  id="image-upload"
+                  accept="image/jpeg,image/png"
+                  onChange={handleImageChange}
+                />
+                <div className="border p-1 px-4 rounded-sm hover:cursor-pointer border-white text-gray-300 cursor-pointer">
+                  {imagePreview ? "Change Image" : "Choose Image"}
+                </div>
+              </label>
+            </div>
           </div>
         </div>
 
@@ -177,7 +238,7 @@ const Page = () => {
 
         <div>
           <Button
-            className="mt-4 bg-[#1A3F70] w-28 h-11 hover:bg-[#1A3F70] dm-sans text-white"
+            className="mt-4 bg-[#1A3F70] w-28 h-11 hover:cursor-pointer hover:bg-[#1A3F70] dm-sans text-white"
             onClick={handleSave}
             disabled={isLoading}
           >

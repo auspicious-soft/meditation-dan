@@ -197,10 +197,10 @@ export const generateSignedUrlForCollectionImage = async (bestFor:string,collect
     throw error;
   }
 };
-export const generateSignedUrlForAdminProfile = async (bestFor:string,collectionName:string, fileName: string, fileType: string) => {
+export const generateSignedUrlForAdminProfile = async (adminId:string, fileName: string, fileType: string) => {
   const uploadParams = {
     Bucket: process.env.AWS_BUCKET_NAME,
-    Key: `${bestFor}/${collectionName}/image/${fileName}`,
+    Key: `${adminId}/image/${fileName}`,
     ContentType: fileType,
     acl: "public-read",
   };

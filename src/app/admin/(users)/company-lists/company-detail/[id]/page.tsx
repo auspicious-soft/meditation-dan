@@ -127,13 +127,11 @@ const Page = () => {
     try {
       // Assuming there's an updateCompany service function
       const updatePayload = {
-        companyName: formData.companyName,
-        email: formData.email,
-        ...(formData.password && { password: formData.password }), // Only include password if provided
+        companyName: formData.companyName
       };
 
       // You'll need to implement this service function
-      const response = await updateCompanyDetails(`/admin/update-company/${id}`, updatePayload);
+      const response = await updateCompanyDetails(`/admin/update/company/name/${id}`, updatePayload);
       
       if (response.data.success) {
         setUserData({
@@ -142,12 +140,20 @@ const Page = () => {
           email: formData.email,
         });
         toast.success("Company details updated successfully");
+        setTimeout(() => {
+          window.location.href = "/admin/company-lists";
+
+        }, 1000);
       } else {
         toast.error("Failed to update company details");
       }
     } catch (error) {
       console.error("Error updating company:", error);
-      toast.error("Failed to update company details");
+      toast.error(
+              error instanceof Error && (error as any)?.response?.data?.message
+                ? (error as any).response.data.message
+                : 'Failed to save item'
+            );
     }
   };
 

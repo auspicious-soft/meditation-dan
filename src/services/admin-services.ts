@@ -22,7 +22,7 @@ export const updateAdminDetails = async(route:string,payload:any)=>{
 }
 export const updateAdminProfilePic = async(route:string,payload:any)=>{
     const axiosInstance = await getAxiosInstance()
-    return axiosInstance.put(route,payload)
+    return axiosInstance.patch(route,payload)
 }
 export const uploadAudioStats = async (route: string , payload: any) => {
     const axiosInstance = await getAxiosInstance()
@@ -170,7 +170,7 @@ export const deleteUser = async (route: string) => {
 };
 export const updateCompanyDetails = async (route: string, companyData: any) => {
     const axiosInstance = await getAxiosInstance();
-    return axiosInstance.put(route, companyData);
+    return axiosInstance.patch(route, companyData);
 }
 
 // Get all blocked users
