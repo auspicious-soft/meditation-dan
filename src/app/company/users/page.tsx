@@ -76,7 +76,7 @@ const Page = () => {
                 <TableHead className="w-[100px] py-4">ID</TableHead>
                 <TableHead className="py-4">User Name</TableHead>
                 <TableHead className="py-4">Email Id</TableHead>
-                <TableHead className="py-4">Birthday</TableHead>
+                {/* <TableHead className="py-4">Birthday</TableHead> */}
                 <TableHead className="py-4">Gender</TableHead>
                 <TableHead className="text-right py-4">Action</TableHead>
               </TableRow>
@@ -129,7 +129,7 @@ const Page = () => {
                     <TableCell className="py-4">{user.identifier}</TableCell>
                     <TableCell className="py-4">{user.firstName} {user.lastName}</TableCell>
                     <TableCell className="py-4">{user.email}</TableCell>
-                    <TableCell className="py-4">{formatDate(user.dob)}</TableCell>
+                    {/* <TableCell className="py-4">{formatDate(user.dob)}</TableCell> */}
                     <TableCell className="py-4">{user.gender || "N/A"}</TableCell>
                     <TableCell className="text-right py-4">
                       <Button

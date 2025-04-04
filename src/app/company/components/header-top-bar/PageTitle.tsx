@@ -6,12 +6,12 @@ const PageTitle = () => {
   const pathname = usePathname();
   
   const lastSegment = pathname.split("/").filter(Boolean).pop() || "Home";
-  const pageTitle = lastSegment.replace(/-/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
+  let pageTitle = lastSegment.replace(/-/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
   
-  // const Userpattern = /^\/company\/users\/add-user$/;
-  // if(Userpattern.test(pathname)){
-  //   pageTitle="User Profile Edit"
-  // }
+  const Userpattern = /^\/company\/users\/details\/[0-9a-fA-F]{24}$/;
+  if(Userpattern.test(pathname)){
+    pageTitle="User Detail"
+  }
 
   // const UserList = /^\/company\/(users)\/user-list\/\d+$/;
   // if (UserList.test(pathname)) {

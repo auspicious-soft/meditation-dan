@@ -35,7 +35,7 @@ const UserProfile = () => {
     <Button variant="outline" className="ring-0 cursor-pointer border-0 bg-transparent hover:bg-transparent outline-none p-0 h-auto w-auto [&_svg]:size-10 focus:outline-none focus:ring-0 focus:ring-ring focus:ring-offset-0">
      <Avatar>
       <AvatarImage src={profilePicUrl} alt="User Avatar" />
-      <AvatarFallback>SS</AvatarFallback>
+      <AvatarFallback>A</AvatarFallback>
      </Avatar>
     </Button>
    </DropdownMenuTrigger>
