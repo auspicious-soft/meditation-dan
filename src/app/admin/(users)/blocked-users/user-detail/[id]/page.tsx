@@ -1,10 +1,11 @@
-"use client"
-import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { getSingleUser } from '@/services/admin-services'
-import { useParams } from 'next/navigation'
-import React, { useState } from 'react'
-import useSWR from 'swr'
+"use client";
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { getSingleUser, deleteUser, toggleBlockUser } from '@/services/admin-services'; // Added toggleBlockUser import
+import { useParams } from 'next/navigation';
+import React, { useState } from 'react';
+import useSWR from 'swr';
+import { toast } from 'sonner'; // Added toast import for feedback
 
 // Skeleton Component for individual field
 const SkeletonField = () => (
@@ -12,7 +13,7 @@ const SkeletonField = () => (
     <div className="h-3 w-20 bg-gray-600 rounded mb-1 animate-pulse"></div>
     <div className="h-4 w-32 bg-gray-600 rounded animate-pulse"></div>
   </div>
-)
+);
 
 // Skeleton Component for header
 const SkeletonHeader = () => (
@@ -20,7 +21,7 @@ const SkeletonHeader = () => (
     <div className="h-6 w-48 bg-gray-600 rounded mb-2 animate-pulse"></div>
     <div className="h-4 w-64 bg-gray-600 rounded animate-pulse"></div>
   </div>
-)
+);
 
 const fetcher = async (url: string) => {
   console.log("Fetching URL:", url);
@@ -29,10 +30,10 @@ const fetcher = async (url: string) => {
 };
 
 const Page = () => {
-  const { id } = useParams()
+  const { id } = useParams();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const { data: apiResponse, error, isLoading } = useSWR(
+  const { data: apiResponse, error, isLoading, mutate } = useSWR(
     id ? `/admin/user/${id}` : null,
     fetcher,
     {
@@ -42,13 +43,39 @@ const Page = () => {
   );
   const userData = apiResponse?.data;
 
-  const handleDeleteAccount = () => {
-    console.log('Delete account requested for user:', id);
-    setIsDialogOpen(false);
+  const handleUnblock = async () => {
+    try {
+      const payload: { isBlocked: boolean } = { isBlocked: false };
+      const response = await toggleBlockUser(`/admin/user/${id}/block`, payload);
+      if (response.data.success) {
+        toast.success("User unblocked successfully!");
+        mutate(); // Refresh user data after unblocking
+        setTimeout(() => {
+          window.location.href = "/admin/blocked-users";
+        },1000)
+      } else {
+        throw new Error(response.data.message || "Failed to unblock user");
+      }
+    } catch (err) {
+      console.error("Error unblocking user:", err);
+      toast.error(err instanceof Error ? err.message : "Failed to unblock user");
+    }
   };
 
-  const handleUnblock = () => {
-    console.log('Unblock requested for user:', id);
+  const handleDeleteAccount = async () => {
+    try {
+      await deleteUser(`/admin/user/delete-user/${id}`);
+      console.log("User deleted successfully");
+      setIsDialogOpen(false);
+      mutate("/admin/get-all-users"); // Refresh the user list
+      toast.success("User deleted successfully!");
+      setTimeout(() => {
+        window.location.href = "/admin/user-lists";
+      }, 1000);
+    } catch (err) {
+      console.error("Error deleting user:", err);
+      toast.error("Failed to delete user");
+    }
   };
 
   if (error) return <div className="text-white">Error loading user data</div>;
@@ -161,7 +188,7 @@ const Page = () => {
         </DialogContent>
       </Dialog>
     </div>
-  )
-}
+  );
+};
 
-export default Page
+export default Page;

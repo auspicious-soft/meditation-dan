@@ -64,6 +64,10 @@ export const toggleBlockCompany = async (route: string, data: BlockCompanyPayloa
     const axiosInstance = await getAxiosInstance();
     return axiosInstance.put(route, data);
   };
+export const toggleBlockUser = async (route: string, data: BlockCompanyPayload) => {
+    const axiosInstance = await getAxiosInstance();
+    return axiosInstance.put(route, data);
+};
 export const getAllCollectionStats = async (route: string,params: any = {} ) => {
     const axiosInstance = await getAxiosInstance()
     return axiosInstance.get(route,{ params })

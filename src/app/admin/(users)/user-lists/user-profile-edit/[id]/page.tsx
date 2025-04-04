@@ -10,11 +10,16 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { getSingleUser, updateUser, deleteUser } from "@/services/admin-services";
+import { getSingleUser, updateUser, deleteUser, toggleBlockUser } from "@/services/admin-services";
 import { useParams } from "next/navigation";
 import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
 import useSWR, { mutate } from "swr";
+
+// Define the BlockCompanyPayload type
+interface BlockCompanyPayload {
+  isBlocked: boolean;
+}
 
 // Define the UserData type for form data
 interface UserData {
@@ -25,6 +30,7 @@ interface UserData {
   dob: string;
   companyName: string;
   totalMeditationListen?: number;
+  isBlocked?: boolean; // Added isBlocked field
 }
 
 // Skeleton Components
@@ -66,6 +72,7 @@ const Page = () => {
     dob: "",
     companyName: "",
     totalMeditationListen: 0,
+    isBlocked: false, // Initialize isBlocked
   });
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -74,6 +81,7 @@ const Page = () => {
       setFormData({
         ...data.data.data,
         dob: data.data.data.dob.split("T")[0],
+        isBlocked: data.data.data.isBlocked || false, // Set isBlocked from API response
       });
     }
   }, [data]);
@@ -85,6 +93,27 @@ const Page = () => {
       ...prevState,
       [field]: value,
     }));
+  };
+
+  const handleToggleBlock = async () => {
+    try {
+      const newBlockedState = !formData.isBlocked; // Toggle the current state
+      const payload: BlockCompanyPayload = { isBlocked: newBlockedState };
+      const response = await toggleBlockUser(`/admin/user/${id}/block`, payload);
+      if (response.data.success) {
+        toast.success(`User ${newBlockedState ? "blocked" : "unblocked"} successfully!`);
+        setFormData((prevState) => ({
+          ...prevState,
+          isBlocked: newBlockedState, // Update local state
+        }));
+        mutate(`/admin/user/${id}`); // Refresh user data after toggling block status
+      } else {
+        throw new Error(response.data.message || `Failed to ${newBlockedState ? "block" : "unblock"} user`);
+      }
+    } catch (err) {
+      console.error(`Error ${formData.isBlocked ? "unblocking" : "blocking"} user:`, err);
+      toast.error(err instanceof Error ? err.message : `Failed to ${formData.isBlocked ? "unblock" : "block"} user`);
+    }
   };
 
   const handleSave = async () => {
@@ -100,7 +129,7 @@ const Page = () => {
       }, 1000);
     } catch (err) {
       console.error("Error updating user:", err);
-      toast.error("Failed to update user"); // Changed to toast.error for consistency
+      toast.error("Failed to update user");
     }
   };
 
@@ -116,7 +145,7 @@ const Page = () => {
       }, 1000);
     } catch (err) {
       console.error("Error deleting user:", err);
-      toast.error("Failed to delete user"); // Added error toast
+      toast.error("Failed to delete user");
     }
   };
 
@@ -166,7 +195,7 @@ const Page = () => {
                   <Input
                     id={field}
                     type={field === "dob" ? "date" : "text"}
-                    value={formData[field as keyof UserData] || ""}
+                    value={String(formData[field as keyof UserData] || "")}
                     onChange={(e) => handleChange(field as keyof UserData, e.target.value)}
                     className="bg-[#0f172a] h-12 border-none text-white"
                     disabled={field === "totalMeditationListen"} // Disable totalMeditationListen field
@@ -182,6 +211,13 @@ const Page = () => {
                 onClick={() => setIsDialogOpen(true)}
               >
                 Delete Account
+              </Button>
+              <Button
+                variant="default"
+                className="bg-[#1A3F70] w-28 h-11 hover:bg-[#1A3F70] hover:cursor-pointer"
+                onClick={handleToggleBlock}
+              >
+                {formData.isBlocked ? "Unblock" : "Block"} {/* Dynamically set button label */}
               </Button>
               <Button
                 variant="default"
