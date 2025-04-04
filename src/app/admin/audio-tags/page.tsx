@@ -113,6 +113,12 @@ const AudioLevelsManager = () => {
       return;
     }
 
+    // Validate character count (limit to 20 characters)
+    if (editValue.length > 20) {
+      toast.error('Name cannot exceed 20 characters');
+      return;
+    }
+
     setIsLoading(true);
     try {
       if (editingLevelId) {

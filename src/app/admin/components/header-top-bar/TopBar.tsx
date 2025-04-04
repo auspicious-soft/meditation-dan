@@ -10,15 +10,9 @@ const TopBar = () => {
     <div className="flex items-center justify-between gap-2 flex-wrap md:flex-row">
       <PageTitle />
       <MobileTrigger />
-      <div className="card-bg rounded-lg p-[10px] flex items-center justify-between gap-5">
-        <div className="hidden md:block">
-          <SearchBar />
-        </div>
+      <div className="card-bg rounded-lg p-[10px] flex items-center justify-between gap-5"> 
         <NotificationsPanel />
         <UserProfile />
-      </div>
-      <div className="block md:hidden  w-full card-bg rounded-lg p-[10px]">
-        <SearchBar />
       </div>
     </div>
   );
