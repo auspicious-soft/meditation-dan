@@ -174,10 +174,10 @@ export const generateSignedUrlForAudioImage = async (songName:string, collection
     throw error;
   }
 };
-export const generateSignedUrlForCollectionImage = async (bestFor:string,collectionName:string, fileName: string, fileType: string) => {
+export const generateSignedUrlForCollectionImage = async (collectionName:string,time:any, fileName: string, fileType: string) => {
   const uploadParams = {
     Bucket: process.env.AWS_BUCKET_NAME,
-    Key: `${bestFor}/${collectionName}/image/${fileName}`,
+    Key: `${collectionName}/${time}/image/${fileName}`,
     ContentType: fileType,
     acl: "public-read",
   };

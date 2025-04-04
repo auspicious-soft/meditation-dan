@@ -354,8 +354,8 @@ const EditCollectionForm = () => {
         const imageFileName = `${image.name}`;
 
         const { signedUrl, key } = await generateSignedUrlForCollectionImage(
-          bestForNames,
           collectionName,
+          new Date().toISOString(),
           imageFileName,
           image.type
         );
