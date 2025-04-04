@@ -259,19 +259,20 @@ const Page = () => {
                   </div>
                   <div className="mt-4 text-left text-xl font-medium font-['SF_Pro_Display']">
                     <span className={`${priceTextColor} text-5xl font-bold font-['SF_Pro_Display']`}>${price}</span>
-                    <span className={`${priceTextColor} text-lg font-medium font-['SF_Pro_Display']`}>/{interval}ly</span>
+                    <span className={`${priceTextColor} text-lg font-medium font-['SF_Pro_Display']`}>/user</span>
                   </div>
-                  <div className="mt-6 flex flex-col gap-3 w-full">
-                    {features.map((text: string, index: number) => (
+                  <div className="mt-6 self-stretch h-15  text-neutral-400 text-sm font-normal flex flex-col gap-3 w-full">
+                    {product.description}
+                    {/* {features.map((text: string, index: number) => (
                       <div key={index} className="flex items-center gap-3">
                         <Image src={tickImage} alt="check" width={16} height={16} />
                         <div className={`${featureTextColor} text-xs font-normal font-['SF_Pro_Display'] leading-7`}>
                           {text}
                         </div>
                       </div>
-                    ))}
+                    ))} */}
                   </div>
-                  <div className="mt-8 flex justify-center w-full">
+                  <div className="mt-8 flex justify-left w-full">
                     {isCardLoading || isCardCanceling ? (
                       <div className={`flex justify-center items-center p-5 ${isCurrentPlan ? "text-white" : "text-[#1A3F70]"}`}>Loading...</div>
                     ) : isCurrentPlan ? (
@@ -284,19 +285,20 @@ const Page = () => {
                         </span>
                       </button>
                     ) : (
+                      
                       <button
                         disabled={isCurrentPlan}
                         onClick={() => handlePlanSelect(planType, price, product.id)}
-                        className={`h-12 w-full max-w-[200px] ${buttonBgColor} rounded-lg flex items-center justify-center`}
+                        className={`h-12 w-full max-w-[150px]  ${buttonBgColor} rounded-lg flex items-center justify-center text-center`}
                       >
-                        <span className={`${buttonTextColor} text-base font-medium`}>
+                        <span className={`${buttonTextColor}  text-base font-medium`}>
                         Activate Plan
                         </span>
                       </button>
                     )}
                   </div>
                   {isCurrentPlan && expiryDate && (
-                    <div className={`mt-4 text-center ${textColor} text-xs font-normal`}>
+                    <div className={`mt-4 text-left ${textColor} text-xs font-normal`}>
                       Expires on {expiryDate}
                     </div>
                   )}

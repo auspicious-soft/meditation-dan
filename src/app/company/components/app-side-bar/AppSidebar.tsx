@@ -37,12 +37,6 @@ const data = {
       icon: BellNotifactionIcon,
    
     },
-
-     {
-      title: "",
-      url: "/company/company-profile",
-   
-    },
     
   ],
 };
