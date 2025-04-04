@@ -79,6 +79,7 @@ export default function SignupPage() {
      toast.success(response.message);
      router.push("/request-pending");
      
+     
     } else {
      toast.error(response?.message || "Signup failed. Please try again.");
     }
