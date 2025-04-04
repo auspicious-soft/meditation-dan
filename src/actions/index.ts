@@ -69,16 +69,8 @@ export const signupAction = async (payload: any) => {
     const userName = user?.firstName ? user.firstName + " " + user.lastName : user?.companyName; 
 
     if (res && res?.data?.success) {
-      const user = res.data.data.userData;
+      
 
-      await signIn("credentials", {
-        email: user.email,
-        fullName: userName, 
-        _id: user._id,
-        role: user?.role,
-        profilePic: user?.image,
-        redirect: false,
-      });
     } else {
       console.log('9. Success condition NOT met, res.data:', res?.data);
     }

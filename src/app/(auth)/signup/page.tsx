@@ -77,15 +77,8 @@ export default function SignupPage() {
 
     if (response?.success) {
      toast.success(response.message);
-     if(response?.data?.userData?.isVerifiedByAdmin ==="pending"){
-      router.push("/request-pending");
-     }else if(response?.data?.userData?.isVerifiedByAdmin ==="rejected"){
-      router.push("/request-rejected");
-     }
-     else{
-        router.push("/");
-     }
-//      router.push("/verifyotp");
+     router.push("/request-pending");
+     
     } else {
      toast.error(response?.message || "Signup failed. Please try again.");
     }
