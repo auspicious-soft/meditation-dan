@@ -29,9 +29,6 @@ const RequestDeclinePage: React.FC = () => {
         <h1 className="text-5xl font-bold mb-2">Opps!</h1>
         <p className="text-2xl mb-5 w-[40%]">Your Request Decline</p>
         
-        <button onClick={()=>handleOk()} className="bg-blue-600 text-white px-5 py-2 rounded-md text-lg hover:bg-blue-700 transition">
-          OK
-        </button>
       </div>
     </>
   );
