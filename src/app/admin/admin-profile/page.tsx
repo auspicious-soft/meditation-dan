@@ -220,20 +220,6 @@ const Page = () => {
               disabled={isLoading}
             />
           </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="gender" className="text-white dm-sans text-base font-normal">
-              Gender
-            </Label>
-            <Input
-              id="gender"
-              type="text"
-              value={formData.gender}
-              onChange={(e) => handleChange("gender", e.target.value)}
-              className="bg-[#1B2236] h-12 border-none text-white"
-              disabled={isLoading}
-            />
-          </div>
         </div>
 
         <div>
