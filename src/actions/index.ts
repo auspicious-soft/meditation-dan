@@ -62,27 +62,14 @@ export const signupAction = async (payload: any) => {
   console.log('1. Payload received in signupAction:', payload);
 
   try {
-    console.log('2. Calling signupService with payload:', payload);
     const res: any = await signupService(payload);
-    console.log('3. Response from signupService:', res); 
 
     const user = res?.data?.data?.user;
-    console.log('4. Extracted user object:', user); 
 
-    const userName = user?.firstName ? user.firstName + " " + user.lastName : user.companyName; 
-    console.log('5. userName set to:', userName); 
+    const userName = user?.firstName ? user.firstName + " " + user.lastName : user?.companyName; 
 
     if (res && res?.data?.success) {
-      console.log('6. Success condition met, res.data:', res.data.data.userData);
       const user = res.data.data.userData;
-      console.log('7. Calling signIn with:', {
-        email: user.email,
-        name: user?.companyName,
-        _id: user._id,
-        role: user?.role,
-        profilePic: user?.image,
-        redirect: false,
-      });
 
       await signIn("credentials", {
         email: user.email,
@@ -92,16 +79,13 @@ export const signupAction = async (payload: any) => {
         profilePic: user?.image,
         redirect: false,
       });
-      console.log('8. signIn completed successfully');
     } else {
       console.log('9. Success condition NOT met, res.data:', res?.data);
     }
 
-    console.log('10. Returning res.data:', res?.data);
     return res?.data;
   } catch (error: any) {
-    console.error('11. Error caught in signupAction:', error); 
-    console.error('12. Error response data:', error?.response?.data); 
+    console.error('Signup action error:', error);
     return error?.response?.data;
   }
 };

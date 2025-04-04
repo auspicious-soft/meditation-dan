@@ -69,7 +69,6 @@ export default function SignupPage() {
   startTransition(async () => {
    try {
     const response: any = await signupAction({
-    name,
     email,
     companyName,
     password,
