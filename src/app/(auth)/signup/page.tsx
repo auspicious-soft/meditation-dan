@@ -142,16 +142,17 @@ export default function SignupPage() {
 
          {errorMessage && <p className="text-red-500 text-sm mt-1">{errorMessage}</p>}
 
-         <div className="flex items-center justify-between">
+         
+
+         <Button type="submit" className="cursor-pointer px-3 py-1.5 bg-[#1a3f70] h-[50px] rounded-lg text-white text-lg font w-full leading-[30px] hover:bg-[#1a3f70]" disabled={isPending}>
+          {isPending ? "Signing up..." : "Send Request"}
+         </Button>
+         <div className="flex items-center justify-center">
           <Link href="/" className="text-[#9a9a9a] text-base font-medium">
            Already have an account?
            <span className="hover:underline"> Sign In</span>
           </Link>
          </div>
-
-         <Button type="submit" className="cursor-pointer px-3 py-1.5 bg-[#1a3f70] h-[50px] rounded-lg text-white text-lg font w-full leading-[30px] hover:bg-[#1a3f70]" disabled={isPending}>
-          {isPending ? "Signing up..." : "Send Request"}
-         </Button>
         </div>
        </form>
       </CardContent>
