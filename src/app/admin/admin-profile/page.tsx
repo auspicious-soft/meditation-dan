@@ -15,7 +15,6 @@ const Page = () => {
     firstName: "",
     lastName: "",
     email: "",
-    gender: "",
   });
   const [adminId, setAdminId] = useState<string>(""); 
   const [profileImage, setProfileImage] = useState<string>("");
@@ -34,7 +33,6 @@ const Page = () => {
           firstName: adminData.firstName || "",
           lastName: adminData.lastName || "",
           email: adminData.email || "",
-          gender: adminData.gender || "",
         });
         setAdminId(adminData.id || "");
 
