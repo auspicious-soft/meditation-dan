@@ -10,6 +10,9 @@ import {
   Pencil,
   AlertCircle,
   Loader2,
+  ChevronDown,
+  X,
+  Search,
 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -28,8 +31,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/popover";
+import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
+import { useDebounce } from "use-debounce";
 
 interface Audio {
   _id: string;
@@ -40,6 +50,8 @@ interface Audio {
   };
   imageUrl: string;
   audioUrl: string;
+  levels?: { _id: string; name: string }[]; // Assuming audio has levels
+  bestFor?: { _id: string; name: string }[]; // Assuming audio has bestFor
 }
 
 interface Pagination {
@@ -71,19 +83,105 @@ const AudioList = () => {
   const [loadingAudioId, setLoadingAudioId] = useState<string | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [audioToDelete, setAudioToDelete] = useState<string | null>(null);
+  const [selectedLevels, setSelectedLevels] = useState<string[]>([]);
+  const [selectedBestFor, setSelectedBestFor] = useState<string[]>([]);
+  const [levelOptions, setLevelOptions] = useState<{ id: string; name: string }[]>([]);
+  const [bestForOptions, setBestForOptions] = useState<{ id: string; name: string }[]>([]);
+  const [isLoadingLevels, setIsLoadingLevels] = useState<boolean>(false);
+  const [isLoadingBestFor, setIsLoadingBestFor] = useState<boolean>(false);
+  const [levelsError, setLevelsError] = useState<string | null>(null);
+  const [bestForError, setBestForError] = useState<string | null>(null);
+  const [isLevelsOpen, setIsLevelsOpen] = useState<boolean>(false);
+  const [isBestForOpen, setIsBestForOpen] = useState<boolean>(false);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [debouncedSearchQuery] = useDebounce(searchQuery, 500);
   const limit = 10;
 
-  // Create a ref to store all active audio elements
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
+  // Fetch levels and best for options on mount
+  useEffect(() => {
+    const fetchLevels = async () => {
+      setIsLoadingLevels(true);
+      setLevelsError(null);
+      try {
+        const response = await getAllAudiosStats("/level", {}); // Adjust endpoint if needed
+        if (response?.data?.success && Array.isArray(response?.data?.data)) {
+          const transformedLevels = response.data.data
+            .filter((level: any) => level.isActive)
+            .map((level: any) => ({
+              id: level._id,
+              name: level.name,
+            }));
+          setLevelOptions(transformedLevels);
+        } else {
+          setLevelsError(response?.data?.message || "Failed to load levels");
+        }
+      } catch (error) {
+        console.error("Error fetching levels:", error);
+        setLevelsError("An error occurred while fetching levels");
+      } finally {
+        setIsLoadingLevels(false);
+      }
+    };
+
+    const fetchBestForOptions = async () => {
+      setIsLoadingBestFor(true);
+      setBestForError(null);
+      try {
+        const response = await getAllAudiosStats("/bestfor", {}); // Adjust endpoint if needed
+        if (response?.data?.success && Array.isArray(response?.data?.data)) {
+          const transformedOptions = response.data.data
+            .filter((option: any) => option.isActive)
+            .map((option: any) => ({
+              id: option._id,
+              name: option.name,
+            }));
+          setBestForOptions(transformedOptions);
+        } else {
+          setBestForError(response?.data?.message || "Failed to load best for options");
+        }
+      } catch (error) {
+        console.error("Error fetching best for options:", error);
+        setBestForError("An error occurred while fetching best for options");
+      } finally {
+        setIsLoadingBestFor(false);
+      }
+    };
+
+    fetchLevels();
+    fetchBestForOptions();
+  }, []);
+
+  // Reset page to 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedLevels, selectedBestFor, debouncedSearchQuery]);
+
+  // Fetch audios with filters
   useEffect(() => {
     const fetchAudios = async () => {
+      setLoading(true);
+      setError(null);
       try {
-        const response = await getAllAudiosStats("/audio", {
+        const filters: any = {
           page: currentPage,
           limit,
-        });
+        };
 
+        if (selectedLevels.length > 0) {
+          filters.levels = selectedLevels.join(",");
+        }
+
+        if (selectedBestFor.length > 0) {
+          filters.bestFor = selectedBestFor.join(",");
+        }
+
+        if (debouncedSearchQuery) {
+          filters.search = debouncedSearchQuery;
+        }
+
+        const response = await getAllAudiosStats("/audio", filters);
         const data: ApiResponse = response.data;
 
         if (data.success) {
@@ -102,17 +200,15 @@ const AudioList = () => {
 
     fetchAudios();
 
-    // Cleanup function to stop any playing audio when component unmounts
     return () => {
       stopCurrentAudio();
     };
-  }, [currentPage]);
+  }, [currentPage, selectedLevels, selectedBestFor, debouncedSearchQuery]);
 
-  // Function to stop the currently playing audio
   const stopCurrentAudio = () => {
     if (audioRef.current) {
       audioRef.current.pause();
-      audioRef.current.currentTime = 0; // Reset position
+      audioRef.current.currentTime = 0;
       audioRef.current = null;
       setPlayingAudioId(null);
     }
@@ -127,24 +223,19 @@ const AudioList = () => {
 
     const audioUrl = getS3Url(audio.audioUrl);
 
-    // Case 1: This audio is already playing - pause it
     if (playingAudioId === audio._id) {
       stopCurrentAudio();
       return;
     }
 
-    // Case 2: A different audio is playing or no audio is playing
-    // First, stop any currently playing audio
     stopCurrentAudio();
 
-    // Then start playing the new audio
     setLoadingAudioId(audio._id);
 
     try {
       const newAudio = new Audio(audioUrl);
       audioRef.current = newAudio;
 
-      // Set up event handlers before playing
       newAudio.onended = () => {
         setPlayingAudioId(null);
         audioRef.current = null;
@@ -158,7 +249,6 @@ const AudioList = () => {
         toast.error("Failed to play audio");
       };
 
-      // Start playback
       await newAudio.play();
       setPlayingAudioId(audio._id);
     } catch (err) {
@@ -175,7 +265,7 @@ const AudioList = () => {
 
       if (response?.data?.success) {
         toast.success("Audio deleted successfully");
-        window.location.reload();
+        setAudios((prev) => prev.filter((audio) => audio._id !== id));
       } else {
         throw new Error(response?.data?.message || "Failed to delete audio");
       }
@@ -194,7 +284,6 @@ const AudioList = () => {
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages && newPage !== currentPage) {
-      // Stop any playing audio when changing pages
       stopCurrentAudio();
       setCurrentPage(newPage);
     }
@@ -208,6 +297,30 @@ const AudioList = () => {
   const cancelDelete = () => {
     setAudioToDelete(null);
     setIsDialogOpen(false);
+  };
+
+  const addLevel = (levelId: string) => {
+    if (!selectedLevels.includes(levelId)) {
+      setSelectedLevels((prev) => [...prev, levelId]);
+    }
+  };
+
+  const removeLevel = (levelId: string) => {
+    setSelectedLevels((prev) => prev.filter((id) => id !== levelId));
+  };
+
+  const addBestFor = (bestForId: string) => {
+    if (!selectedBestFor.includes(bestForId)) {
+      setSelectedBestFor((prev) => [...prev, bestForId]);
+    }
+  };
+
+  const removeBestFor = (bestForId: string) => {
+    setSelectedBestFor((prev) => prev.filter((id) => id !== bestForId));
+  };
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
   };
 
   if (error) return <div className="text-red-500">{error}</div>;
@@ -224,100 +337,248 @@ const AudioList = () => {
         </Button>
       </div>
 
-      {!loading ? (
-        <div className="grid grid-cols-2 gap-4 border-red-600">
-          {audios.map((audio) => (
-            <div
-              key={audio._id}
-              className="flex flex-col lg:flex-row items-center space-y-2 justify-between w-full min-h-[100px] relative bg-slate-900 p-4 rounded"
-            >
-              <div className="rounded bg-slate-800 overflow-hidden flex-shrink-0">
-                <Image
-                  src={
-                    audio?.imageUrl
-                      ? getS3Url(audio?.imageUrl)
-                      : "/default-placeholder.png"
-                  }
-                  alt={audio?.songName}
-                  className="object-cover"
-                  width={60}
-                  height={40}
-                  style={{ height: "auto" }}
-                />
-              </div>
-
-              <div className="flex-1 min-w-0 mx-3">
-                <div className="text-sm text-center text-slate-400">
-                  Music Name:
-                </div>
-                <div className="text-white text-center text-sm font-medium truncate">
-                  {audio?.songName}
-                </div>
-              </div>
-
-              <div className="text-center flex-1 min-w-0 mx-3">
-                <div className="text-sm text-center text-slate-400">
-                  Duration
-                </div>
-                <div className="flex text-center items-center text-sm justify-center text-white">
-                  <Clock size={14} className="mr-1" />
-                  <span>{audio?.duration}</span>
-                </div>
-              </div>
-
-              <div className="text-center flex-1 min-w-0 mx-3">
-                <div className="text-sm text-center text-slate-400">
-                  Collection
-                </div>
-                <div className="text-white text-sm text-center border-0 truncate">
-                  {audio?.collectionType?.name || "Unknown Collection"}
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <button
-                  className="text-slate-400 hover:cursor-pointer rounded-md bg-[#1B2236] p-2 hover:text-white relative"
-                  onClick={() => handlePlayPause(audio)}
-                  disabled={!audio?.audioUrl || loadingAudioId === audio._id}
-                >
-                  {loadingAudioId === audio._id ? (
+      {/* Filters */}
+      <div className="grid grid-cols-1 md:grid-cols-3 items-center md:gap-4 mb-2">
+        <div>
+          <Popover open={isLevelsOpen} onOpenChange={setIsLevelsOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className="my-2 w-full bg-[#0B132B] hover:bg-[#0B132B] min-h-12 border-none text-white justify-between"
+              >
+                <div className="flex flex-wrap gap-2 items-center">
+                  {isLoadingLevels ? (
                     <Loader2 size={24} className="animate-spin text-white" />
-                  ) : playingAudioId === audio._id ? (
-                    <Pause size={25} />
+                  ) : selectedLevels.length > 0 ? (
+                    selectedLevels.map((levelId) => {
+                      const level = levelOptions.find((l) => l.id === levelId);
+                      return (
+                        <span
+                          key={levelId}
+                          className="bg-[#1B2236] p-1 rounded-md text-white flex items-center"
+                        >
+                          {level?.name || levelId}
+                          <span
+                            className="h-4 w-4 ml-1 flex items-center justify-center cursor-pointer text-gray-400 hover:text-white"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              removeLevel(levelId);
+                            }}
+                          >
+                            <X size={12} />
+                          </span>
+                        </span>
+                      );
+                    })
                   ) : (
-                    <Play size={24} color="white" fill="white" />
+                    <span className="text-gray-400">Select Levels</span>
                   )}
-                </button>
+                </div>
+                <ChevronDown className="h-4 w-4" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="bg-[#0B132B] border-gray-700 text-white p-0">
+              {isLoadingLevels ? (
+                <div className="p-2">
+                  <Loader2 size={24} className="animate-spin text-white" />
+                </div>
+              ) : levelsError ? (
+                <div className="p-2 text-red-500">{levelsError}</div>
+              ) : levelOptions.length === 0 ? (
+                <div className="p-2 text-gray-500">No levels available</div>
+              ) : (
+                levelOptions.map((level) => (
+                  <div
+                    key={level.id}
+                    className={`p-2 hover:bg-[#1B2236] cursor-pointer ${
+                      selectedLevels.includes(level.id) ? "bg-[#1B2236]" : ""
+                    }`}
+                    onClick={() => addLevel(level.id)}
+                  >
+                    {level.name}
+                  </div>
+                ))
+              )}
+            </PopoverContent>
+          </Popover>
+        </div>
 
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button className="text-slate-400 hover:cursor-pointer rounded-md p-1 hover:text-white">
-                      <MoreVertical size={25} />
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="bg-[#1B2236] text-white border border-[#334155]">
-                    <DropdownMenuItem
-                      className="hover:bg-[#1B2236] cursor-pointer"
-                      onClick={() => handleEdit(audio._id)}
-                    >
-                      <Pencil size={16} className="mr-2 hover:text-black" />
-                      Edit
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      className="hover:bg-[#1B2236] cursor-pointer"
-                      onClick={() => openDeleteDialog(audio._id)}
-                    >
-                      <Trash2
-                        size={16}
-                        className="mr- h-4 w-4 mr-2 hover:text-black"
-                      />
-                      Delete
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+        <div>
+          <Popover open={isBestForOpen} onOpenChange={setIsBestForOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className="my-2 w-full bg-[#0B132B] hover:bg-[#0B132B] min-h-12 border-none text-white justify-between"
+              >
+                <div className="flex flex-wrap gap-2 items-center">
+                  {isLoadingBestFor ? (
+                    <Loader2 size={24} className="animate-spin text-white" />
+                  ) : selectedBestFor.length > 0 ? (
+                    selectedBestFor.map((bestForId) => {
+                      const bestFor = bestForOptions.find((b) => b.id === bestForId);
+                      return (
+                        <span
+                          key={bestForId}
+                          className="bg-[#1B2236] p-1 rounded-md text-white flex items-center"
+                        >
+                          {bestFor?.name || bestForId}
+                          <span
+                            className="h-4 w-4 ml-1 flex items-center justify-center cursor-pointer text-gray-400 hover:text-white"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              removeBestFor(bestForId);
+                            }}
+                          >
+                            <X size={12} />
+                          </span>
+                        </span>
+                      );
+                    })
+                  ) : (
+                    <span className="text-gray-400">Select Best For</span>
+                  )}
+                </div>
+                <ChevronDown className="h-4 w-4" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="bg-[#0B132B] border-gray-700 text-white p-0">
+              {isLoadingBestFor ? (
+                <div className="p-2">
+                  <Loader2 size={24} className="animate-spin text-white" />
+                </div>
+              ) : bestForError ? (
+                <div className="p-2 text-red-500">{bestForError}</div>
+              ) : bestForOptions.length === 0 ? (
+                <div className="p-2 text-gray-500">No best for options available</div>
+              ) : (
+                bestForOptions.map((option) => (
+                  <div
+                    key={option.id}
+                    className={`p-2 hover:bg-[#1B2236] cursor-pointer ${
+                      selectedBestFor.includes(option.id) ? "bg-[#1B2236]" : ""
+                    }`}
+                    onClick={() => addBestFor(option.id)}
+                  >
+                    {option.name}
+                  </div>
+                ))
+              )}
+            </PopoverContent>
+          </Popover>
+        </div>
+
+        <div className="relative my-2 flex justify-between items-center bg-[#0b132b] h-12 !rounded-lg">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-3 w-3 text-white" />
+          <Input
+            type="text"
+            placeholder="Search..."
+            className="pl-8 placeholder-white bg-transparent dm-sans border-0 !rounded-lg !text-sm font-normal !text-white"
+            value={searchQuery}
+            onChange={handleSearch}
+          />
+        </div>
+      </div>
+
+      {!loading ? (
+        <div className="grid grid-cols-2 gap-4">
+          {audios.length > 0 ? (
+            audios.map((audio) => (
+              <div
+                key={audio._id}
+                className="flex flex-col lg:flex-row items-center space-y-2 justify-between w-full min-h-[100px] relative bg-slate-900 p-4 rounded"
+              >
+                <div className="rounded bg-slate-800 overflow-hidden flex-shrink-0">
+                  <Image
+                    src={
+                      audio?.imageUrl
+                        ? getS3Url(audio?.imageUrl)
+                        : "/default-placeholder.png"
+                    }
+                    alt={audio?.songName}
+                    className="object-cover"
+                    width={60}
+                    height={40}
+                    style={{ height: "auto" }}
+                  />
+                </div>
+
+                <div className="flex-1 min-w-0 mx-3">
+                  <div className="text-sm text-center text-slate-400">
+                    Music Name:
+                  </div>
+                  <div className="text-white text-center text-sm font-medium truncate">
+                    {audio?.songName}
+                  </div>
+                </div>
+
+                <div className="text-center flex-1 min-w-0 mx-3">
+                  <div className="text-sm text-center text-slate-400">
+                    Duration
+                  </div>
+                  <div className="flex text-center items-center text-sm justify-center text-white">
+                    <Clock size={14} className="mr-1" />
+                    <span>{audio?.duration}</span>
+                  </div>
+                </div>
+
+                <div className="text-center flex-1 min-w-0 mx-3">
+                  <div className="text-sm text-center text-slate-400">
+                    Collection
+                  </div>
+                  <div className="text-white text-sm text-center border-0 truncate">
+                    {audio?.collectionType?.name || "Unknown Collection"}
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    className="text-slate-400 hover:cursor-pointer rounded-md bg-[#1B2236] p-2 hover:text-white relative"
+                    onClick={() => handlePlayPause(audio)}
+                    disabled={!audio?.audioUrl || loadingAudioId === audio._id}
+                  >
+                    {loadingAudioId === audio._id ? (
+                      <Loader2 size={24} className="animate-spin text-white" />
+                    ) : playingAudioId === audio._id ? (
+                      <Pause size={25} />
+                    ) : (
+                      <Play size={24} color="white" fill="white" />
+                    )}
+                  </button>
+
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button className="text-slate-400 hover:cursor-pointer rounded-md p-1 hover:text-white">
+                        <MoreVertical size={25} />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="bg-[#1B2236] text-white border border-[#334155]">
+                      <DropdownMenuItem
+                        className="hover:bg-[#1B2236] cursor-pointer"
+                        onClick={() => handleEdit(audio._id)}
+                      >
+                        <Pencil size={16} className="mr-2 hover:text-black" />
+                        Edit
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className="hover:bg-[#1B2236] cursor-pointer"
+                        onClick={() => openDeleteDialog(audio._id)}
+                      >
+                        <Trash2
+                          size={16}
+                          className="mr-2 h-4 w-4 hover:text-black"
+                        />
+                        Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
               </div>
+            ))
+          ) : (
+            <div className="text-white text-center py-8 col-span-2">
+              No audios found. Try adjusting your filters.
             </div>
-          ))}
+          )}
         </div>
       ) : (
         <div>
