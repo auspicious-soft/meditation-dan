@@ -10,30 +10,34 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import SubscriptionReminderTable from "../components/(dasboard)/SubscriptionReminderTable";
 import { getAdminDashboardStats } from "@/services/admin-services";
 import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 
 // Updated Invoice interface to match API response
 interface Invoice {
-  Id: string; 
-  identifier:string;// Maps to _id
-  CompanyName: string; // Maps to companyName
-  NameCustomer: string; // No direct mapping; use "N/A" or fetch separately if needed
-  DueDate: string; // Maps to createdAt (or subscriptionExpiryDate if applicable)
-  Action: string; // Static "View" for button
-  email: string; // Maps to email
+  Id: string;
+  identifier: string;
+  CompanyName: string;
+  NameCustomer?: string;
+  DueDate: string;
+  Action: string;
+  email?: string;
 }
 
 interface ApiResponse {
   success: boolean;
   message: string;
   data: {
-    companies: any[]; // Not used in this table
+    companies: {
+      _id: string;
+      identifier: string;
+      companyName: string;
+      subscriptionExpiryDate: string;
+    }[];
     recentUsers: {
       _id: string;
-      identifier:string;
+      identifier: string;
       companyName: string;
       email: string;
       createdAt: string;
@@ -44,7 +48,8 @@ interface ApiResponse {
 const DashBoard = () => {
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [invoices, setInvoices] = useState<Invoice[]>([]); // For Recent New Company (recentUsers)
+  const [expiringSubscriptions, setExpiringSubscriptions] = useState<Invoice[]>([]); // For Subscriptions Expiring (companies)
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -67,17 +72,27 @@ const DashBoard = () => {
         const data: ApiResponse = response.data;
 
         if (data.success) {
-          // Map recentUsers to Invoice interface
-          const mappedInvoices = data.data.recentUsers.map((user) => ({
+          // Map recentUsers to Invoice interface (Recent New Company)
+          const mappedRecentUsers = data.data.recentUsers.map((user) => ({
             Id: user._id,
-            identifier:user.identifier,
+            identifier: user.identifier,
             CompanyName: user.companyName,
             NameCustomer: "N/A", // No customer name in response
             DueDate: user.createdAt, // Using createdAt as register date
             Action: "View", // Static action for button
             email: user.email,
           }));
-          setInvoices(mappedInvoices);
+          setInvoices(mappedRecentUsers);
+
+          // Map companies to Invoice interface (Subscriptions Expiring Within One Week)
+          const mappedCompanies = data.data.companies.map((company) => ({
+            Id: company._id,
+            identifier: company.identifier,
+            CompanyName: company.companyName,
+            DueDate: company.subscriptionExpiryDate, // Using subscriptionExpiryDate
+            Action: "Reminder", // Static action for button
+          }));
+          setExpiringSubscriptions(mappedCompanies);
         } else {
           setError(data.message || "Failed to fetch dashboard data");
         }
@@ -182,7 +197,50 @@ const DashBoard = () => {
             <h2 className="text-white text-[20px] md:text-2xl font-bold mb-3">
               Subscriptions Expiring Within One Week
             </h2>
-            <SubscriptionReminderTable />
+            <div className="w-full rounded-none overflow-hidden">
+              <div className="w-full overflow-auto max-h-[210px] scroll-container">
+                <Table className="min-w-[500px] scrollbar-thin scroll-container">
+                  <TableHeader>
+                    <TableRow className="text-white text-sm font-bold dm-sans border-0 border-b border-[#666666] hover:bg-transparent">
+                      <TableHead className="w-[100px] py-4">ID</TableHead>
+                      <TableHead className="py-4">Company Name</TableHead>
+                      <TableHead className="py-4">Due Date</TableHead>
+                      <TableHead className="text-right py-4">Action</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {expiringSubscriptions.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={4} className="text-center text-white py-4">
+                          No subscriptions expiring within one week.
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      expiringSubscriptions.map((subscription) => (
+                        <TableRow
+                          key={subscription.Id}
+                          className="border-0 text-sm font-normal hover:bg-transparent"
+                        >
+                          <TableCell className="py-4">{subscription.identifier}</TableCell>
+                          <TableCell className="py-4">{subscription.CompanyName}</TableCell>
+                          <TableCell className="py-4">
+                            {new Date(subscription.DueDate).toLocaleDateString()}
+                          </TableCell>
+                          <TableCell className="text-right py-4">
+                            <Button
+                              className="px-3 !py-0 h-6 w-44 !bg-[#1a3f70] hover:cursor-pointer rounded inline-flex justify-center items-center text-white text-sm !font-normal !leading-tight !tracking-tight"
+                              onClick={() => handleClick(subscription.Id)}
+                            >
+                              {subscription.Action}
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
           </div>
 
           <div className="grid grid-cols-12 gap-4 w-full">

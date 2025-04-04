@@ -8,21 +8,33 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { signOut } from "next-auth/react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
+import { getImageUrlOfS3 } from "@/actions";
 
 const UserProfile = () => {
     const { data: session } = useSession();
-       const userName =session?.user?.fullName;
-        useEffect(() => {
-          if(session?.user?.fullName === null || session?.user?.fullName === undefined || session?.user?.fullName === ""){
-           window.location.reload()
-          }
-        }, [session]);
+    const userName = session?.user?.fullName;
+    const [profilePicUrl, setProfilePicUrl] = React.useState<string | undefined>(undefined);
+
+    useEffect(() => {
+        if (session?.user?.fullName === null || session?.user?.fullName === undefined || session?.user?.fullName === "") {
+            window.location.reload();
+        }
+
+    const fetchProfilePic = async () => {
+        if (session?.user?.image) {
+            const url = await getImageUrlOfS3(session.user?.image);
+            setProfilePicUrl(url);
+        }
+    };
+
+        fetchProfilePic();
+    }, [session]);
  return (
   <DropdownMenu>
    <DropdownMenuTrigger asChild>
     <Button variant="outline" className="ring-0 cursor-pointer border-0 bg-transparent hover:bg-transparent outline-none p-0 h-auto w-auto [&_svg]:size-10 focus:outline-none focus:ring-0 focus:ring-ring focus:ring-offset-0">
      <Avatar>
-      <AvatarImage src="https://github.com/shadcn.png" alt="User Avatar" />
+      <AvatarImage src={profilePicUrl} alt="User Avatar" />
       <AvatarFallback>SS</AvatarFallback>
      </Avatar>
     </Button>
@@ -31,7 +43,8 @@ const UserProfile = () => {
     <DropdownMenuGroup>
      <div className="flex items-center p-[8px]">
       <Avatar>
-       <AvatarImage src="https://github.com/shadcn.png" alt="User Avatar" />
+       <AvatarImage src={profilePicUrl} alt="User Avatar" />
+       
        <AvatarFallback>SS</AvatarFallback>
       </Avatar>
       <div className="ml-2">

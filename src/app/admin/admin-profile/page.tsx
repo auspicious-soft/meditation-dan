@@ -133,7 +133,7 @@ const Page = () => {
         <div>
           <p className="mb-4 text-zinc-300 text-base SF Pro Display font-normal">Profile Image</p>
           <div className="flex flex-wrap items-end gap-4 mb-4">
-            <Card className="w-44 h-44 flex items-center justify-center bg-[#0B132B] border-none rounded-lg relative">
+            <Card className="w-44 min-h-40 flex items-center justify-center bg-[#0B132B] border-none rounded-lg relative">
               {imagePreview ? (
                 <>
                   <Image

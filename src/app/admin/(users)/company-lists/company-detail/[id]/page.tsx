@@ -246,6 +246,13 @@ const Page = () => {
           >
             Delete Account
           </Button>
+          <Button
+          variant="destructive"
+          className="bg-[#1A3F70] hover:bg-[#1A3F70] hover:cursor-pointer"
+          onClick={()=> window.location.href = "/admin/company-lists"}
+          >
+            Back
+          </Button>
         </div>
 
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
