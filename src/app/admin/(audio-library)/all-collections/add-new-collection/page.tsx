@@ -263,8 +263,8 @@ const AddCollectionForm = () => {
         const imageFileName = `${imageFile.name}`;
 
         const { signedUrl, key } = await generateSignedUrlForCollectionImage(
-          new Date().toISOString(),
           collectionName,
+          new Date().toISOString(),
           imageFileName,
           image.type
         );

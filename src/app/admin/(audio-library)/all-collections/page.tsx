@@ -50,6 +50,7 @@ const AllCollection: React.FC = () => {
         });
 
         const data: ApiResponse = response.data;
+        console.log('data:', data);
 
         if (data.success) {
           setCollections(data.data.collections);
@@ -86,6 +87,17 @@ const AllCollection: React.FC = () => {
   return (
     <div className="grid grid-cols-12 gap-4 w-full">
       <div className="col-span-12 space-y-6 bg-[#1b2236] rounded-[12px] md:rounded-[20px] py-4 px-4 md:py-8 md:px-9">
+        <div className="flex items-center justify-between flex-wrap mb-2">
+          <h2 className="text-white text-[20px] md:text-2xl font-bold mb-3">
+            Collection
+          </h2>
+          <Button
+            className="w-44 h-8 px-12 py-2 !bg-[#1a3f70] rounded inline-flex justify-center items-center hover:cursor-pointer text-white text-sm !font-normal !leading-tight !tracking-tight"
+            onClick={() => router.push("/admin/all-collections/add-new-collection")}
+          >
+            + Add New Collection
+          </Button>
+        </div>
         <div className="flex items-center justify-between flex-wrap mb-2">
           <h2 className="text-white text-[20px] md:text-2xl font-bold mb-3">
             Collection

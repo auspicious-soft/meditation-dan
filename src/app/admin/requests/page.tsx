@@ -23,7 +23,7 @@ interface CompanyJoinRequest {
   status: string;
 }
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 10;
 
 const Page = () => {
   const router = useRouter();

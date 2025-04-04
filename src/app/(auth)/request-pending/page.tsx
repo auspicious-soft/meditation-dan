@@ -26,7 +26,7 @@ const RequestDeclinePage: React.FC = () => {
             className="object-contain"
           />
         </div>
-        <h1 className="text-5xl font-bold mb-2">Registration Successful!</h1>
+        <h1 className="text-5xl font-bold mb-2">Request Pending!</h1>
         <p className="text-m mb-5 w-[40%]">If you do not receive an approval email in 48 hours, please contact us. The Contact us would be a link to an email support@inscape.life.</p>
         
       </div>
