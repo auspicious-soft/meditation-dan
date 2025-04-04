@@ -98,7 +98,7 @@ const AllCollection: React.FC = () => {
             + Add New Collection
           </Button>
         </div>
-        <div className="flex items-center justify-between flex-wrap mb-2">
+        {/* <div className="flex items-center justify-between flex-wrap mb-2">
           <h2 className="text-white text-[20px] md:text-2xl font-bold mb-3">
             Collection
           </h2>
@@ -108,7 +108,7 @@ const AllCollection: React.FC = () => {
           >
             + Add New Collection
           </Button>
-        </div>
+        </div> */}
         {!loading ?
           <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 justify-center gap-4">
             {
