@@ -5,11 +5,12 @@ import {
   Sidebar,
   SidebarContent,
   SidebarHeader,
+  SidebarMenuButton,
 } from "@/components/ui/sidebar";
 import LogoCard from "./LogoCard";
 import { NavMain } from "./NavMain";
 import { AudioTagesIcon, BellNotifactionIcon, CompassIcon, FAQIcon, SecurityIcon, SubscriptionIcon, UsersIcon } from "@/lib/svg";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 // Sample data for the sidebar menu
 const data = {
   navMain: [
@@ -70,6 +71,9 @@ const data = {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const router = useRouter()
+  const pathname = usePathname()
+
+  const isSubscriptionExpiringActive = pathname === "/admin/subscription-expiring"
   return (
     <Sidebar collapsible="icon" {...props} className="bg-[#1B2236] !py-6 !px-4 !border-0 rounded-tr-[20px] rounded-br-[20px]">
       <SidebarHeader className="px-4 pt-1 pb-0 md:p-0">
@@ -79,11 +83,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent className="px-0 py-0 md:p-0">
         <NavMain items={data.navMain} />
       </SidebarContent>
-      <div className="flex gap-2 items-center hover:cursor-pointer mt-6 text-white text-base font-normal px-4 py-0 md:p-0"
-      onClick={()=> router.push('/admin/subscription-expiring')}>
+      <SidebarMenuButton className={`flex gap-2 items-center hover:cursor-pointer h-auto mt-6 text-base font-normal px-[12px] py-[10px] ${
+          isSubscriptionExpiringActive ? "bg-[#1a3f70]" : "font-normal"}`}
+        onClick={()=> router.push('/admin/subscription-expiring')}>
         <BellNotifactionIcon />
          Subscriptions Expiring Today
-      </div>
+      </SidebarMenuButton>
       <hr className="opacity-[0.30] mt-6"></hr>
     </Sidebar>
   );
