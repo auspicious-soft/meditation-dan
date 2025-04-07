@@ -359,7 +359,7 @@ const Page = () => {
               </div>
             </div>
           </div>
-
+ 
           <div className="col-span-full">
             <div className="space-y-6 bg-[#1b2236] rounded-[12px] md:rounded-[20px] py-4 px-4 md:py-8 md:px-9">
               <h2 className="text-white text-[20px] md:text-2xl font-bold mb-3">
