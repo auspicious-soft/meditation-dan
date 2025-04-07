@@ -12,7 +12,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { getBlockedUsers } from "@/services/admin-services";
-// import { getBlockedUsers } from "@/services/admin-services";
+import { Loader2 } from "lucide-react"; // Import Loader2 for loading state
 
 interface Invoice {
   Id: string;
@@ -56,6 +56,7 @@ const SkeletonRow = () => (
 const Page = () => {
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const [viewingUserId, setViewingUserId] = useState<string | null>(null); // State to track loading for View action
 
   const { data, error, isLoading } = useSWR(
     `/admin/users/blocked?page=${currentPage}&limit=${PAGE_SIZE}`,
@@ -76,7 +77,12 @@ const Page = () => {
   };
 
   const handleViewClick = (id: string) => {
-    router.push(`/admin/blocked-users/user-detail/${id}`);
+    setViewingUserId(id); // Set loading state for this user
+    // Simulate an async operation (e.g., fetching data before navigation)
+    setTimeout(() => {
+      router.push(`/admin/blocked-users/user-detail/${id}`);
+      setViewingUserId(null); // Reset loading state after navigation
+    }, 500); // Adjust delay as needed (e.g., if you add an async call)
   };
 
   if (error) {
@@ -128,8 +134,13 @@ const Page = () => {
                       <Button
                         className="px-3 !py-0 w-16 h-6 hover:cursor-pointer !bg-[#1a3f70] rounded inline-flex justify-center items-center text-white text-sm !font-normal !leading-tight !tracking-tight"
                         onClick={() => handleViewClick(invoice._id)}
+                        disabled={viewingUserId === invoice._id}
                       >
-                        View
+                        {viewingUserId === invoice._id ? (
+                          <Loader2 size={16} className="animate-spin text-white" />
+                        ) : (
+                          "View"
+                        )}
                       </Button>
                     </TableCell>
                   </TableRow>

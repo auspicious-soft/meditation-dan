@@ -12,6 +12,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { getAllUsers } from "@/services/admin-services";
+import { Loader2 } from "lucide-react"; // Import Loader2 for loading state
 
 const PAGE_SIZE = 10;
 
@@ -53,6 +54,7 @@ const SkeletonRow = () => (
 const Page = () => {
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const [viewingUserId, setViewingUserId] = useState<string | null>(null); // State to track loading for View action
 
   const { data, error, isLoading } = useSWR("/admin/get-all-users", fetcher, {
     revalidateOnFocus: false,
@@ -72,7 +74,12 @@ const Page = () => {
   };
 
   const handleViewClick = (id: string) => {
-    router.push(`/admin/user-lists/user-profile-edit/${id}`);
+    setViewingUserId(id); // Set loading state for this user
+    // Simulate an async operation (e.g., fetching data before navigation)
+    setTimeout(() => {
+      router.push(`/admin/user-lists/user-profile-edit/${id}`);
+      setViewingUserId(null); // Reset loading state after navigation
+    }, 500); // Adjust delay as needed (e.g., if you add an async call)
   };
 
   if (error) {
@@ -119,9 +126,14 @@ const Page = () => {
                     <TableCell>
                       <Button
                         onClick={() => handleViewClick(user._id)}
-                        className="cursor-pointer !bg-[#1a3f70]"
+                        className="cursor-pointer !bg-[#1a3f70] flex items-center justify-center"
+                        disabled={viewingUserId === user._id}
                       >
-                        View
+                        {viewingUserId === user._id ? (
+                          <Loader2 size={20} className="animate-spin text-white" />
+                        ) : (
+                          "View"
+                        )}
                       </Button>
                     </TableCell>
                   </TableRow>

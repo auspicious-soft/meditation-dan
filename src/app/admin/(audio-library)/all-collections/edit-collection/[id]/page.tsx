@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { ChevronDown, Trash2, Upload, X, AlertCircle } from "lucide-react";
+import { ChevronDown, Trash2, Upload, X, AlertCircle, ChevronLeft } from "lucide-react";
 import Image from "next/image";
 import {
   Popover,
@@ -411,8 +411,16 @@ const EditCollectionForm = () => {
       onSubmit={handleSubmit(onSubmit)}
       className="p-6 bg-[#1B2236] text-white rounded-lg shadow-md"
     >
-      <h2 className="text-xl font-semibold mb-4">Edit Collection</h2>
-
+      <div className="flex items-center mb-4 gap-2">
+      <Button
+            variant="destructive"
+            className="bg-[#0B132B] hover:bg-[#0B132B] p-0 h-7 w-7 hover:cursor-pointer"
+            onClick={() => (window.location.href = "/admin/all-collections")}
+          >
+            <ChevronLeft  />
+          </Button>
+      <h2 className="text-xl font-semibold">Edit Collection</h2>
+      </div>
       <Label className="text-gray-300 mb-3 block">Collection Name</Label>
       <Input
         {...register("collectionName")}

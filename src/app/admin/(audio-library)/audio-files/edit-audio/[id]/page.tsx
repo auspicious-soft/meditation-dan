@@ -31,7 +31,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"; // Added Dialog components
-import { AlertCircle, ChevronDown, Trash2, Upload, X } from "lucide-react";
+import { AlertCircle, ChevronDown, ChevronLeft, Trash2, Upload, X } from "lucide-react";
 import Image from "next/image";
 import { toast } from "sonner";
 import {
@@ -534,7 +534,14 @@ const GetAudio = () => {
       onSubmit={handleSubmit(onSubmit)}
       className="p-6 bg-[#1B2236] text-white rounded-lg shadow-md"
     >
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex gap-2 items-center mb-4">
+      <Button
+            variant="destructive"
+            className="bg-[#0B132B] hover:bg-[#0B132B] p-0 h-7 w-7 hover:cursor-pointer"
+            onClick={() => (window.location.href = "/admin/all-collections")}
+          >
+            <ChevronLeft  />
+          </Button>
         <h2 className="text-xl font-semibold">Edit Audio</h2>
       </div>
 

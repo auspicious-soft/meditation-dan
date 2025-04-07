@@ -65,7 +65,7 @@ const AllCollection: React.FC = () => {
       setIsLoadingLevels(true);
       setLevelsError(null);
       try {
-        const response = await getAllCollectionStats("/level", {}); // Adjust endpoint/service
+        const response = await getAllCollectionStats("/level", {});
         if (response?.data?.success && Array.isArray(response?.data?.data)) {
           const transformedLevels = response.data.data
             .filter((level: any) => level.isActive)
@@ -89,7 +89,7 @@ const AllCollection: React.FC = () => {
       setIsLoadingBestFor(true);
       setBestForError(null);
       try {
-        const response = await getAllCollectionStats("/bestfor", {}); // Adjust endpoint/service
+        const response = await getAllCollectionStats("/bestfor", {});
         if (response?.data?.success && Array.isArray(response?.data?.data)) {
           const transformedOptions = response.data.data
             .filter((option: any) => option.isActive)
@@ -128,20 +128,20 @@ const AllCollection: React.FC = () => {
           page: currentPage,
           limit,
         };
-        
+
         // Only add filters if they have values
         if (selectedLevels.length > 0) {
           filters.levels = selectedLevels.join(",");
         }
-        
+
         if (selectedBestFor.length > 0) {
           filters.bestFor = selectedBestFor.join(",");
         }
-        
+
         if (debouncedSearchQuery) {
           filters.search = debouncedSearchQuery;
         }
-        
+
         const response = await getAllCollectionStats("/collection", filters);
         const data: ApiResponse = response.data;
 
@@ -158,7 +158,7 @@ const AllCollection: React.FC = () => {
         setLoading(false);
       }
     };
- 
+
     fetchCollections();
   }, [currentPage, selectedLevels, selectedBestFor, debouncedSearchQuery]);
 
@@ -184,7 +184,7 @@ const AllCollection: React.FC = () => {
   };
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
+    setSearchQuery(e.target.value.trim());
   };
 
   const getS3Url = (subPath: string) => {
@@ -196,7 +196,7 @@ const AllCollection: React.FC = () => {
       setCurrentPage(newPage);
     }
   };
- 
+
   if (error) {
     return <div className="text-red-500">{error}</div>;
   }
@@ -205,9 +205,7 @@ const AllCollection: React.FC = () => {
     <div className="grid grid-cols-12 gap-4 w-full">
       <div className="col-span-12 space-y-6 bg-[#1b2236] rounded-[12px] md:rounded-[20px] py-4 px-4 md:py-8 md:px-9">
         <div className="flex items-center justify-between flex-wrap mb-2">
-          <h2 className="text-white text-[20px] md:text-2xl font-bold mb-3">
-            Collection
-          </h2>
+          <h2 className="text-white text-[20px] md:text-2xl font-bold mb-3">Collection</h2>
           <Button
             className="w-44 h-8 px-12 py-2 !bg-[#1a3f70] rounded inline-flex justify-center items-center hover:cursor-pointer text-white text-sm !font-normal !leading-tight !tracking-tight"
             onClick={() => router.push("/admin/all-collections/add-new-collection")}
@@ -225,7 +223,7 @@ const AllCollection: React.FC = () => {
                   variant="outline"
                   className="my-2 w-full bg-[#0B132B] hover:bg-[#0B132B] min-h-12 border-none text-white justify-between"
                 >
-                  <div className="flex overflow-auto flex-wrap gap-2 items-center">
+                  <div className="flex items-center w-full overflow-x-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800 p-1">
                     {isLoadingLevels ? (
                       <Loader2 size={24} className="animate-spin text-white" />
                     ) : selectedLevels.length > 0 ? (
@@ -234,7 +232,7 @@ const AllCollection: React.FC = () => {
                         return (
                           <span
                             key={levelId}
-                            className="bg-[#1B2236] p-1 rounded-md text-white flex items-center"
+                            className="bg-[#1B2236] text-white px-2 py-1 rounded-md flex items-center mr-2 whitespace-nowrap"
                           >
                             {level?.name || levelId}
                             <span
@@ -289,7 +287,7 @@ const AllCollection: React.FC = () => {
                   variant="outline"
                   className="my-2 w-full bg-[#0B132B] hover:bg-[#0B132B] min-h-12 border-none text-white justify-between"
                 >
-                  <div className="flex flex-wrap gap-2 items-center">
+                  <div className="flex items-center w-full overflow-x-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800 p-1">
                     {isLoadingBestFor ? (
                       <Loader2 size={24} className="animate-spin text-white" />
                     ) : selectedBestFor.length > 0 ? (
@@ -298,7 +296,7 @@ const AllCollection: React.FC = () => {
                         return (
                           <span
                             key={bestForId}
-                            className="bg-[#1B2236] p-1 rounded-md text-white flex items-center"
+                            className="bg-[#1B2236] text-white px-2 py-1 rounded-md flex items-center mr-2 whitespace-nowrap"
                           >
                             {bestFor?.name || bestForId}
                             <span

@@ -15,6 +15,7 @@ import { useParams } from "next/navigation";
 import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
 import useSWR, { mutate } from "swr";
+import { ChevronLeft, Loader2 } from "lucide-react"; // Import Loader2 for loading states
 
 // Define the BlockCompanyPayload type
 interface BlockCompanyPayload {
@@ -62,7 +63,7 @@ const Page = () => {
     revalidateOnFocus: false,
     refreshInterval: 0,
   });
-  console.log('data:', data);
+  console.log("data:", data);
 
   const [formData, setFormData] = useState<UserData>({
     firstName: "",
@@ -75,6 +76,9 @@ const Page = () => {
     isBlocked: false, // Initialize isBlocked
   });
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [deleting, setDeleting] = useState<boolean>(false); // Loading state for Delete
+  const [togglingBlock, setTogglingBlock] = useState<boolean>(false); // Loading state for Block/Unblock
+  const [saving, setSaving] = useState<boolean>(false); // Loading state for Save
 
   useEffect(() => {
     if (data?.data?.data) {
@@ -96,6 +100,7 @@ const Page = () => {
   };
 
   const handleToggleBlock = async () => {
+    setTogglingBlock(true); // Start loading for block toggle
     try {
       const newBlockedState = !formData.isBlocked; // Toggle the current state
       const payload: BlockCompanyPayload = { isBlocked: newBlockedState };
@@ -106,17 +111,22 @@ const Page = () => {
           ...prevState,
           isBlocked: newBlockedState, // Update local state
         }));
-        mutate(`/admin/user/${id}`); // Refresh user data after toggling block status
+        setTimeout(() => {
+          window.location.href = "/admin/user-lists"; // Redirect after success
+        }, 1000);
       } else {
         throw new Error(response.data.message || `Failed to ${newBlockedState ? "block" : "unblock"} user`);
       }
     } catch (err) {
       console.error(`Error ${formData.isBlocked ? "unblocking" : "blocking"} user:`, err);
       toast.error(err instanceof Error ? err.message : `Failed to ${formData.isBlocked ? "unblock" : "block"} user`);
+    } finally {
+      setTogglingBlock(false); // Stop loading for block toggle
     }
   };
 
   const handleSave = async () => {
+    setSaving(true); // Start loading for save
     try {
       // Remove totalMeditationListen from the payload to prevent updating it
       const { totalMeditationListen, ...updateData } = formData;
@@ -130,10 +140,13 @@ const Page = () => {
     } catch (err) {
       console.error("Error updating user:", err);
       toast.error("Failed to update user");
+    } finally {
+      setSaving(false); // Stop loading for save
     }
   };
 
   const handleDeleteAccount = async () => {
+    setDeleting(true); // Start loading for delete
     try {
       await deleteUser(`/admin/user/delete-user/${id}`);
       console.log("User deleted successfully");
@@ -146,6 +159,8 @@ const Page = () => {
     } catch (err) {
       console.error("Error deleting user:", err);
       toast.error("Failed to delete user");
+    } finally {
+      setDeleting(false); // Stop loading for delete
     }
   };
 
@@ -168,9 +183,11 @@ const Page = () => {
           <>
             <SkeletonHeader />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {Array(7).fill(0).map((_, index) => (
-                <SkeletonField key={index} />
-              ))}
+              {Array(7)
+                .fill(0)
+                .map((_, index) => (
+                  <SkeletonField key={index} />
+                ))}
             </div>
             <div className="flex flex-wrap gap-4 mt-12">
               <SkeletonButton />
@@ -180,9 +197,18 @@ const Page = () => {
         ) : (
           <>
             <div>
+              <div className="flex items-center gap-2">
+              <Button
+            variant="destructive"
+            className="bg-[#0B132B] hover:bg-[#0B132B] p-0 h-7 w-7 hover:cursor-pointer"
+            onClick={() => (window.location.href = "/admin/user-lists")}
+          >
+            <ChevronLeft  />
+          </Button>
               <h2 className="text-white text-xl font-medium">
                 {formData.firstName} {formData.lastName}
               </h2>
+              </div>
               <p className="opacity-80">{formData.email}</p>
             </div>
 
@@ -214,17 +240,25 @@ const Page = () => {
               </Button>
               <Button
                 variant="default"
-                className="bg-[#1A3F70] w-28 h-11 hover:bg-[#1A3F70] hover:cursor-pointer"
+                className="bg-[#1A3F70] w-28 h-11 hover:bg-[#1A3F70] hover:cursor-pointer flex items-center justify-center"
                 onClick={handleToggleBlock}
+                disabled={togglingBlock}
               >
-                {formData.isBlocked ? "Unblock" : "Block"} {/* Dynamically set button label */}
+                {togglingBlock ? (
+                  <Loader2 size={20} className="animate-spin text-white" />
+                ) : formData.isBlocked ? "Unblock" : "Block"}
               </Button>
               <Button
                 variant="default"
-                className="bg-[#1A3F70] w-28 h-11 hover:bg-[#1A3F70] hover:cursor-pointer"
+                className="bg-[#1A3F70] w-28 h-11 hover:bg-[#1A3F70] hover:cursor-pointer flex items-center justify-center"
                 onClick={handleSave}
+                disabled={saving}
               >
-                Save
+                {saving ? (
+                  <Loader2 size={20} className="animate-spin text-white" />
+                ) : (
+                  "Save"
+                )}
               </Button>
             </div>
           </>
@@ -248,10 +282,15 @@ const Page = () => {
               </Button>
               <Button
                 variant="destructive"
-                className="bg-[#FF4747] hover:bg-[#FF4747] hover:cursor-pointer w-44 h-11"
+                className="bg-[#FF4747] hover:bg-[#FF4747] hover:cursor-pointer w-44 h-11 flex items-center justify-center"
                 onClick={handleDeleteAccount}
+                disabled={deleting}
               >
-                Yes
+                {deleting ? (
+                  <Loader2 size={20} className="animate-spin text-white" />
+                ) : (
+                  "Yes"
+                )}
               </Button>
             </DialogFooter>
           </DialogContent>

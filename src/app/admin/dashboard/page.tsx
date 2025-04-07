@@ -114,7 +114,7 @@ const DashBoard = () => {
   };
 
   const handleClick = (id: string) => {
-    router.push(`/admin/company-lists/company-detail/${id}`);
+    router.push(`/admin/company-detail/${id}`);
   };
 
   if (loading) {

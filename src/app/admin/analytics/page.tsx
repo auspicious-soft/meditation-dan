@@ -27,6 +27,13 @@ interface Subscription {
 interface Payment {
   id: string;
   CompanyName: string;
+  customerDetails: {
+    name: string;
+    id: string;
+  };
+  plans:{
+    amount: number;
+  },
   Plan: string;
   Transaction: string;
 }
@@ -292,10 +299,10 @@ const Page = () => {
                     ) : (
                       paymentToday.map((payment) => (
                         <TableRow key={payment.id} className="border-0 text-sm font-normal hover:bg-transparent">
-                          <TableCell className="py-4">{payment.id}</TableCell>
-                          <TableCell className="py-4">{payment.CompanyName}</TableCell>
-                          <TableCell className="py-4">{payment.Plan}</TableCell>
-                          <TableCell className="py-4">{payment.Transaction}</TableCell>
+                          <TableCell className="py-4">{payment.customerDetails.id}</TableCell>
+                          <TableCell className="py-4">{payment.customerDetails.name}</TableCell>
+                          <TableCell className="py-4">{payment.plans.amount}</TableCell>
+                          <TableCell className="py-4">{payment.plans.amount}</TableCell>
                         </TableRow>
                       ))
                     )}

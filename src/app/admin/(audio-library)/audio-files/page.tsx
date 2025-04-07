@@ -50,8 +50,8 @@ interface Audio {
   };
   imageUrl: string;
   audioUrl: string;
-  levels?: { _id: string; name: string }[]; // Assuming audio has levels
-  bestFor?: { _id: string; name: string }[]; // Assuming audio has bestFor
+  levels?: { _id: string; name: string }[];
+  bestFor?: { _id: string; name: string }[];
 }
 
 interface Pagination {
@@ -320,7 +320,7 @@ const AudioList = () => {
   };
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
+    setSearchQuery(e.target.value.trim());
   };
 
   if (error) return <div className="text-red-500">{error}</div>;
@@ -346,7 +346,7 @@ const AudioList = () => {
                 variant="outline"
                 className="my-2 w-full bg-[#0B132B] hover:bg-[#0B132B] min-h-12 border-none text-white justify-between"
               >
-                <div className="flex flex-wrap gap-2 items-center">
+                <div className="flex items-center w-full overflow-x-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800 p-1" style={{ maxHeight: '40px' }}>
                   {isLoadingLevels ? (
                     <Loader2 size={24} className="animate-spin text-white" />
                   ) : selectedLevels.length > 0 ? (
@@ -355,7 +355,7 @@ const AudioList = () => {
                       return (
                         <span
                           key={levelId}
-                          className="bg-[#1B2236] p-1 rounded-md text-white flex items-center"
+                          className="bg-[#1B2236] text-white px-2 py-1 rounded-md flex items-center mr-2 whitespace-nowrap"
                         >
                           {level?.name || levelId}
                           <span
@@ -410,7 +410,7 @@ const AudioList = () => {
                 variant="outline"
                 className="my-2 w-full bg-[#0B132B] hover:bg-[#0B132B] min-h-12 border-none text-white justify-between"
               >
-                <div className="flex flex-wrap gap-2 items-center">
+                <div className="flex items-center w-full overflow-x-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800 p-1" style={{ maxHeight: '40px' }}>
                   {isLoadingBestFor ? (
                     <Loader2 size={24} className="animate-spin text-white" />
                   ) : selectedBestFor.length > 0 ? (
@@ -419,7 +419,7 @@ const AudioList = () => {
                       return (
                         <span
                           key={bestForId}
-                          className="bg-[#1B2236] p-1 rounded-md text-white flex items-center"
+                          className="bg-[#1B2236] text-white px-2 py-1 rounded-md flex items-center mr-2 whitespace-nowrap"
                         >
                           {bestFor?.name || bestForId}
                           <span

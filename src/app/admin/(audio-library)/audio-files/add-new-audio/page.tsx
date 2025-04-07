@@ -21,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ChevronDown, Loader2, Trash2, Upload, X } from "lucide-react";
+import { ChevronDown, ChevronLeft, Loader2, Trash2, Upload, X } from "lucide-react";
 import Image from "next/image";
 import { toast } from "sonner";
 import {
@@ -420,8 +420,16 @@ const AddNewAudio = () => {
       onSubmit={handleSubmit(onSubmit)}
       className="p-6 bg-[#1B2236] text-white rounded-lg shadow-md"
     >
-      <h2 className="text-xl font-semibold mb-4">Add New Audio</h2>
-
+      <div className="flex items-center mb-4 gap-2">
+      <Button
+            variant="destructive"
+            className="bg-[#0B132B] hover:bg-[#0B132B] p-0 h-7 w-7 hover:cursor-pointer"
+            onClick={() => (window.location.href = "/admin/all-collections")}
+          >
+            <ChevronLeft  />
+          </Button>
+      <h2 className="text-xl font-semibold">Add New Audio</h2>
+</div>
       <Label className="text-gray-300 mb-3 block">Collection Type</Label>
       <Controller
         name="collectionType"

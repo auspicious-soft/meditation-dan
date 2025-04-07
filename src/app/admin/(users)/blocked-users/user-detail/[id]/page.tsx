@@ -1,11 +1,19 @@
 "use client";
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { getSingleUser, deleteUser, toggleBlockUser } from '@/services/admin-services'; // Added toggleBlockUser import
-import { useParams } from 'next/navigation';
-import React, { useState } from 'react';
-import useSWR from 'swr';
-import { toast } from 'sonner'; // Added toast import for feedback
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { getSingleUser, deleteUser, toggleBlockUser } from "@/services/admin-services"; // Added toggleBlockUser import
+import { useParams } from "next/navigation";
+import React, { useState } from "react";
+import useSWR from "swr";
+import { toast } from "sonner"; // Added toast import for feedback
+import { Loader2 } from "lucide-react"; // Import Loader2 for loading states
 
 // Skeleton Component for individual field
 const SkeletonField = () => (
@@ -32,6 +40,8 @@ const fetcher = async (url: string) => {
 const Page = () => {
   const { id } = useParams();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [unblocking, setUnblocking] = useState<boolean>(false); // Loading state for Unblock
+  const [deleting, setDeleting] = useState<boolean>(false); // Loading state for Delete
 
   const { data: apiResponse, error, isLoading, mutate } = useSWR(
     id ? `/admin/user/${id}` : null,
@@ -44,6 +54,7 @@ const Page = () => {
   const userData = apiResponse?.data;
 
   const handleUnblock = async () => {
+    setUnblocking(true); // Start loading for unblock
     try {
       const payload: { isBlocked: boolean } = { isBlocked: false };
       const response = await toggleBlockUser(`/admin/user/${id}/block`, payload);
@@ -52,17 +63,20 @@ const Page = () => {
         mutate(); // Refresh user data after unblocking
         setTimeout(() => {
           window.location.href = "/admin/blocked-users";
-        },1000)
+        }, 1000);
       } else {
         throw new Error(response.data.message || "Failed to unblock user");
       }
     } catch (err) {
       console.error("Error unblocking user:", err);
       toast.error(err instanceof Error ? err.message : "Failed to unblock user");
+    } finally {
+      setUnblocking(false); // Stop loading for unblock
     }
   };
 
   const handleDeleteAccount = async () => {
+    setDeleting(true); // Start loading for delete
     try {
       await deleteUser(`/admin/user/delete-user/${id}`);
       console.log("User deleted successfully");
@@ -75,6 +89,8 @@ const Page = () => {
     } catch (err) {
       console.error("Error deleting user:", err);
       toast.error("Failed to delete user");
+    } finally {
+      setDeleting(false); // Stop loading for delete
     }
   };
 
@@ -87,9 +103,11 @@ const Page = () => {
         <>
           <SkeletonHeader />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6">
-            {Array(6).fill(0).map((_, index) => (
-              <SkeletonField key={index} />
-            ))}
+            {Array(6)
+              .fill(0)
+              .map((_, index) => (
+                <SkeletonField key={index} />
+              ))}
           </div>
           <div className="flex gap-4 mt-12">
             <div className="h-10 w-32 bg-gray-600 rounded animate-pulse"></div>
@@ -100,13 +118,13 @@ const Page = () => {
         <div className="text-white">No user data found</div>
       ) : (
         <>
-          <div className='mb-6'>
+          <div className="mb-6">
             <h2 className="text-white text-xl font-medium">
               {userData.firstName} {userData.lastName}
             </h2>
-            <p className='opacity-80'>{userData.email}</p>
+            <p className="opacity-80">{userData.email}</p>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6">
             <div>
               <p className="text-sm text-slate-400 mb-1">First Name</p>
@@ -140,7 +158,7 @@ const Page = () => {
               <p className="text-white">{userData?.companyName || "N/A"}</p>
             </div>
           </div>
-          
+
           <div className="flex gap-4 mt-12">
             <Button
               variant="destructive"
@@ -149,18 +167,23 @@ const Page = () => {
             >
               Delete Account
             </Button>
-            
-            <Button 
+
+            <Button
               variant="default"
-              className="bg-[#1A3F70] hover:bg-[#1A3F70] hover:cursor-pointer"
+              className="bg-[#1A3F70] hover:bg-[#1A3F70] hover:cursor-pointer flex items-center justify-center"
               onClick={handleUnblock}
+              disabled={unblocking}
             >
-              Unblock
+              {unblocking ? (
+                <Loader2 size={20} className="animate-spin text-white" />
+              ) : (
+                "Unblock"
+              )}
             </Button>
           </div>
         </>
       )}
-      
+
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="bg-[#141B2D] border-[#1F2937] w-[450px] p-6 flex flex-col items-center text-white rounded-lg">
           <DialogHeader className="text-center">
@@ -179,10 +202,15 @@ const Page = () => {
             </Button>
             <Button
               variant="destructive"
-              className="bg-[#FF4747] hover:bg-[#FF4747] hover:cursor-pointer w-44 h-11"
+              className="bg-[#FF4747] hover:bg-[#FF4747] hover:cursor-pointer w-44 h-11 flex items-center justify-center"
               onClick={handleDeleteAccount}
+              disabled={deleting}
             >
-              Yes
+              {deleting ? (
+                <Loader2 size={20} className="animate-spin text-white" />
+              ) : (
+                "Yes"
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>

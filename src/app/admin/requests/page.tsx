@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css"; // Import CSS for skeleton
 import { getCompanyJoinRequest, updateCompanyJoinRequest } from "@/services/admin-services";
+import { Loader2 } from "lucide-react"; // Import Loader2 for the loading state
 
 // Define interface for company join request based on backend response
 interface CompanyJoinRequest {
@@ -32,6 +33,7 @@ const Page = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedRequestId, setSelectedRequestId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [approvingRequestId, setApprovingRequestId] = useState<string | null>(null); // New state for approval loading
 
   // Fetch company join requests on mount
   useEffect(() => {
@@ -69,6 +71,7 @@ const Page = () => {
 
   // Handle approval
   const handleApprove = async (requestId: string) => {
+    setApprovingRequestId(requestId); // Set loading state for this request
     try {
       const response = await updateCompanyJoinRequest(
         `/admin/company-join-requests/${requestId}?status=approve`
@@ -82,6 +85,8 @@ const Page = () => {
     } catch (error) {
       console.error("Error approving request:", error);
       toast.error("Failed to approve request");
+    } finally {
+      setApprovingRequestId(null); // Reset loading state
     }
   };
 
@@ -97,16 +102,16 @@ const Page = () => {
         setIsDialogOpen(false);
         setSelectedRequestId(null);
         await fetchRequests(); // Refetch to update UI
-        } else {
-          toast.error("Failed to deny request");
-        }
-      } catch (error: any) {
-        if (typeof error === "object" && error !== null && "response" in error && (error as any).response?.data?.message) {
-          toast.error((error as any).response.data.message);
-        } else {
-          toast.error("Failed to deny request");
-        }
-    } 
+      } else {
+        toast.error("Failed to deny request");
+      }
+    } catch (error: any) {
+      if (typeof error === "object" && error !== null && "response" in error && (error as any).response?.data?.message) {
+        toast.error((error as any).response.data.message);
+      } else {
+        toast.error("Failed to deny request");
+      }
+    }
   };
 
   // Loading state with skeleton
@@ -165,47 +170,51 @@ const Page = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-  {currentRequests.length > 0 ? (
-    currentRequests.map((request) => (
-      <TableRow key={request._id} className="border-0 text-sm font-normal hover:bg-transparent">
-        <TableCell className="py-4 w-1/4">{request.companyId?.identifier || "N/A"}</TableCell>
-        <TableCell className="py-4 w-1/4 whitespace-nowrap overflow-hidden overflow-ellipsis">
-          {request.companyId?.companyName || "N/A"}
-        </TableCell>
-        <TableCell className="py-4 w-1/4 whitespace-nowrap overflow-hidden overflow-ellipsis">
-          {request.companyId?.email || "N/A"}
-        </TableCell>
-        <TableCell className="text-right py-4 w-1/4 whitespace-nowrap min-w-[120px]">
-          <div className="flex gap-x-2 justify-end">
-            <Button
-              className="bg-[#14AB00] hover:bg-[#14AB00] hover:cursor-pointer"
-              onClick={() => request.companyId?._id && handleApprove(request.companyId._id)}
-              disabled={request.status !== "Pending"}
-            >
-              <Image src="/GreenTick.svg" alt="Check" width={20} height={20} />
-            </Button>
-            <Button
-              onClick={() => {
-                setSelectedRequestId(request.companyId?._id ?? null);
-                setIsDialogOpen(true);
-              }}
-              className="bg-[#FF4747] hover:bg-[#FF4747] hover:cursor-pointer"
-              disabled={request.status !== "Pending"}
-            >
-              <Image src="/Cross.svg" alt="Cross" width={20} height={20} />
-            </Button>
-          </div>
-        </TableCell>
-      </TableRow>
-    ))
-  ) : (
-    <TableRow>
-      <TableCell colSpan={4}>
-        <p className="text-white text-center">No requests found</p>
-      </TableCell>
-    </TableRow>
-  )}
-</TableBody>
+                {currentRequests.length > 0 ? (
+                  currentRequests.map((request) => (
+                    <TableRow key={request._id} className="border-0 text-sm font-normal hover:bg-transparent">
+                      <TableCell className="py-4 w-1/4">{request.companyId?.identifier || "N/A"}</TableCell>
+                      <TableCell className="py-4 w-1/4 whitespace-nowrap overflow-hidden overflow-ellipsis">
+                        {request.companyId?.companyName || "N/A"}
+                      </TableCell>
+                      <TableCell className="py-4 w-1/4 whitespace-nowrap overflow-hidden overflow-ellipsis">
+                        {request.companyId?.email || "N/A"}
+                      </TableCell>
+                      <TableCell className="text-right py-4 w-1/4 whitespace-nowrap min-w-[120px]">
+                        <div className="flex gap-x-2 justify-end">
+                          <Button
+                            className="bg-[#14AB00] hover:bg-[#14AB00] hover:cursor-pointer flex items-center justify-center"
+                            onClick={() => request.companyId?._id && handleApprove(request.companyId._id)}
+                            disabled={request.status !== "Pending" || approvingRequestId === request.companyId?._id}
+                          >
+                            {approvingRequestId === request.companyId?._id ? (
+                              <Loader2 size={20} className="animate-spin text-white" />
+                            ) : (
+                              <Image src="/GreenTick.svg" alt="Check" width={20} height={20} />
+                            )}
+                          </Button>
+                          <Button
+                            onClick={() => {
+                              setSelectedRequestId(request.companyId?._id ?? null);
+                              setIsDialogOpen(true);
+                            }}
+                            className="bg-[#FF4747] hover:bg-[#FF4747] hover:cursor-pointer flex items-center justify-center"
+                            disabled={request.status !== "Pending"}
+                          >
+                            <Image src="/Cross.svg" alt="Cross" width={20} height={20} />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={4}>
+                      <p className="text-white text-center">No requests found</p>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
             </Table>
             <div className="flex flex-col sm:flex-row justify-end items-center gap-2 mt-4">
               <Button
@@ -217,7 +226,7 @@ const Page = () => {
               </Button>
               <span className="text-white text-sm">Page {currentPage} of {totalPages}</span>
               <Button
-                className="bg-[#0B132B] "
+                className="bg-[#0B132B]"
                 onClick={() => handlePageChange(currentPage + 1)}
                 disabled={currentPage === totalPages}
               >
@@ -242,7 +251,7 @@ const Page = () => {
             <DialogFooter className="flex justify-center gap-4 mt-4">
               <Button
                 variant="outline"
-                className="bg-[#1A3F70] border-[#0c4a6e]  hover:bg-[#1A3F70] w-32 sm:w-44 h-10 sm:h-11"
+                className="bg-[#1A3F70] border-[#0c4a6e] hover:bg-[#1A3F70] w-32 sm:w-44 h-10 sm:h-11"
                 onClick={() => {
                   setIsDialogOpen(false);
                   setSelectedRequestId(null);

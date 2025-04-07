@@ -16,7 +16,6 @@ const Page = () => {
     lastName: "",
     email: "",
   });
-  const [adminId, setAdminId] = useState<string>(""); 
   const [profileImage, setProfileImage] = useState<string>("");
   const [imagePreview, setImagePreview] = useState<string>(""); 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -34,7 +33,6 @@ const Page = () => {
           lastName: adminData.lastName || "",
           email: adminData.email || "",
         });
-        setAdminId(adminData.id || "");
 
         // Get the full S3 URL for the profile image
         if (adminData.profilePic) {
