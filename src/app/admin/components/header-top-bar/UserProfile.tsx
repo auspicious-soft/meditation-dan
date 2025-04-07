@@ -54,7 +54,7 @@ const UserProfile = () => {
      </div>
      <DropdownMenuItem className="p-0 !bg-transparent">
       <Link className="gap-2 w-full p-[8px] hover:bg-[#1a3f70] hover:text-white rounded-sm dm-sans" href="/admin/admin-profile">
-       User Profile
+       Admin Profile
       </Link>
      </DropdownMenuItem>
     </DropdownMenuGroup>
