@@ -54,7 +54,7 @@ const SkeletonTable = () => (
 );
 
 // Modal Component
-const SubscriptionModal = ({ isOpen, onClose, onContinue, planType, price }: any) => {
+const SubscriptionModal = ({ isOpen, onClose, onContinue, planType, price,description }: any) => {
   const [numberOfUsers, setNumberOfUsers] = useState(1);
   const [isLoading, setIsLoading] = useState(false); // State for loading on Continue button
   console.log('isLoading: ', isLoading);
@@ -79,8 +79,7 @@ const SubscriptionModal = ({ isOpen, onClose, onContinue, planType, price }: any
           <div className="flex justify-between items-center ">
             <p className="opacity-80 text-white text-base font-normal font-['DM_Sans']">Description</p>
             <div className="w-[50%] justify-start text-white text-sm font-normal ">
-              Introducing our Premium Subscription Plan for just $25.99 a month. Enjoy unlimited access to exclusive
-              content, personalized recommendations.
+              {description}
             </div>
           </div>
           <div>
@@ -115,7 +114,8 @@ const SubscriptionModal = ({ isOpen, onClose, onContinue, planType, price }: any
           <button
             onClick={() => {
               setIsLoading(true);
-              onContinue(numberOfUsers).finally(() => setIsLoading(false));
+              onContinue(numberOfUsers);
+              setTimeout(() => setIsLoading(false));
             }}
             className="w-full bg-[#14ab00] text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 transition flex items-center justify-center"
             disabled={isLoading}
@@ -145,10 +145,10 @@ const Page = () => {
   const [isCanceling, setIsCanceling] = useState<string | null>(null);
   const [showSkeletonAfterCancel, setShowSkeletonAfterCancel] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedPlanDetails, setSelectedPlanDetails] = useState({ planType: "", price: "", planId: "" });
+  const [selectedPlanDetails, setSelectedPlanDetails] = useState({ planType: "", price: "", planId: "", description: "" });
 
-  const handlePlanSelect = (planType: string, price: string, planId: string) => {
-    setSelectedPlanDetails({ planType, price, planId });
+  const handlePlanSelect = (planType: string, price: string, planId: string, description: string) => {
+    setSelectedPlanDetails({ planType, price, planId, description });
     setIsModalOpen(true);
   };
 
@@ -185,8 +185,12 @@ const Page = () => {
     });
   };
 
-  const handleCancelSubscription = async (subscriptionId: string) => {
-    setIsCanceling(subscriptionId);
+  const handleCancelSubscription = async () => {
+    // if(!subscriptionId) {
+    //   toast.error("Subscription ID is missing.");
+    //   return;
+    // };
+    // setIsCanceling(subscriptionId);
     try {
       const response = await cancelSubscription(`/company/cancel-subscription`);
       if (response?.data.success) {
@@ -230,7 +234,9 @@ const Page = () => {
                 : null;
               const planType = product.name.split(" ")[0].toLowerCase();
               const isCardLoading = isPending && selectedPlanId === product.id;
-              const isCardCanceling = isCanceling === product.currentPlan?.subscriptionId;
+              const isLifetime = product.currentPlan?.planType === "lifetime";
+              const isCardCanceling = product.currentPlan?.subscriptionId && isCanceling === product.currentPlan.subscriptionId;
+              // const isCardCanceling = isCanceling === product.currentPlan?.subscriptionId;
 
               const cardBgColor = isCurrentPlan ? "bg-[#1A3F70]" : "bg-white";
               const textColor = isCurrentPlan ? "text-white" : "text-black";
@@ -250,7 +256,7 @@ const Page = () => {
                   className={`relative w-full max-w-sm h-fit ${cardBgColor} rounded-lg flex flex-col items-left p-6 shadow-lg transition-transform duration-300 hover:scale-105`}
                 >
                   {isCurrentPlan && (
-                    <div className="absolute top-0 right-0 text-center justify-start bg-white text-[#1a3f70] text-sm font-medium font-['SF_Pro_Display'] p-2 px-3 rounded-lg shadow-lg">
+                    <div className="absolute top-0 right-0 text-center justify-start bg-white text-[#1a3f70] text-sm font-medium p-2 px-3 rounded-tr-lg rounded-bl-lg shadow-lg">
                       Current Plan
                     </div>
                   )}
@@ -272,7 +278,7 @@ const Page = () => {
                       </div>
                     ))} */}
                   </div>
-                  <div className="mt-8 flex justify-left w-full">
+                  {/* <div className="mt-8 flex justify-left w-full">
                     {isCardLoading || isCardCanceling ? (
                       <div className={`flex justify-center items-center p-5 ${isCurrentPlan ? "text-white" : "text-[#1A3F70]"}`}>Loading...</div>
                     ) : isCurrentPlan ? (
@@ -288,12 +294,37 @@ const Page = () => {
                       
                       <button
                         disabled={isCurrentPlan}
-                        onClick={() => handlePlanSelect(planType, price, product.id)}
+                        onClick={() => handlePlanSelect(planType, price, product.id ,product.description)}
                         className={`h-12 w-full max-w-[150px]  ${buttonBgColor} rounded-lg flex items-center justify-center text-center`}
                       >
                         <span className={`${buttonTextColor}  text-base font-medium`}>
                         Activate Plan
                         </span>
+                      </button>
+                    )}
+                  </div> */}
+                  <div className="mt-8 flex justify-left w-full">
+                    {isCardCanceling ? (
+                      <div className={`flex justify-center items-center p-5 ${isCurrentPlan ? "text-white" : "text-[#1A3F70]"}`}>Loading...</div>
+                    ) : isCurrentPlan && !isLifetime ? (
+                      <button
+                        onClick={() => handleCancelSubscription()}
+                        className={`h-12 w-full max-w-[200px] ${buttonBgColor} rounded-lg flex items-center justify-center`}
+                      >
+                       <span className={`${buttonTextColor} text-lg font-medium font-['SF_Pro_Display']`}>
+                          Cancel Subscription
+                        </span>
+                      </button>
+                    ) : isCurrentPlan && isLifetime ? (
+                      <div className="text-center text-white">Lifetime Plan</div>
+                    ) : (
+                      <button
+                        onClick={() => handlePlanSelect(product.name.split(" ")[0].toLowerCase(), price, product.id, product.description)}
+                        className={`h-12 w-full max-w-[150px]  ${buttonBgColor} rounded-lg flex items-center justify-center text-center`}
+                        >
+                          <span className={`${buttonTextColor}  text-base font-medium`}>
+                          Activate Plan
+                          </span>
                       </button>
                     )}
                   </div>
@@ -313,6 +344,7 @@ const Page = () => {
           onContinue={handleContinue}
           planType={selectedPlanDetails.planType}
           price={selectedPlanDetails.price}
+          description={selectedPlanDetails.description}
         />
       </div>
 

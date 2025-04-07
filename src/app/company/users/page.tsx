@@ -7,16 +7,18 @@ import { getAllUsers } from "@/services/company-services";
 import useSWR from "swr";
 import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css"; // Import skeleton CSS
+import SearchBar from "@/components/ui/SearchBar";
 
 const PAGE_SIZE = 5; // Number of users per page (we'll override the API's limit)
 
 const Page = () => {
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const [searchParams, setsearchParams] = useState("");
 
   // Fetch data using SWR with pagination parameters
   const { data, error, isLoading, mutate } = useSWR(
-    `/company/users?page=${currentPage}&limit=${PAGE_SIZE}`, // Override the API's default limit
+    `/company/users?description=${searchParams}&page=${currentPage}&limit=${PAGE_SIZE}`, // Override the API's default limit
     getAllUsers,
     {
       revalidateOnFocus: false,
@@ -30,7 +32,7 @@ const Page = () => {
   // Extract users and pagination data from the API response
   const users = data?.data?.data?.users || [];
   const pagination = data?.data?.data || { limit: PAGE_SIZE, page: 1, totalUsers: 0 };
-  
+
   // Use pagination data from the API
   const totalUsers = pagination.totalUsers;
   const totalPages = Math.ceil(totalUsers / PAGE_SIZE);
@@ -61,11 +63,15 @@ const Page = () => {
       <div className="col-span-12 space-y-6 bg-[#1B2236] rounded-[12px] md:rounded-[20px] py-4 px-4 md:py-8 md:px-9">
         <div className="flex justify-between">
           <h2 className="text-white text-[20px] md:text-2xl font-bold mb-3">User Lists</h2>
+
+          <div className="flex gap-[10px]">
           <div
-            className="px-[48px] py-[8px] bg-[#1A3F70] rounded inline-flex justify-center items-center gap-2.5 hover:cursor-pointer"
+            className="px-5 py-2 bg-[#1A3F70] rounded-[20px] inline-flex justify-center items-center gap-2.5 hover:cursor-pointer"
             onClick={handleAddUserClick}
           >
             <div className="text-center justify-start text-white text-sm font-normal">+ Add New User</div>
+          </div>
+          <SearchBar setQuery={setsearchParams} query={searchParams} />
           </div>
         </div>
 

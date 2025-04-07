@@ -97,14 +97,14 @@ const RecentNewUsers = () => {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    transactions.map((invoice: any) => (
-                      <TableRow key={invoice.id} className="border-0 text-sm font-normal hover:bg-transparent">
-                        <TableCell className="py-4">{invoice.id}</TableCell>
+                    transactions.data.map((invoice: any) => (
+                      <TableRow key={invoice.transactionId} className="border-0 text-sm font-normal hover:bg-transparent">
+                        <TableCell className="py-4">{invoice.transactionId}</TableCell>
                         <TableCell className="text-center py-4">
                           {new Date(invoice.purchaseDate).toLocaleDateString()}
                         </TableCell>
-                        <TableCell className="text-center py-4">{invoice.planName}</TableCell>
-                        <TableCell className="text-right py-4">${invoice.price}</TableCell>
+                        <TableCell className="text-center py-4">{invoice.planType}</TableCell>
+                        <TableCell className="text-right py-4">${invoice.transactionAmount}</TableCell>
                       </TableRow>
                     ))
                   )}
@@ -181,7 +181,7 @@ const RecentNewUsers = () => {
                         </TableCell>
                         <TableCell className="text-right py-4">
                           <Button
-                            className="px-3 !py-0 h-6 !bg-[#1a3f70] rounded inline-flex justify-center items-center text-white text-sm !font-normal !leading-tight !tracking-tight"
+                            className="px-3 !py-0 h-6 !bg-[#1a3f70] rounded inline-flex justify-center items-center text-white text-sm !font-normal !leading-tight !tracking-tight hover:cursor-pointer"
                             onClick={() => handleViewClick(user._id)}
                           >
                             View

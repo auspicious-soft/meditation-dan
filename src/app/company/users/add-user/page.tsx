@@ -2,22 +2,37 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createUserAccount } from "@/services/company-services";
 import { toast } from "sonner";
+import { useSession } from "next-auth/react";
 
 const Page = () => {
+  const { data: session } = useSession();
   const router = useRouter();
+
+  // State to manage form data
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
     email: "",
     gender: "",
-    companyName: "",
-    birthday: "",
+    companyName: "",  
+    // birthday: "",
     password: "",
   });
+
+  // Set companyName from session when available
+  useEffect(() => {
+    if (session?.user?.fullName) {
+      setFormData((prevData) => ({
+        ...prevData,
+        companyName: session.user.fullName,  // Set from session data
+      }));
+    }
+  }, [session]);
+
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -36,7 +51,7 @@ const Page = () => {
       "email",
       "gender",
       "companyName",
-      "birthday",
+      // "birthday",
       "password"
     ];
     for (const field of requiredFields) {
@@ -50,7 +65,6 @@ const Page = () => {
     return null;
   };
 
-  // Check if all fields are filled
   const isFormComplete = () => {
     return (
       formData.firstName.trim() !== "" &&
@@ -58,7 +72,7 @@ const Page = () => {
       formData.email.trim() !== "" &&
       formData.gender.trim() !== "" &&
       formData.companyName.trim() !== "" &&
-      formData.birthday.trim() !== "" &&
+      // formData.birthday.trim() !== "" &&
       formData.password.trim() !== ""
     );
   };
@@ -81,13 +95,13 @@ const Page = () => {
         lastName: formData.lastName,
         email: formData.email,
         gender: formData.gender,
-        companyName: formData.companyName,
-        dob: formData.birthday,
+        companyName: formData.companyName,  
+        // dob: formData.birthday,
         password: formData.password,
       };
       const response = await createUserAccount("/company/users", payload);
       console.log('response: ', response);
-      if(response?.data?.success){
+      if (response?.data?.success) {
         toast.success(response.data.message);
         router.push("/company/users");
       }
@@ -156,7 +170,38 @@ const Page = () => {
                 required
               />
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="companyName" className="text-white dm-sans text-base font-normal">
+                Company Name
+              </Label>
+              <Input
+                id="companyName"
+                type="text"
+                value={formData.companyName}  // This will be the value set from the session
+                onChange={() => { }}
+                className="bg-[#0f172a] h-12 border-none text-white"
+                disabled={true}  // Make this field disabled to prevent editing
+                required
+              />
+            </div>
 
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* <div className="space-y-2">
+              <Label htmlFor="birthday" className="text-white dm-sans text-base font-normal">
+                Birthday
+              </Label>
+              <Input
+                id="birthday"
+                type="date"
+                value={formData.birthday}
+                onChange={(e) => handleChange("birthday", e.target.value)}
+                className="bg-[#0f172a] h-12 border-none text-white"
+                disabled={isLoading}
+                required
+              />
+            </div> */}
             <div className="space-y-2">
               <Label htmlFor="email" className="text-white dm-sans text-base font-normal">
                 Email Address
@@ -171,54 +216,24 @@ const Page = () => {
                 required
               />
             </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <Label htmlFor="birthday" className="text-white dm-sans text-base font-normal">
-                Birthday
+            <div className="space-y-2  ">
+              <Label htmlFor="password" className="text-white dm-sans text-base font-normal">
+                Password
               </Label>
               <Input
-                id="birthday"
-                type="date"
-                value={formData.birthday}
-                onChange={(e) => handleChange("birthday", e.target.value)}
-                className="bg-[#0f172a] h-12 border-none text-white"
+                id="password"
+                type="password"
+                value={formData.password}
+                onChange={(e) => handleChange("password", e.target.value)}
+                className="bg-[#0f172a] h-12 border-none text-white w-full"
                 disabled={isLoading}
                 required
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="companyName" className="text-white dm-sans text-base font-normal">
-                Company Name
-              </Label>
-              <Input
-                id="companyName"
-                type="text"
-                value={formData.companyName}
-                onChange={(e) => handleChange("companyName", e.target.value)}
-                className="bg-[#0f172a] h-12 border-none text-white"
-                disabled={isLoading}
-                required
-              />
-            </div>
           </div>
 
-          <div className="space-y-2 md:w-[48%] lg:w-[48%] sm:w-full">
-            <Label htmlFor="password" className="text-white dm-sans text-base font-normal">
-              Password
-            </Label>
-            <Input
-              id="password"
-              type="password"
-              value={formData.password}
-              onChange={(e) => handleChange("password", e.target.value)}
-              className="bg-[#0f172a] h-12 border-none text-white"
-              disabled={isLoading}
-              required
-            />
-          </div>
+
 
           <div>
             <Button

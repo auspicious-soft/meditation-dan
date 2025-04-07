@@ -3,6 +3,10 @@
 import { axiosInstance, getAxiosInstance, getCompanyAxiosInstance } from "@/config/axios"
 
 
+export const getCompanyDetails = async (route: string ,params: any = {}) => {
+    const axiosInstance = await getCompanyAxiosInstance()
+    return axiosInstance.get(route)
+}
 export const getCompanyDashboard = async (route: string ,params: any = {}) => {
     const axiosInstance = await getCompanyAxiosInstance()
     return axiosInstance.get(route)
