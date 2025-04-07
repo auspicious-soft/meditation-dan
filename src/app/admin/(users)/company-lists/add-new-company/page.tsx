@@ -8,6 +8,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";// Adjust the import path
 import { toast } from "sonner";
 import { addNewCompanyStats } from "@/services/admin-services";
+import { ChevronLeft } from "lucide-react";
 
 // Validation Schema
 const schema = yup.object({
@@ -78,9 +79,18 @@ const Page = () => {
   return (
     <div className="grid grid-cols-12 gap-4 h-screen w-full">
       <div className="col-span-12 space-y-6 bg-[#1b2236] rounded-[12px] md:rounded-[20px] py-4 px-4 md:py-8 md:px-9">
-        <h2 className="text-white text-[20px] md:text-2xl font-bold mb-6">
+       <div className="flex items-center gap-2 mb-4"> 
+       <Button
+            variant="destructive"
+            className="bg-[#0B132B] hover:bg-[#0B132B] p-0 h-7 w-7 hover:cursor-pointer"
+            onClick={() => (window.location.href = "/admin/company-lists")}
+          >
+            <ChevronLeft  />
+          </Button>
+        <h2 className="text-white text-[20px] md:text-2xl font-bold ">
           Add New Company
         </h2>
+        </div>
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">

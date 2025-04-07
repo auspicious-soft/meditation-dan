@@ -83,7 +83,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent className="px-0 py-0 md:p-0">
         <NavMain items={data.navMain} />
       </SidebarContent>
-      <SidebarMenuButton className={`flex gap-2 items-center hover:cursor-pointer h-auto mt-6 text-base font-normal px-[12px] py-[10px] ${
+      <SidebarMenuButton className={`flex gap-2 items-center hover:cursor-pointer h-auto text-base font-normal px-[12px] py-[10px] ${
           isSubscriptionExpiringActive ? "bg-[#1a3f70]" : "font-normal"}`}
         onClick={()=> router.push('/admin/subscription-expiring')}>
         <BellNotifactionIcon />

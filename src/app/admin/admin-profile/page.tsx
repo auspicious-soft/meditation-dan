@@ -9,6 +9,7 @@ import { generateSignedUrlForAdminProfile, getImageUrlOfS3 } from "@/actions";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { signIn } from "next-auth/react"; // Import signIn for session update
 
 const Page = () => {
   const [formData, setFormData] = useState({
@@ -17,7 +18,7 @@ const Page = () => {
     email: "",
   });
   const [profileImage, setProfileImage] = useState<string>("");
-  const [imagePreview, setImagePreview] = useState<string>(""); 
+  const [imagePreview, setImagePreview] = useState<string>("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -76,48 +77,66 @@ const Page = () => {
   const handleSave = async () => {
     setIsLoading(true);
     try {
-      // Update profile data
-      await updateAdminDetails(`/admin`, formData);
-      toast.success("Profile updated successfully");
+      // Update profile data and capture response
+      const profileUpdateResponse = await updateAdminDetails(`/admin`, formData);
+      if (profileUpdateResponse && profileUpdateResponse.data.success) {
+        toast.success("Profile updated successfully");
 
-      // Update profile picture if a new image was selected
-      if (selectedFile) {
-        const image = selectedFile;
-        const imageFileName = `${Date.now()}-${image.name}`;
-        const fileType = image.type;
+        // Update profile picture if a new image was selected
+        let imageUpdateResponse;
+        if (selectedFile) {
+          const image = selectedFile;
+          const imageFileName = `${Date.now()}-${image.name}`;
+          const fileType = image.type;
 
-        // Generate signed URL for S3 upload
-        const { signedUrl, key } = await generateSignedUrlForAdminProfile(formData.email, imageFileName, fileType);
-        console.log('key:', key);
+          // Generate signed URL for S3 upload
+          const { signedUrl, key } = await generateSignedUrlForAdminProfile(formData.email, imageFileName, fileType);
+          console.log("key:", key);
 
-        // Upload the image to S3 using the signed URL
-        const imageUploadResponse = await fetch(signedUrl, {
-          method: "PUT",
-          body: image,
-          headers: { "Content-Type": image.type },
-        });
+          // Upload the image to S3 using the signed URL
+          const imageUploadResponse = await fetch(signedUrl, {
+            method: "PUT",
+            body: image,
+            headers: { "Content-Type": image.type },
+          });
 
-        if (!imageUploadResponse.ok) {
-          throw new Error("Failed to upload image to S3");
+          if (!imageUploadResponse.ok) {
+            throw new Error("Failed to upload image to S3");
+          }
+
+          // Update backend with the new S3 key
+          imageUpdateResponse = await updateAdminProfilePic(`/admin/profile/pic`, { profilePic: key });
+
+          if (imageUpdateResponse && imageUpdateResponse.data.success) {
+            setProfileImage(key);
+            setSelectedFile(null);
+            toast.success("Profile picture updated successfully");
+          } else {
+            throw new Error(imageUpdateResponse?.data?.message || "Failed to update profile picture");
+          }
         }
 
-        // Update backend with the new S3 key
-        await updateAdminProfilePic(`/admin/profile/pic`, { profilePic: key });
-        
-        // Update state with the new key
-        setProfileImage(key);
-        
-        // Clear the selected file as it's been uploaded
-        setSelectedFile(null);
-       
-        toast.success("Profile picture updated successfully");
-        setTimeout(() =>{
+        // Update session with the latest data if all updates are successful
+        const userName = `${formData.firstName} ${formData.lastName}`;
+        const updatedProfilePicKey = imageUpdateResponse?.data?.data?.profilePic || profileUpdateResponse.data.data.profilePic || profileImage;
+        await signIn("credentials", {
+          email: formData.email,
+          fullName: userName,
+          _id: profileUpdateResponse.data.data._id || "", // Assuming the response includes an _id
+          role: profileUpdateResponse.data.data.role || "admin", // Assuming role is returned
+          profilePic:updatedProfilePicKey || "",
+          redirect: false,
+        });
+
+        setTimeout(() => {
           window.location.reload();
-        })
+        }, 1000);
+      } else {
+        throw new Error(profileUpdateResponse?.data?.message || "Failed to update profile");
       }
     } catch (error) {
       console.error("Error saving profile:", error);
-      toast.error("Failed to save profile");
+      toast.error(error instanceof Error ? error.message : "Failed to save profile");
     } finally {
       setIsLoading(false);
     }
@@ -137,8 +156,7 @@ const Page = () => {
                     alt="Preview"
                     width={176}
                     height={176}
-                    className="rounded-lg w-full h-full object-cover"
-                    // Add a key to force React to re-render the image when the URL changes
+                    className="rounded-lg object-cover"
                     key={imagePreview}
                   />
                   <Button
