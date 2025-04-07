@@ -42,30 +42,32 @@ const Page = () => {
     }
   };
 
-  const handleApproveClick = async(id: string) => {
-   console.log("Delete account requested");
-   const response = await getApproveOrDeclinePendingJoinRequest(`/company/join-requests/${id}?status=approve`);
-   console.log('response: ', response);
-   if(response?.data?.success){
-    toast.success("Account approved successfully");
-    mutate();
-   }
-   else{
-    toast.error(response?.data?.message || "Failed to approve account");
-   }
+  const handleApproveClick = async (id: string) => {
+    try {
+
+      const response = await getApproveOrDeclinePendingJoinRequest(`/company/join-requests/${id}?status=approve`);
+      console.log('response: ', response);
+      if (response?.data?.success) {
+        toast.success("Account approved successfully");
+        mutate();
+      }
+    } catch (err: any) {
+      console.log(err);
+      toast.error(err?.response?.data?.message || "Failed to approve account");
+    }
   };
 
-  const handleDeleteAccount = async(id:string) => {
+  const handleDeleteAccount = async (id: string) => {
     console.log("Delete account requested");
     const response = await getApproveOrDeclinePendingJoinRequest(`/company/join-requests/${id}?status=deny`);
     console.log('response: ', response);
-    if(response?.data?.success){
+    if (response?.data?.success) {
       toast.success("Request declined successfully");
       mutate();
-     }
-     else{
+    }
+    else {
       toast.error(response?.data?.message || "Failed to declined request");
-     }
+    }
     setIsDialogOpen(false);
     // Add your delete logic here
   };
@@ -130,36 +132,36 @@ const Page = () => {
                       </div>
                     </TableCell>
                     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogContent className="bg-[#141B2D] border-[#1F2937] w-full max-w-[450px] p-6 flex flex-col items-center text-white rounded-lg">
-              <DialogHeader className="text-center">
-                <div className="flex justify-center mb-4">
-                  <Image src="/error.svg" alt="error" width={20} height={20} />
-                </div>
-                <DialogTitle className="text-lg font-semibold text-center">Delete?</DialogTitle>
-                <DialogDescription className="text-sm text-gray-400">
-                  Are you sure you want to delete this? This action cannot be undone.
-                </DialogDescription>
-              </DialogHeader>
-              <DialogFooter className="flex justify-center gap-4 mt-4">
-                <Button
-                  variant="outline"
-                  className="bg-[#1A3F70] border-[#0c4a6e] hover:bg-[#1A3F70] w-32 sm:w-44 h-10 sm:h-11"
-                  onClick={() => setIsDialogOpen(false)}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  variant="destructive"
-                  className="w-32 sm:w-44 h-10 sm:h-11"
-                  onClick={() => handleDeleteAccount(request.userId?._id)}
-                >
-                  Delete
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+                      <DialogContent className="bg-[#141B2D] border-[#1F2937] w-full max-w-[450px] p-6 flex flex-col items-center text-white rounded-lg">
+                        <DialogHeader className="text-center">
+                          <div className="flex justify-center mb-4">
+                            <Image src="/error.svg" alt="error" width={20} height={20} />
+                          </div>
+                          <DialogTitle className="text-lg font-semibold text-center">Delete?</DialogTitle>
+                          <DialogDescription className="text-sm text-gray-400">
+                            Are you sure you want to delete this? This action cannot be undone.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <DialogFooter className="flex justify-center gap-4 mt-4">
+                          <Button
+                            variant="outline"
+                            className="bg-[#1A3F70] border-[#0c4a6e] hover:bg-[#1A3F70] w-32 sm:w-44 h-10 sm:h-11"
+                            onClick={() => setIsDialogOpen(false)}
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            className="w-32 sm:w-44 h-10 sm:h-11"
+                            onClick={() => handleDeleteAccount(request.userId?._id)}
+                          >
+                            Delete
+                          </Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
                   </TableRow>
-                  
+
                 ))
               )}
             </TableBody>
@@ -220,7 +222,7 @@ const Page = () => {
           </Dialog> */}
         </div>
       </div>
-    </div> 
+    </div>
   );
 };
 
