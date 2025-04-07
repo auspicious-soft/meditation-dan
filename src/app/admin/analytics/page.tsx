@@ -2,7 +2,14 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { toast } from "sonner";
 import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
@@ -31,9 +38,10 @@ interface Payment {
     name: string;
     id: string;
   };
-  plans:{
+  plans: {
     amount: number;
-  },
+    interval: string;
+  }[];
   Plan: string;
   Transaction: string;
 }
@@ -53,7 +61,9 @@ const PAGE_SIZE = 20;
 const Page = () => {
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
+  const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(
+    null
+  );
 
   useEffect(() => {
     const fetchData = async () => {
@@ -75,7 +85,11 @@ const Page = () => {
 
   if (!analyticsData) {
     return (
-      <SkeletonTheme baseColor="#0B132B" highlightColor="#1B2236" borderRadius="0.5rem">
+      <SkeletonTheme
+        baseColor="#0B132B"
+        highlightColor="#1B2236"
+        borderRadius="0.5rem"
+      >
         <div className="py-4">
           <div className="mb-8 text-white text-2xl font-bold">
             Track and measure user engagement and app performance.
@@ -96,17 +110,29 @@ const Page = () => {
                   <Table>
                     <TableHeader>
                       <TableRow className="border-0 border-b border-[#666666]">
-                        <TableHead className="w-[100px] py-4"><Skeleton height={20} /></TableHead>
-                        <TableHead className="py-4"><Skeleton height={20} /></TableHead>
-                        <TableHead className="py-4"><Skeleton height={20} /></TableHead>
+                        <TableHead className="w-[100px] py-4">
+                          <Skeleton height={20} />
+                        </TableHead>
+                        <TableHead className="py-4">
+                          <Skeleton height={20} />
+                        </TableHead>
+                        <TableHead className="py-4">
+                          <Skeleton height={20} />
+                        </TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {[...Array(5)].map((_, index) => (
                         <TableRow key={index} className="border-0">
-                          <TableCell className="py-4"><Skeleton height={20} /></TableCell>
-                          <TableCell className="py-4"><Skeleton height={20} /></TableCell>
-                          <TableCell className="py-4"><Skeleton height={20} /></TableCell>
+                          <TableCell className="py-4">
+                            <Skeleton height={20} />
+                          </TableCell>
+                          <TableCell className="py-4">
+                            <Skeleton height={20} />
+                          </TableCell>
+                          <TableCell className="py-4">
+                            <Skeleton height={20} />
+                          </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
@@ -121,19 +147,35 @@ const Page = () => {
                   <Table>
                     <TableHeader>
                       <TableRow className="border-0 border-b border-[#666666]">
-                        <TableHead className="w-[100px] py-4"><Skeleton height={20} /></TableHead>
-                        <TableHead className="py-4"><Skeleton height={20} /></TableHead>
-                        <TableHead className="py-4"><Skeleton height={20} /></TableHead>
-                        <TableHead className="py-4"><Skeleton height={20} /></TableHead>
+                        <TableHead className="w-[100px] py-4">
+                          <Skeleton height={20} />
+                        </TableHead>
+                        <TableHead className="py-4">
+                          <Skeleton height={20} />
+                        </TableHead>
+                        <TableHead className="py-4">
+                          <Skeleton height={20} />
+                        </TableHead>
+                        <TableHead className="py-4">
+                          <Skeleton height={20} />
+                        </TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {[...Array(3)].map((_, index) => (
                         <TableRow key={index} className="border-0">
-                          <TableCell className="py-4"><Skeleton height={20} /></TableCell>
-                          <TableCell className="py-4"><Skeleton height={20} /></TableCell>
-                          <TableCell className="py-4"><Skeleton height={20} /></TableCell>
-                          <TableCell className="py-4"><Skeleton height={20} width={60} /></TableCell>
+                          <TableCell className="py-4">
+                            <Skeleton height={20} />
+                          </TableCell>
+                          <TableCell className="py-4">
+                            <Skeleton height={20} />
+                          </TableCell>
+                          <TableCell className="py-4">
+                            <Skeleton height={20} />
+                          </TableCell>
+                          <TableCell className="py-4">
+                            <Skeleton height={20} width={60} />
+                          </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
@@ -146,19 +188,35 @@ const Page = () => {
                   <Table>
                     <TableHeader>
                       <TableRow className="border-0 border-b border-[#666666]">
-                        <TableHead className="w-[100px] py-4"><Skeleton height={20} /></TableHead>
-                        <TableHead className="py-4"><Skeleton height={20} /></TableHead>
-                        <TableHead className="py-4"><Skeleton height={20} /></TableHead>
-                        <TableHead className="py-4"><Skeleton height={20} /></TableHead>
+                        <TableHead className="w-[100px] py-4">
+                          <Skeleton height={20} />
+                        </TableHead>
+                        <TableHead className="py-4">
+                          <Skeleton height={20} />
+                        </TableHead>
+                        <TableHead className="py-4">
+                          <Skeleton height={20} />
+                        </TableHead>
+                        <TableHead className="py-4">
+                          <Skeleton height={20} />
+                        </TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {[...Array(3)].map((_, index) => (
                         <TableRow key={index} className="border-0">
-                          <TableCell className="py-4"><Skeleton height={20} /></TableCell>
-                          <TableCell className="py-4"><Skeleton height={20} /></TableCell>
-                          <TableCell className="py-4"><Skeleton height={20} /></TableCell>
-                          <TableCell className="py-4"><Skeleton height={20} /></TableCell>
+                          <TableCell className="py-4">
+                            <Skeleton height={20} />
+                          </TableCell>
+                          <TableCell className="py-4">
+                            <Skeleton height={20} />
+                          </TableCell>
+                          <TableCell className="py-4">
+                            <Skeleton height={20} />
+                          </TableCell>
+                          <TableCell className="py-4">
+                            <Skeleton height={20} />
+                          </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
@@ -181,7 +239,10 @@ const Page = () => {
 
   const indexOfLastInvoice = currentPage * PAGE_SIZE;
   const indexOfFirstInvoice = indexOfLastInvoice - PAGE_SIZE;
-  const recentUsers = analyticsData.newUser.slice(indexOfFirstInvoice, indexOfLastInvoice);
+  const recentUsers = analyticsData.newUser.slice(
+    indexOfFirstInvoice,
+    indexOfLastInvoice
+  );
   const subscriptionExpiringToday = analyticsData.subscriptionExpireToday;
   const paymentToday = analyticsData.paymentToday;
 
@@ -190,7 +251,11 @@ const Page = () => {
   };
 
   return (
-    <SkeletonTheme baseColor="#0B132B" highlightColor="#1B2236" borderRadius="0.5rem">
+    <SkeletonTheme
+      baseColor="#0B132B"
+      highlightColor="#1B2236"
+      borderRadius="0.5rem"
+    >
       <div className="py-4">
         <div className="mb-8 text-white text-2xl font-bold">
           Track and measure user engagement and app performance.
@@ -208,7 +273,9 @@ const Page = () => {
       <div className="grid grid-cols-12 gap-4">
         <div className="col-span-12 lg:col-span-6 w-full">
           <div className="col-span-12 space-y-6 bg-[#1b2236] rounded-[12px] md:rounded-[20px] py-4 px-4 md:py-8 md:px-9">
-            <h2 className="text-white text-[20px] md:text-2xl font-bold mb-3">Recent New Users</h2>
+            <h2 className="text-white text-[20px] md:text-2xl font-bold mb-3">
+              Recent New Users
+            </h2>
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
@@ -220,7 +287,10 @@ const Page = () => {
                 </TableHeader>
                 <TableBody>
                   {recentUsers.map((user) => (
-                    <TableRow key={user._id} className="border-0 text-sm font-normal hover:bg-transparent">
+                    <TableRow
+                      key={user._id}
+                      className="border-0 text-sm font-normal hover:bg-transparent"
+                    >
                       <TableCell className="py-4">{user.identifier}</TableCell>
                       <TableCell className="py-4">{`${user.firstName} ${user.lastName}`}</TableCell>
                       <TableCell className="py-4">{user.companyName}</TableCell>
@@ -235,7 +305,9 @@ const Page = () => {
         <div className="col-span-12 lg:col-span-6 space-y-4">
           <div className="col-span-full h-auto w-full">
             <div className="space-y-6 bg-[#1b2236] rounded-[12px] md:rounded-[20px] py-4 px-4 md:py-8 md:px-9">
-              <h2 className="text-white text-[20px] md:text-2xl font-bold mb-3">Subscription Expire Today</h2>
+              <h2 className="text-white text-[20px] md:text-2xl font-bold mb-3">
+                Subscription Expire Today
+              </h2>
               <div>
                 <Table>
                   <TableHeader>
@@ -249,16 +321,28 @@ const Page = () => {
                   <TableBody>
                     {subscriptionExpiringToday.length === 0 ? (
                       <TableRow key="no-subscriptions">
-                        <TableCell colSpan={4} className="text-center py-4 text-white">
+                        <TableCell
+                          colSpan={4}
+                          className="text-center py-4 text-white"
+                        >
                           No subscriptions expiring today
                         </TableCell>
                       </TableRow>
                     ) : (
                       subscriptionExpiringToday.map((subscription) => (
-                        <TableRow key={subscription.Id} className="border-0 text-sm font-normal hover:bg-transparent">
-                          <TableCell className="py-4">{subscription.Id}</TableCell>
-                          <TableCell className="py-4">{subscription.CompanyName}</TableCell>
-                          <TableCell className="py-4">{subscription.RegisterDate}</TableCell>
+                        <TableRow
+                          key={subscription.Id}
+                          className="border-0 text-sm font-normal hover:bg-transparent"
+                        >
+                          <TableCell className="py-4">
+                            {subscription.Id}
+                          </TableCell>
+                          <TableCell className="py-4">
+                            {subscription.CompanyName}
+                          </TableCell>
+                          <TableCell className="py-4">
+                            {subscription.RegisterDate}
+                          </TableCell>
                           <TableCell className="text-right py-4">
                             <Button
                               className="px-3 !py-0 h-6 !bg-[#1a3f70] rounded inline-flex justify-center items-center text-white text-sm !font-normal !leading-tight !tracking-tight"
@@ -275,10 +359,12 @@ const Page = () => {
               </div>
             </div>
           </div>
-
+ 
           <div className="col-span-full">
             <div className="space-y-6 bg-[#1b2236] rounded-[12px] md:rounded-[20px] py-4 px-4 md:py-8 md:px-9">
-              <h2 className="text-white text-[20px] md:text-2xl font-bold mb-3">Recent Payments</h2>
+              <h2 className="text-white text-[20px] md:text-2xl font-bold mb-3">
+                Recent Payments
+              </h2>
               <div>
                 <Table>
                   <TableHeader>
@@ -292,17 +378,37 @@ const Page = () => {
                   <TableBody>
                     {paymentToday.length === 0 ? (
                       <TableRow key="no-payments">
-                        <TableCell colSpan={4} className="text-center py-4 text-white">
+                        <TableCell
+                          colSpan={4}
+                          className="text-center py-4 text-white"
+                        >
                           No recent payments
                         </TableCell>
                       </TableRow>
                     ) : (
                       paymentToday.map((payment) => (
-                        <TableRow key={payment.id} className="border-0 text-sm font-normal hover:bg-transparent">
-                          <TableCell className="py-4">{payment.customerDetails.id}</TableCell>
-                          <TableCell className="py-4">{payment.customerDetails.name}</TableCell>
-                          <TableCell className="py-4">{payment.plans.amount}</TableCell>
-                          <TableCell className="py-4">{payment.plans.amount}</TableCell>
+                        <TableRow
+                          key={payment.id}
+                          className="border-0 text-sm font-normal hover:bg-transparent"
+                        >
+                          <TableCell className="py-4">
+                            {payment.customerDetails.id}
+                          </TableCell>
+                          <TableCell className="py-4">
+                            {payment.customerDetails.name}
+                          </TableCell>
+                          <TableCell className="py-4">
+                            {payment.plans.map((plan, index) => (
+                              <div key={index}>{plan.interval}</div>
+                            ))}
+                          </TableCell>
+                          <TableCell className="py-4">
+                            {payment.plans.map((plan, index) => (
+                              <div key={index}>
+                                ${(plan.amount / 100).toFixed(2)}
+                              </div>
+                            ))}
+                          </TableCell>
                         </TableRow>
                       ))
                     )}
