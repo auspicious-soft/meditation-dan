@@ -1,5 +1,4 @@
 "use client";
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -9,15 +8,18 @@ import useSWR from "swr";
 import { getAllPendingJoinRequests, getApproveOrDeclinePendingJoinRequest } from "@/services/company-services";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
+import SearchBar from "@/components/ui/SearchBar";
+import { useState } from "react";
 
 const Page = () => {
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const PAGE_SIZE = 10; // Adjust as needed
+  const PAGE_SIZE = 10; 
+  const [searchParams, setsearchParams] = useState("");
 
   const { data, error, isLoading, mutate } = useSWR(
-    `/company/join-requests?page=${currentPage}&limit=${PAGE_SIZE}`,
+    `/company/join-requests?description=${searchParams}&page=${currentPage}&limit=${PAGE_SIZE}`,
     getAllPendingJoinRequests,
     {
       revalidateOnFocus: false,
@@ -26,7 +28,6 @@ const Page = () => {
   );
 
   const joinRequests = data?.data?.data || [];
-  console.log('joinRequests: ', joinRequests);
   const pagination = data?.data?.pagination || {
     total: 0,
     page: 1,
@@ -75,7 +76,10 @@ const Page = () => {
   return (
     <div className="grid grid-cols-12 gap-4 h-screen w-full">
       <div className="col-span-12 space-y-6 bg-[#1b2236] rounded-[12px] md:rounded-[20px] py-4 px-4 md:py-8 md:px-9">
+        <div className="flex justify-between">
         <h2 className="text-white text-[20px] md:text-2xl font-bold mb-3">Pending Join Requests</h2>
+        <SearchBar setQuery={setsearchParams} query={searchParams} />
+        </div>
         <div>
           <Table>
             <TableHeader>

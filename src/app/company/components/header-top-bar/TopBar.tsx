@@ -11,15 +11,15 @@ const TopBar = () => {
       <PageTitle />
       <MobileTrigger />
       <div className="card-bg rounded-lg p-[10px] flex items-center justify-between gap-5">
-        <div className="hidden md:block">
+        {/* <div className="hidden md:block">
           <SearchBar />
-        </div>
+        </div> */}
         <NotificationsPanel />
         <UserProfile />
       </div>
-      <div className="block md:hidden  w-full card-bg rounded-lg p-[10px]">
+      {/* <div className="block md:hidden  w-full card-bg rounded-lg p-[10px]">
         <SearchBar />
-      </div>
+      </div> */}
     </div>
   );
 };
