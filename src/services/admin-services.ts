@@ -183,16 +183,19 @@ export const getBlockedUsers = async (route: string) => {
     return axiosInstance.get(route);
   };
   
-  // Get single user by ID
   export const getUserById = async (route: string) => {
     const axiosInstance = await getAxiosInstance();
     return axiosInstance.get(route);
   };
-
   export const getUserList = async (params: any = {}) => {
     const axiosInstance = await getAxiosInstance();
     return axiosInstance.get('/admin/user-lists', { params });
-};export const getAdminDashboardStats = async (route: string,params:any = {}) => {
+};
+export const getAdminDashboardStats = async (route: string,params:any = {}) => {
+  const axiosInstance = await getAxiosInstance();
+  return axiosInstance.get(route,{params});
+};      
+export const getStripeDetail = async (route: string,params:any = {}) => {
   const axiosInstance = await getAxiosInstance();
   return axiosInstance.get(route,{params});
 };      
