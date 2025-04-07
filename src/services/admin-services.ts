@@ -173,7 +173,12 @@ export const getBlockedUsers = async (route: string) => {
   export const getUserList = async (params: any = {}) => {
     const axiosInstance = await getAxiosInstance();
     return axiosInstance.get('/admin/user-lists', { params });
-};export const getAdminDashboardStats = async (route: string,params:any = {}) => {
+};
+export const getAdminDashboardStats = async (route: string,params:any = {}) => {
   const axiosInstance = await getAxiosInstance();
   return axiosInstance.get(route,{params});
 };      
+
+
+
+
