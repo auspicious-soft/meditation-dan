@@ -164,9 +164,9 @@ const Page = () => {
                           <div className="flex justify-center mb-4">
                             <Image src="/error.svg" alt="error" width={20} height={20} />
                           </div>
-                          <DialogTitle className="text-lg font-semibold text-center">Delete?</DialogTitle>
+                          <DialogTitle className="text-lg font-semibold text-center">Decline?</DialogTitle>
                           <DialogDescription className="text-sm text-gray-400">
-                            Are you sure you want to delete this? This action cannot be undone.
+                            Are you sure you want to decline this? This action cannot be undone.
                           </DialogDescription>
                         </DialogHeader>
                         <DialogFooter className="flex justify-center gap-4 mt-4">
@@ -186,7 +186,7 @@ const Page = () => {
                             {loadingDeny === request.userId?._id ? (
                               <Loader2 size={20} className="animate-spin text-white" />
                             ) : (
-                              "Delete"
+                              "Decline"
                             )}
                           </Button>
                         </DialogFooter>
