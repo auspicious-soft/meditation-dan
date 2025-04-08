@@ -428,7 +428,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { getCompanyDetails, updateCompanyDetails } from "@/services/company-services";
-import { useSession } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import React, { useState, useEffect } from "react";
 import useSWR from "swr";
 import { toast } from "sonner";
@@ -515,6 +515,13 @@ const Page = () => {
         toast.success("Company details updated successfully");
         mutate(); // Revalidate the data after successful update
         setInitialCompanyName(formData.companyName); // Update initial value after successful save
+        await signIn("credentials", {
+          email: formData.email,
+          fullName: formData.companyName, // Use companyName as fullName (or add a custom field if preferred)
+          _id: session.user.id, // Use the existing user ID from session
+          role: session.user.role || "company", // Assuming role might be in session, fallback to "company"
+          redirect: false,
+        });
       } else {
         toast.error(response?.data?.message || "Failed to update company details");
       }
