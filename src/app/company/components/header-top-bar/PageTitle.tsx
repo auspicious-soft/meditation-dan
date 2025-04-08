@@ -12,15 +12,22 @@ const PageTitle = () => {
   let pageTitle = lastSegment.replace(/-/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
 
   const UserDetailPattern = /^\/company\/users\/details\/[0-9a-fA-F]{24}$/;
+  const UserEditPattern = /^\/company\/users\/edit\/[0-9a-fA-F]{24}$/;
+  const UserAddPattern = /^\/company\/users\/add-user$/;
+  
   const isUserDetail = UserDetailPattern.test(pathname);
-
+  const isUserEdit = UserEditPattern.test(pathname);
+  const isUserAdd = UserAddPattern.test(pathname);
   if (isUserDetail) {
     pageTitle = "User Detail";
+  }
+  if (isUserEdit) {
+    pageTitle = "Edit User";
   }
 
   return (
     <div className="flex items-center gap-2">
-      {isUserDetail && (
+      {(isUserDetail || isUserEdit || isUserAdd) && (
         <Button
           variant="destructive"
           className="bg-[#0B132B] hover:bg-[#0B132B] p-0 h-7 w-7 hover:cursor-pointer"

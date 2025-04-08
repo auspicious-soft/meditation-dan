@@ -48,6 +48,9 @@ const Page = () => {
   const handleViewClick = (userId: string) => {
     router.push(`/company/users/details/${userId}`); // Navigate to user details with ID
   };
+  const handleEditClick = (userId: string) => {
+    router.push(`/company/users/edit/${userId}`); // Navigate to user details with ID
+  };
 
   const handleAddUserClick = () => {
     router.push(`/company/users/add-user`);
@@ -135,12 +138,18 @@ const Page = () => {
                     <TableCell className="py-4">{user.firstName} {user.lastName}</TableCell>
                     <TableCell className="py-4">{user.email}</TableCell>
                     {/* <TableCell className="py-4">{formatDate(user.dob)}</TableCell> */}
-                    <TableCell className="text-right py-4">
+                    <TableCell className="text-right py-4 space-x-1.5">
                       <Button
                         className="px-3 !py-0 w-16 h-6 !bg-[#1a3f70] rounded inline-flex justify-center items-center text-white text-sm !font-normal !leading-tight !tracking-tight hover:cursor-pointer"
                         onClick={() => handleViewClick(user._id)}
                       >
                         View
+                      </Button>
+                      <Button
+                        className="px-3 !py-0 w-16 h-6 !bg-blue-400 rounded inline-flex justify-center items-center text-white text-sm !font-normal !leading-tight !tracking-tight hover:cursor-pointer"
+                        onClick={() => handleEditClick(user._id)}
+                      >
+                        Edit
                       </Button>
                     </TableCell>
                   </TableRow>
