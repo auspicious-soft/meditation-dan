@@ -199,3 +199,7 @@ export const getStripeDetail = async (route: string,params:any = {}) => {
   const axiosInstance = await getAxiosInstance();
   return axiosInstance.get(route,{params});
 };      
+export const getAdminNotifications = async (route: string,params:any = {}) => {
+  const axiosInstance = await getAxiosInstance();
+  return axiosInstance.get(route,{params});
+};      
