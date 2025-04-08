@@ -56,7 +56,7 @@ const AllCollection: React.FC = () => {
   const [isLevelsOpen, setIsLevelsOpen] = useState<boolean>(false);
   const [isBestForOpen, setIsBestForOpen] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [debouncedSearchQuery] = useDebounce(searchQuery, 500);
+  const [debouncedSearchQuery] = useDebounce(searchQuery.trim(), 500);
   const limit = 12;
 
   // Fetch levels and best for options on mount
@@ -184,7 +184,7 @@ const AllCollection: React.FC = () => {
   };
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value.trim());
+    setSearchQuery(e.target.value);
   };
 
   const getS3Url = (subPath: string) => {

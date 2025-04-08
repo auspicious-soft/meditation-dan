@@ -94,7 +94,7 @@ const AudioList = () => {
   const [isLevelsOpen, setIsLevelsOpen] = useState<boolean>(false);
   const [isBestForOpen, setIsBestForOpen] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [debouncedSearchQuery] = useDebounce(searchQuery, 500);
+  const [debouncedSearchQuery] = useDebounce(searchQuery.trim(), 500);
   const limit = 10;
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -320,7 +320,7 @@ const AudioList = () => {
   };
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value.trim());
+    setSearchQuery(e.target.value);
   };
 
   if (error) return <div className="text-red-500">{error}</div>;
