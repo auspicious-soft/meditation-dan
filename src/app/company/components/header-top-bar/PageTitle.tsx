@@ -1,52 +1,36 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft } from "lucide-react";
 
 const PageTitle = () => {
   const pathname = usePathname();
-  
+  const router = useRouter();
+
   const lastSegment = pathname.split("/").filter(Boolean).pop() || "Home";
   let pageTitle = lastSegment.replace(/-/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
-  
-  const Userpattern = /^\/company\/users\/details\/[0-9a-fA-F]{24}$/;
-  if(Userpattern.test(pathname)){
-    pageTitle="User Detail"
+
+  const UserDetailPattern = /^\/company\/users\/details\/[0-9a-fA-F]{24}$/;
+  const isUserDetail = UserDetailPattern.test(pathname);
+
+  if (isUserDetail) {
+    pageTitle = "User Detail";
   }
 
-  // const UserList = /^\/company\/(users)\/user-list\/\d+$/;
-  // if (UserList.test(pathname)) {
-  //   pageTitle = "Users";
-  // }
-
-  // const UserDetail = /^\/company\/users\/\d+$/;
-  // if (UserDetail.test(pathname)) {
-  //   pageTitle = "User  Detail";
-  // }
-
-  // const JoinRequests = /^\/company\/join-request$/;
-  // if (JoinRequests.test(pathname)) {
-  //   pageTitle = "Join Requests";
-  // }
-
-  // const UserRequest = /^\/company\/join-request\/single-user-request\d+$/;
-  // if (UserRequest.test(pathname)) {
-  //   pageTitle = "User Request";
-  // }
-
-  // const companyDetailPattern = /^\/admin\/company-lists\/company-detail\/\d+$/;
-  // if (companyDetailPattern.test(pathname)) {
-  //   pageTitle = "Company Detail";
-  // }
-
-  // const CompanyProfile = /^\/company\/company-profile\/\d+$/;
-  // if (CompanyProfile.test(pathname)) {
-  //   pageTitle = "Company  Profile";
-  // }
-
-
-
   return (
-        <h1 className="text-2xl font-bold hidden md:block">{pageTitle}</h1>
+    <div className="flex items-center gap-2">
+      {isUserDetail && (
+        <Button
+          variant="destructive"
+          className="bg-[#0B132B] hover:bg-[#0B132B] p-0 h-7 w-7 hover:cursor-pointer"
+          onClick={() => router.back()}
+        >
+          <ChevronLeft className="w-4 h-4 text-white" />
+        </Button>
+      )}
+      <h1 className="text-2xl font-bold hidden md:block">{pageTitle}</h1>
+    </div>
   );
 };
 

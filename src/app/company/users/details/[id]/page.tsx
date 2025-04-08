@@ -88,7 +88,7 @@ const Page = () => {
   }
 
   return (
-    <div className="text-white py-6 w-full h-screen">
+    <div className="text-white  w-full h-screen">
       <div className="mb-6">
         <h2 className="text-white text-xl font-medium">
           {userDetails.firstName || "N/A"} {userDetails.lastName || ""}
