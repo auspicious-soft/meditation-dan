@@ -8,6 +8,7 @@ import { loadStripe } from "@stripe/stripe-js";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 import { cancelSubscription } from "../../../services/company-services";
+import { Loader2 } from "lucide-react";
 
 // Skeleton Loading Component
 const SkeletonCard = () => (
@@ -107,7 +108,7 @@ const SubscriptionModal = ({ isOpen, onClose, onContinue, planType, price,descri
         <div className="w-full mt-6 flex justify-between gap-[12px]">
           <button
             onClick={onClose}
-            className="w-[45%] bg-[#1a3f70] text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition"
+            className="w-[45%] bg-[#1a3f70] text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition hover:cursor-pointer"
           >
             Cancel
           </button>
@@ -117,7 +118,7 @@ const SubscriptionModal = ({ isOpen, onClose, onContinue, planType, price,descri
               onContinue(numberOfUsers);
               setTimeout(() => setIsLoading(false));
             }}
-            className="w-full bg-[#14ab00] text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 transition flex items-center justify-center"
+            className="w-full bg-[#14ab00] text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 transition flex items-center justify-center hover:cursor-pointer"
             disabled={isLoading}
           >
             {isLoading ? "Loading..." : "Continue"}
@@ -157,7 +158,6 @@ const Page = () => {
     setSelectedPlanId(selectedPlanDetails.planId);
 
     startTransition(async () => {
-      // setIsLoading(false)
       try {
         const payload = {
           planType: selectedPlanDetails.planType,
@@ -167,7 +167,6 @@ const Page = () => {
           price: Number(selectedPlanDetails.price) * numberOfUsers,
           numberOfUsers,
         };
-        console.log("payload: ", payload);
         const response = await buyPlan(`/company/create-subscription/${session.data?.user?.id}`, payload);
         const data = await response.data;
         if (data.data.id) {
@@ -229,9 +228,10 @@ const Page = () => {
               const price = activePrice ? (activePrice.unit_amount / 100).toFixed(0) : "N/A";
               const interval = activePrice?.recurring?.interval || "month";
               const isCurrentPlan = !!product.currentPlan;
-              const expiryDate = isCurrentPlan
-                ? new Date(product.currentPlan.expiryDate).toLocaleDateString()
-                : null;
+              const expiryDate = (isCurrentPlan && product.currentPlan.expiryDate)
+              ? new Date(product.currentPlan.expiryDate).toLocaleDateString()
+              : (isCurrentPlan && product.currentPlan.planType === "lifetime") ? "Lifetime" : null;
+              console.log('expiryDate: ', expiryDate);
               const planType = product.name.split(" ")[0].toLowerCase();
               const isCardLoading = isPending && selectedPlanId === product.id;
               const isLifetime = product.currentPlan?.planType === "lifetime";
@@ -304,12 +304,14 @@ const Page = () => {
                     )}
                   </div> */}
                   <div className="mt-8 flex justify-left w-full">
-                    {isCardCanceling ? (
-                      <div className={`flex justify-center items-center p-5 ${isCurrentPlan ? "text-white" : "text-[#1A3F70]"}`}>Loading...</div>
+                    {isCardCanceling || isCardLoading ? (
+                      <div className={`flex justify-center items-center w-full max-w-[200px] h-12 rounded-lg bg-[#1A3F70]`}>
+                      <Loader2 size={24} className="animate-spin text-white" />
+                    </div>
                     ) : isCurrentPlan && !isLifetime ? (
                       <button
                         onClick={() => handleCancelSubscription()}
-                        className={`h-12 w-full max-w-[200px] ${buttonBgColor} rounded-lg flex items-center justify-center`}
+                        className={`h-12 w-full max-w-[200px] ${buttonBgColor} rounded-lg flex items-center justify-center hover:cursor-pointer`}
                       >
                        <span className={`${buttonTextColor} text-lg font-medium font-['SF_Pro_Display']`}>
                           Cancel Subscription
@@ -320,7 +322,7 @@ const Page = () => {
                     ) : (
                       <button
                         onClick={() => handlePlanSelect(product.name.split(" ")[0].toLowerCase(), price, product.id, product.description)}
-                        className={`h-12 w-full max-w-[150px]  ${buttonBgColor} rounded-lg flex items-center justify-center text-center`}
+                        className={`h-12 w-full max-w-[150px]  ${buttonBgColor} rounded-lg flex items-center justify-center text-center hover:cursor-pointer`}
                         >
                           <span className={`${buttonTextColor}  text-base font-medium`}>
                           Activate Plan

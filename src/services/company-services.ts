@@ -7,6 +7,10 @@ export const getCompanyDetails = async (route: string ,params: any = {}) => {
     const axiosInstance = await getCompanyAxiosInstance()
     return axiosInstance.get(route)
 }
+export const updateCompanyDetails = async (route: string ,payload: any = {}) => {
+    const axiosInstance = await getCompanyAxiosInstance()
+    return axiosInstance.put(route,payload)
+}
 export const getCompanyDashboard = async (route: string ,params: any = {}) => {
     const axiosInstance = await getCompanyAxiosInstance()
     return axiosInstance.get(route)
@@ -60,4 +64,10 @@ export const buyPlan = async (route: string ,payload: any ) => {
 export const cancelSubscription = async (route: string  ) => {
     const axiosInstance = await getCompanyAxiosInstance()
     return axiosInstance.post(route)
+}
+
+//Notification
+export const getCompanyNotifications = async (route: string ,params: any = {}) => {
+    const axiosInstance = await getCompanyAxiosInstance()
+    return axiosInstance.get(route)
 }

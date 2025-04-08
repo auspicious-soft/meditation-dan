@@ -44,7 +44,8 @@ return (
     <DropdownMenuGroup>
      <div className="flex items-center p-[8px]">
       <Avatar>
-       <AvatarImage src={profilePicUrl} alt="User Avatar" />
+       {/* <AvatarImage src={profilePicUrl} alt="User Avatar" /> */}
+       <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
        <AvatarFallback>SS</AvatarFallback>
       </Avatar>
       <div className="ml-2">
@@ -54,7 +55,7 @@ return (
      </div>
      <DropdownMenuItem className="p-0 !bg-transparent">
       <Link className="gap-2 w-full p-[8px] hover:bg-[#1a3f70] hover:text-white rounded-sm dm-sans" href="/company/company-profile">
-       User Profile
+       Company Profile
       </Link>
      </DropdownMenuItem>
     </DropdownMenuGroup>

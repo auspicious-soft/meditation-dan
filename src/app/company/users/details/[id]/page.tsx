@@ -117,10 +117,10 @@ const Page = () => {
           <p className="text-white">{userDetails.email || "N/A"}</p>
         </div>
 
-        <div>
+        {/* <div>
           <p className="opacity-80 text-sm text-slate-400 mb-1">Birthday</p>
           <p className="text-white">{formatDate(userDetails.dob)}</p>
-        </div>
+        </div> */}
 
         <div>
           <p className="opacity-80 text-sm text-slate-400 mb-1">Company Name</p>
