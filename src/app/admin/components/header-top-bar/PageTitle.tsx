@@ -44,7 +44,7 @@ const PageTitle = () => {
   if (subscriptionExpiring.test(pathname)) {
     pageTitle = "Subscriptions Expiring in 1 Week";
   }
-  const subscriptionExpiringPattern = /^\/admin\/subscription-expiring\/company-detail$/;
+  const subscriptionExpiringPattern = /^\/admin\/subscription-expiring\/company-detail\/[0-9a-fA-F]{24}$/;
   if (subscriptionExpiringPattern.test(pathname)) {
     pageTitle = "Subscriptions Expiring in 1 Week";
   }
