@@ -65,3 +65,9 @@ export const cancelSubscription = async (route: string  ) => {
     const axiosInstance = await getCompanyAxiosInstance()
     return axiosInstance.post(route)
 }
+
+//Notification
+export const getCompanyNotifications = async (route: string ,params: any = {}) => {
+    const axiosInstance = await getCompanyAxiosInstance()
+    return axiosInstance.get(route)
+}

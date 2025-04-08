@@ -167,7 +167,6 @@ const Page = () => {
           price: Number(selectedPlanDetails.price) * numberOfUsers,
           numberOfUsers,
         };
-        console.log("payload: ", payload);
         const response = await buyPlan(`/company/create-subscription/${session.data?.user?.id}`, payload);
         const data = await response.data;
         if (data.data.id) {
@@ -229,9 +228,10 @@ const Page = () => {
               const price = activePrice ? (activePrice.unit_amount / 100).toFixed(0) : "N/A";
               const interval = activePrice?.recurring?.interval || "month";
               const isCurrentPlan = !!product.currentPlan;
-              const expiryDate = isCurrentPlan
-                ? new Date(product.currentPlan.expiryDate).toLocaleDateString()
-                : null;
+              const expiryDate = (isCurrentPlan && product.currentPlan.expiryDate)
+              ? new Date(product.currentPlan.expiryDate).toLocaleDateString()
+              : (isCurrentPlan && product.currentPlan.planType === "lifetime") ? "Lifetime" : null;
+              console.log('expiryDate: ', expiryDate);
               const planType = product.name.split(" ")[0].toLowerCase();
               const isCardLoading = isPending && selectedPlanId === product.id;
               const isLifetime = product.currentPlan?.planType === "lifetime";

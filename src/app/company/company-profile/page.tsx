@@ -36,8 +36,6 @@ const Page = () => {
     }
   );
 
-  console.log('companyName from API: ', data?.data?.data.companyName);
-  console.log('email from API: ', data?.data?.data.email);
 
   const handleChange = (field: string, value: string) => {
     setFormData({
@@ -112,7 +110,7 @@ const Page = () => {
 
         <div>
           <Button
-            className="mt-4 bg-[#1A3F70] w-28 h-11 hover:bg-[#1A3F70] dm-sans text-white flex items-center justify-center"
+            className="mt-4 bg-[#1A3F70] w-28 h-11 hover:bg-[#1A3F70] dm-sans text-white flex items-center justify-center hover:cursor-pointer"
             onClick={handleSave}
             disabled={isLoading}
           >
