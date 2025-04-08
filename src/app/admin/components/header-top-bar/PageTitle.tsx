@@ -32,9 +32,21 @@ const PageTitle = () => {
   if (blockedUserPattern.test(pathname)) {
     pageTitle = "Blocked User Detail";
   }
+  const companyDetail = /^\/admin\/company-detail\/[0-9a-fA-F]{24}$/;
+  if (companyDetail.test(pathname)) {
+    pageTitle = "Recent New Company Detail";
+  }
   const allcollectionPattern = /^\/admin\/all-collections$/;
   if (allcollectionPattern.test(pathname)) {
     pageTitle = "Meditation Library";
+  }
+  const subscriptionExpiring = /^\/admin\/subscription-expiring$/;
+  if (subscriptionExpiring.test(pathname)) {
+    pageTitle = "Subscriptions Expiring in 1 Week";
+  }
+  const subscriptionExpiringPattern = /^\/admin\/subscription-expiring\/company-detail$/;
+  if (subscriptionExpiringPattern.test(pathname)) {
+    pageTitle = "Subscriptions Expiring in 1 Week";
   }
   const audioFilesPattern = /^\/admin\/audio-files$/;
   if (audioFilesPattern.test(pathname)) {

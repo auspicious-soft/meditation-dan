@@ -203,7 +203,7 @@ const Page = () => {
             <ChevronLeft  />
           </Button>
           <div>
-        <h1 className="text-xl font-medium text-white">Edit Company</h1>
+        <h1 className="text-xl font-medium text-white">Company Detail</h1>
         </div>
         </div>
         <div className="space-y-2">

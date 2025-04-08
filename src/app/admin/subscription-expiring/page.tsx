@@ -30,7 +30,7 @@ const SubscriptionReminder = () => {
   return (
     <div className="col-span-12 space-y-6 bg-[#1b2236] rounded-[12px] md:rounded-[20px] py-4 px-4 md:py-8 md:px-9 ">
     <h2 className="text-white text-[20px] md:text-2xl font-bold mb-3">
-    Subscriptions Expiring Within One Week
+    Subscriptions Expiring
     </h2>
     <div className=" w-full rounded-none overflow-hidden">
       <div className="w-full overflow-auto h-[210px] scroll-container">

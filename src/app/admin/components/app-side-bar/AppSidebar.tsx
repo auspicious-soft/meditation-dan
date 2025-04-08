@@ -87,7 +87,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           isSubscriptionExpiringActive ? "bg-[#1a3f70]" : "font-normal"}`}
         onClick={()=> router.push('/admin/subscription-expiring')}>
         <BellNotifactionIcon />
-         Subscriptions Expiring Today
+        Subscriptions Expiring in 1 Week
       </SidebarMenuButton>
       <hr className="opacity-[0.30] mt-6"></hr>
     </Sidebar>

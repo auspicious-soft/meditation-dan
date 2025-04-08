@@ -15,7 +15,7 @@ import { useParams } from "next/navigation";
 import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
 import useSWR, { mutate } from "swr";
-import { ChevronLeft, Loader2 } from "lucide-react"; // Import Loader2 for loading states
+import { ChevronLeft, Loader2 } from "lucide-react";
 
 // Define the BlockCompanyPayload type
 interface BlockCompanyPayload {
@@ -28,10 +28,10 @@ interface UserData {
   lastName: string;
   gender: string;
   email: string;
-  dob: string;
+  dob: string | null; // Allow dob to be null
   companyName: string;
   totalMeditationListen?: number;
-  isBlocked?: boolean; // Added isBlocked field
+  isBlocked?: boolean;
 }
 
 // Skeleton Components
@@ -73,25 +73,24 @@ const Page = () => {
     dob: "",
     companyName: "",
     totalMeditationListen: 0,
-    isBlocked: false, // Initialize isBlocked
+    isBlocked: false,
   });
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [deleting, setDeleting] = useState<boolean>(false); // Loading state for Delete
-  const [togglingBlock, setTogglingBlock] = useState<boolean>(false); // Loading state for Block/Unblock
-  const [saving, setSaving] = useState<boolean>(false); // Loading state for Save
+  const [deleting, setDeleting] = useState<boolean>(false);
+  const [togglingBlock, setTogglingBlock] = useState<boolean>(false);
+  const [saving, setSaving] = useState<boolean>(false);
 
   useEffect(() => {
     if (data?.data?.data) {
       setFormData({
         ...data.data.data,
-        dob: data.data.data.dob.split("T")[0],
-        isBlocked: data.data.data.isBlocked || false, // Set isBlocked from API response
+        dob: data.data.data.dob ? data.data.data.dob.split("T")[0] : "", // Check if dob exists before splitting
+        isBlocked: data.data.data.isBlocked || false,
       });
     }
   }, [data]);
 
   const handleChange = (field: keyof UserData, value: string) => {
-    // Prevent updating totalMeditationListen
     if (field === "totalMeditationListen") return;
     setFormData((prevState) => ({
       ...prevState,
@@ -100,19 +99,19 @@ const Page = () => {
   };
 
   const handleToggleBlock = async () => {
-    setTogglingBlock(true); // Start loading for block toggle
+    setTogglingBlock(true);
     try {
-      const newBlockedState = !formData.isBlocked; // Toggle the current state
+      const newBlockedState = !formData.isBlocked;
       const payload: BlockCompanyPayload = { isBlocked: newBlockedState };
       const response = await toggleBlockUser(`/admin/user/${id}/block`, payload);
       if (response.data.success) {
         toast.success(`User ${newBlockedState ? "blocked" : "unblocked"} successfully!`);
         setFormData((prevState) => ({
           ...prevState,
-          isBlocked: newBlockedState, // Update local state
+          isBlocked: newBlockedState,
         }));
         setTimeout(() => {
-          window.location.href = "/admin/user-lists"; // Redirect after success
+          window.location.href = "/admin/user-lists";
         }, 1000);
       } else {
         throw new Error(response.data.message || `Failed to ${newBlockedState ? "block" : "unblock"} user`);
@@ -121,14 +120,13 @@ const Page = () => {
       console.error(`Error ${formData.isBlocked ? "unblocking" : "blocking"} user:`, err);
       toast.error(err instanceof Error ? err.message : `Failed to ${formData.isBlocked ? "unblock" : "block"} user`);
     } finally {
-      setTogglingBlock(false); // Stop loading for block toggle
+      setTogglingBlock(false);
     }
   };
 
   const handleSave = async () => {
-    setSaving(true); // Start loading for save
+    setSaving(true);
     try {
-      // Remove totalMeditationListen from the payload to prevent updating it
       const { totalMeditationListen, ...updateData } = formData;
       await updateUser(`/admin/user/update/${id}`, updateData);
       console.log("User updated successfully:", updateData);
@@ -141,12 +139,12 @@ const Page = () => {
       console.error("Error updating user:", err);
       toast.error("Failed to update user");
     } finally {
-      setSaving(false); // Stop loading for save
+      setSaving(false);
     }
   };
 
   const handleDeleteAccount = async () => {
-    setDeleting(true); // Start loading for delete
+    setDeleting(true);
     try {
       await deleteUser(`/admin/user/delete-user/${id}`);
       console.log("User deleted successfully");
@@ -160,16 +158,14 @@ const Page = () => {
       console.error("Error deleting user:", err);
       toast.error("Failed to delete user");
     } finally {
-      setDeleting(false); // Stop loading for delete
+      setDeleting(false);
     }
   };
 
   const fields = [
     { label: "First Name", field: "firstName" },
     { label: "Last Name", field: "lastName" },
-    { label: "Gender", field: "gender" },
     { label: "Email Address", field: "email" },
-    { label: "Birthday", field: "dob" },
     { label: "Company Name", field: "companyName" },
     { label: "Total Meditation Listened To", field: "totalMeditationListen" },
   ];
@@ -198,16 +194,16 @@ const Page = () => {
           <>
             <div>
               <div className="flex items-center gap-2">
-              <Button
-            variant="destructive"
-            className="bg-[#0B132B] hover:bg-[#0B132B] p-0 h-7 w-7 hover:cursor-pointer"
-            onClick={() => (window.location.href = "/admin/user-lists")}
-          >
-            <ChevronLeft  />
-          </Button>
-              <h2 className="text-white text-xl font-medium">
-                {formData.firstName} {formData.lastName}
-              </h2>
+                <Button
+                  variant="destructive"
+                  className="bg-[#0B132B] hover:bg-[#0B132B] p-0 h-7 w-7 hover:cursor-pointer"
+                  onClick={() => (window.location.href = "/admin/user-lists")}
+                >
+                  <ChevronLeft />
+                </Button>
+                <h2 className="text-white text-xl font-medium">
+                  {formData.firstName} {formData.lastName}
+                </h2>
               </div>
               <p className="opacity-80">{formData.email}</p>
             </div>
@@ -224,7 +220,7 @@ const Page = () => {
                     value={String(formData[field as keyof UserData] || "")}
                     onChange={(e) => handleChange(field as keyof UserData, e.target.value)}
                     className="bg-[#0f172a] h-12 border-none text-white"
-                    disabled={field === "totalMeditationListen"} // Disable totalMeditationListen field
+                    disabled={field === "totalMeditationListen"}
                   />
                 </div>
               ))}
@@ -254,11 +250,7 @@ const Page = () => {
                 onClick={handleSave}
                 disabled={saving}
               >
-                {saving ? (
-                  <Loader2 size={20} className="animate-spin text-white" />
-                ) : (
-                  "Save"
-                )}
+                {saving ? <Loader2 size={20} className="animate-spin text-white" /> : "Save"}
               </Button>
             </div>
           </>
@@ -286,11 +278,7 @@ const Page = () => {
                 onClick={handleDeleteAccount}
                 disabled={deleting}
               >
-                {deleting ? (
-                  <Loader2 size={20} className="animate-spin text-white" />
-                ) : (
-                  "Yes"
-                )}
+                {deleting ? <Loader2 size={20} className="animate-spin text-white" /> : "Yes"}
               </Button>
             </DialogFooter>
           </DialogContent>
