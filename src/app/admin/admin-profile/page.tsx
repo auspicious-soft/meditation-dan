@@ -4,7 +4,7 @@ import Image from "next/image";
 import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { getAdminDetails, updateAdminDetails, updateAdminProfilePic } from "@/services/admin-services";
-import { Upload, Trash2 } from "lucide-react";
+import { Upload, Trash2, ChevronLeft } from "lucide-react";
 import { generateSignedUrlForAdminProfile, getImageUrlOfS3 } from "@/actions";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -80,7 +80,7 @@ const Page = () => {
       // Update profile data and capture response
       const profileUpdateResponse = await updateAdminDetails(`/admin`, formData);
       if (profileUpdateResponse && profileUpdateResponse.data.success) {
-        toast.success("Profile updated successfully");
+        let successMessage = "Profile updated successfully";
 
         // Update profile picture if a new image was selected
         let imageUpdateResponse;
@@ -110,7 +110,7 @@ const Page = () => {
           if (imageUpdateResponse && imageUpdateResponse.data.success) {
             setProfileImage(key);
             setSelectedFile(null);
-            toast.success("Profile picture updated successfully");
+            successMessage += " and profile picture updated successfully"; // Append message
           } else {
             throw new Error(imageUpdateResponse?.data?.message || "Failed to update profile picture");
           }
@@ -122,12 +122,13 @@ const Page = () => {
         await signIn("credentials", {
           email: formData.email,
           fullName: userName,
-          _id: profileUpdateResponse.data.data._id || "", // Assuming the response includes an _id
-          role: profileUpdateResponse.data.data.role || "admin", // Assuming role is returned
-          profilePic:updatedProfilePicKey || "",
+          _id: profileUpdateResponse.data.data._id || "",
+          role: profileUpdateResponse.data.data.role || "admin",
+          profilePic: updatedProfilePicKey || "",
           redirect: false,
         });
 
+        toast.success(successMessage); // Single toast with combined message
         setTimeout(() => {
           window.location.reload();
         }, 1000);
@@ -146,7 +147,16 @@ const Page = () => {
     <div className="flex flex-1 flex-col gap-4">
       <div className="space-y-6">
         <div>
-          <p className="mb-4 text-zinc-300 text-base SF Pro Display font-normal">Profile Image</p>
+          <div className="flex items-center gap-2 mb-4 ">
+          <Button
+            variant="destructive"
+            className="bg-[#343741] hover:bg-[#343741] p-0 h-7 w-7 hover:cursor-pointer"
+            onClick={() => (window.location.href = "/admin/dashboard")}
+          >
+            <ChevronLeft  />
+          </Button>
+          <p className=" text-zinc-300 text-base SF Pro Display font-normal">Profile Image</p>
+          </div>
           <div className="flex flex-wrap items-end gap-4 mb-4">
             <Card className="w-44 min-h-40 flex items-center justify-center bg-[#0B132B] border-none rounded-lg relative">
               {imagePreview ? (
