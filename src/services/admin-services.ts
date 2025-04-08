@@ -203,3 +203,11 @@ export const getAdminNotifications = async (route: string,params:any = {}) => {
   const axiosInstance = await getAxiosInstance();
   return axiosInstance.get(route,{params});
 };      
+export const sendReminder = async (route: string) => {
+  const axiosInstance = await getAxiosInstance();
+  return axiosInstance.post(route);
+};      
+export const getSubscriptionReminder = async (route: string,params:any = {}) => {
+  const axiosInstance = await getAxiosInstance();
+  return axiosInstance.get(route,{params});
+};      

@@ -10,9 +10,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { getAdminDashboardStats } from "@/services/admin-services";
+import { getAdminDashboardStats, sendReminder } from "@/services/admin-services";
 import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
+import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 // Updated Invoice interface to match API response
 interface Invoice {
@@ -52,6 +54,7 @@ const DashBoard = () => {
   const [expiringSubscriptions, setExpiringSubscriptions] = useState<Invoice[]>([]); // For Subscriptions Expiring (companies)
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [reminderLoading, setReminderLoading] = useState<string | null>(null); // Track loading state for reminder
 
   const PAGE_SIZE = 10;
   const indexOfLastInvoice = currentPage * PAGE_SIZE;
@@ -68,7 +71,7 @@ const DashBoard = () => {
           page: currentPage,
           limit: PAGE_SIZE,
         });
-        console.log('response:', response);
+        console.log("response:", response);
         const data: ApiResponse = response.data;
 
         if (data.success) {
@@ -115,6 +118,33 @@ const DashBoard = () => {
 
   const handleClick = (id: string) => {
     router.push(`/admin/company-detail/${id}`);
+  };
+
+  const handleReminderClick = async (id: string) => {
+    setReminderLoading(id); // Set loading state for this specific reminder
+    try {
+      const response = await sendReminder(`/admin/subscription-expire-remainder/${id}`); // Send Id in route
+      console.log("Reminder response:", response.data); // Debug the response
+      // Check if the response indicates success (flexible check)
+      if (response.data && (response.data.success === true || response.status === 200)) {
+        toast.success("Reminder sent successfully!");
+      } else {
+        toast.error("Failed to send reminder: " + (response.data.message || "Unknown error"));
+      }
+    } catch (err) {
+      console.error("Error sending reminder:", err);
+      if (err instanceof Error) {
+        if ((err as any).response?.data?.message) {
+          toast.error("Error sending reminder: " + (err as any).response.data.message);
+        } else {
+          toast.error("Error sending reminder: " + err.message);
+        }
+      } else {
+        toast.error("Error sending reminder: Unknown error");
+      }
+    } finally {
+      setReminderLoading(null); // Reset loading state
+    }
   };
 
   if (loading) {
@@ -229,9 +259,14 @@ const DashBoard = () => {
                           <TableCell className="text-right py-4">
                             <Button
                               className="px-3 !py-0 h-6 w-44 !bg-[#1a3f70] hover:cursor-pointer rounded inline-flex justify-center items-center text-white text-sm !font-normal !leading-tight !tracking-tight"
-                              onClick={() => handleClick(subscription.Id)}
+                              onClick={() => handleReminderClick(subscription.Id)}
+                              disabled={reminderLoading === subscription.Id}
                             >
-                              {subscription.Action}
+                              {reminderLoading === subscription.Id ? (
+                                <Loader2 size={20} className="animate-spin text-white" />
+                              ) : (
+                                subscription.Action
+                              )}
                             </Button>
                           </TableCell>
                         </TableRow>
@@ -246,7 +281,7 @@ const DashBoard = () => {
           <div className="grid grid-cols-12 gap-4 w-full">
             <div className="col-span-12 space-y-6 bg-[#1b2236] rounded-[12px] md:rounded-[20px] py-4 px-4 md:py-8 md:px-9">
               <h2 className="text-white text-[20px] md:text-2xl font-bold mb-3">
-              Companies Registered Recently
+                Companies Registered Recently
               </h2>
               <div>
                 <Table>

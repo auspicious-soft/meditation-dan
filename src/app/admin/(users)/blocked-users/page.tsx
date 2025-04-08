@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/table";
 import { getBlockedUsers } from "@/services/admin-services";
 import { Loader2 } from "lucide-react"; // Import Loader2 for loading state
+import SearchBar from "@/components/ui/SearchBar";
 
 interface Invoice {
   Id: string;
@@ -57,9 +58,10 @@ const Page = () => {
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [viewingUserId, setViewingUserId] = useState<string | null>(null); // State to track loading for View action
+  const [searchTerm, setSearchTerm] = useState<string>(""); 
 
   const { data, error, isLoading } = useSWR(
-    `/admin/users/blocked?page=${currentPage}&limit=${PAGE_SIZE}`,
+    `/admin/users/blocked?page=${currentPage}&limit=${PAGE_SIZE}&description=${searchTerm}`,
     fetcher,
     {
       revalidateOnFocus: false,
@@ -92,9 +94,12 @@ const Page = () => {
   return (
     <div className="grid grid-cols-12 gap-4 h-screen w-full">
       <div className="col-span-12 space-y-6 bg-[#1b2236] rounded-[12px] md:rounded-[20px] py-4 px-4 md:py-8 md:px-9">
-        <h2 className="text-white text-[20px] md:text-2xl font-bold mb-3">
+        <div className="flex items-center justify-between mb-4">
+        <h2 className="text-white text-[20px] md:text-2xl font-bold ">
           Blocked User Lists
         </h2>
+        <SearchBar setQuery={setSearchTerm} query={searchTerm} />
+        </div>
         <div>
           <Table>
             <TableHeader>

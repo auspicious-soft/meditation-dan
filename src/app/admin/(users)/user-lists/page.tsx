@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/table";
 import { getAllUsers } from "@/services/admin-services";
 import { Loader2 } from "lucide-react"; // Import Loader2 for loading state
+import SearchBar from "@/components/ui/SearchBar";
 
 const PAGE_SIZE = 10;
 
@@ -26,6 +27,16 @@ interface User {
   companyName?: string;
   gender: string;
   email: string;
+}
+
+interface ApiResponse {
+  success: boolean;
+  data: User[];
+  total: number;
+  page: number;
+  limit: number;
+  statusCode: number;
+  message?: string;
 }
 
 const SkeletonRow = () => (
@@ -55,17 +66,22 @@ const Page = () => {
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [viewingUserId, setViewingUserId] = useState<string | null>(null); // State to track loading for View action
+  const [searchTerm, setSearchTerm] = useState<string>(""); // Single search term
 
-  const { data, error, isLoading } = useSWR("/admin/get-all-users", fetcher, {
-    revalidateOnFocus: false,
-    refreshInterval: 0,
-  });
+  // Fetch data using SWR with search term, page, and limit in the URL
+  const { data, error, isLoading } = useSWR(
+    `/admin/get-all-users?description=${searchTerm}&page=${currentPage}&limit=${PAGE_SIZE}`,
+    fetcher,
+    {
+      revalidateOnFocus: false,
+      refreshInterval: 0,
+    }
+  );
 
-  const users = data?.data && Array.isArray(data?.data?.data) ? data?.data?.data : [];
-  const indexOfLastUser = currentPage * PAGE_SIZE;
-  const indexOfFirstUser = indexOfLastUser - PAGE_SIZE;
-  const currentUsers = users.slice(indexOfFirstUser, indexOfLastUser);
-  const totalPages = Math.max(1, Math.ceil(users.length / PAGE_SIZE));
+  // Extract users and pagination data from the API response
+  const users = data?.data?.data || [];
+  const total = data?.data?.total || 0;
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
@@ -91,7 +107,10 @@ const Page = () => {
     <>
       <div className="grid grid-cols-12 gap-4 h-screen w-full">
         <div className="col-span-12 space-y-6 bg-[#1b2236] rounded-[12px] md:rounded-[20px] py-4 px-4 md:py-8 md:px-9">
-          <h2 className="text-white text-[20px] md:text-2xl font-bold mb-3">User Lists</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-white text-[20px] md:text-2xl font-bold">User Lists</h2>
+            <SearchBar setQuery={setSearchTerm} query={searchTerm} />
+          </div>
           <Table className="border-separate border-spacing-0">
             <TableHeader className="border-b border-white">
               <TableRow className="text-white text-sm font-bold dm-sans border-0 border-b border-[#666666] hover:bg-transparent">
@@ -114,9 +133,23 @@ const Page = () => {
                 Array.from({ length: PAGE_SIZE }).map((_, index) => (
                   <SkeletonRow key={index} />
                 ))
+              ) : users.length === 0 && searchTerm.trim() ? (
+                // Specific message for no data with search query
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-4 text-white">
+                    No users found for this search query.
+                  </TableCell>
+                </TableRow>
+              ) : users.length === 0 ? (
+                // General no data message
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-4 text-white">
+                    No users found.
+                  </TableCell>
+                </TableRow>
               ) : (
                 // Render actual user data when loaded
-                currentUsers.map((user: User) => (
+                users.map((user: User) => (
                   <TableRow key={user._id} className="border-none">
                     <TableCell>{user.identifier}</TableCell>
                     <TableCell>{`${user.firstName} ${user.lastName}`}</TableCell>

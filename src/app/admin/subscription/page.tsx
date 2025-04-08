@@ -155,7 +155,7 @@ const Page = () => {
           <DialogContent className="bg-[#1b2236] border-[#1F2937] w-[450px] p-6 flex flex-col items-center text-white rounded-lg">
             <DialogHeader className="text-center">
               <DialogTitle />
-              <div className="self-stretch text-center justify-start text-white text-base font-semibold">Add/Edit FAQ</div>
+              <div className="self-stretch text-center justify-start text-white text-base font-semibold">Add Price</div>
             </DialogHeader>
 
             <div className="self-stretch inline-flex flex-col justify-start items-start gap-3.5">

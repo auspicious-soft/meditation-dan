@@ -14,6 +14,7 @@ import { getCompanyDetailStats } from "@/services/admin-services";
 import { toast } from "sonner";
 import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
+import SearchBar from "@/components/ui/SearchBar";
 
 // Updated Invoice interface based on backend data
 interface Invoice {
@@ -44,16 +45,28 @@ const RecentNewUsers = () => {
   const [totalPages, setTotalPages] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState<string>(""); // Single search term
 
-  // Fetch company details with pagination
+  // Fetch company details with pagination and search
   useEffect(() => {
     const fetchCompanyDetails = async () => {
       try {
         setLoading(true);
-        const response = await getCompanyDetailStats("/admin/get-all-companies", {
+        const payload: {
+          page: number;
+          limit: number;
+          description?: string; // Single search parameter for backend
+        } = {
           page: currentPage,
           limit: 10,
-        });
+        };
+
+        // Add search term to payload if it exists
+        if (searchTerm.trim()) {
+          payload.description = searchTerm.trim();
+        }
+
+        const response = await getCompanyDetailStats("/admin/get-all-companies", payload);
         const data: ApiResponse = response.data;
 
         if (data.success) {
@@ -73,7 +86,7 @@ const RecentNewUsers = () => {
     };
 
     fetchCompanyDetails();
-  }, [currentPage]);
+  }, [currentPage, searchTerm]);
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
@@ -93,16 +106,19 @@ const RecentNewUsers = () => {
     <SkeletonTheme baseColor="#0B132B" highlightColor="#1B2236" borderRadius="0.5rem">
       <div className="grid grid-cols-12 gap-4 w-full">
         <div className="col-span-12 space-y-6 bg-[#1b2236] rounded-[12px] md:rounded-[20px] py-4 px-4 md:py-8 md:px-9">
-          <div className="flex items-center justify-between flex-wrap mb-0">
-            <h2 className="text-white text-[20px] md:text-2xl font-bold mb-3">
+          <div className="flex items-center justify-between flex-wrap mb-4">
+            <h2 className="text-white text-[20px] md:text-2xl font-bold ">
               Company Lists
             </h2>
+            <div className="flex items-center gap-2">
             <Button
-              className="w-44 h-8 px-12 py-2 !bg-[#1a3f70] rounded inline-flex justify-center items-center hover:cursor-pointer text-white text-sm !font-normal !leading-tight !tracking-tight"
+              className="w-44 h-10 px-12 py-2 !bg-[#1a3f70] rounded inline-flex justify-center items-center hover:cursor-pointer text-white text-sm !font-normal !leading-tight !tracking-tight"
               onClick={() => router.push("/admin/company-lists/add-new-company")}
             >
               + Add New Company
             </Button>
+            <SearchBar setQuery={setSearchTerm} query={searchTerm} />
+            </div>
           </div>
           <Table>
             <TableHeader>
