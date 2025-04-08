@@ -98,7 +98,6 @@ const Page = () => {
                 <TableHead className="py-4">User Name</TableHead>
                 <TableHead className="py-4">Company Name</TableHead>
                 <TableHead className="py-4">Email</TableHead>
-                <TableHead className="py-4">Gender</TableHead>
                 <TableHead className="text-right py-4">Action</TableHead>
               </TableRow>
             </TableHeader>
@@ -110,7 +109,7 @@ const Page = () => {
                     <TableCell className="py-4"><Skeleton className="h-4 w-[150px] bg-gray-700" /></TableCell>
                     <TableCell className="py-4"><Skeleton className="h-4 w-[200px] bg-gray-700" /></TableCell>
                     <TableCell className="py-4"><Skeleton className="h-4 w-[180px] bg-gray-700" /></TableCell>
-                    <TableCell className="py-4"><Skeleton className="h-4 w-[80px] bg-gray-700" /></TableCell>
+                    {/* <TableCell className="py-4"><Skeleton className="h-4 w-[80px] bg-gray-700" /></TableCell> */}
                     <TableCell className="py-4"><Skeleton className="h-4 w-[100px] bg-gray-700 ml-auto" /></TableCell>
                   </TableRow>
                 ))
@@ -133,7 +132,6 @@ const Page = () => {
                     <TableCell className="py-4">{request.userId?.firstName} {request.userId?.lastName}</TableCell>
                     <TableCell className="py-4">{request.companyId?.companyName}</TableCell>
                     <TableCell className="py-4">{request.userId?.email}</TableCell>
-                    <TableCell className="py-4">{request.userId?.gender}</TableCell>
                     <TableCell className="text-right py-4">
                       <div className="flex gap-x-2 justify-end">
                         <Button 
@@ -204,7 +202,7 @@ const Page = () => {
           {!isLoading && !error && joinRequests.length > 0 && (
             <div className="flex justify-end items-center gap-2 mt-4">
               <Button
-                className="bg-[#0B132B]"
+                className="bg-[#0B132B] hover:cursor-pointer"
                 onClick={() => handlePageChange(currentPage - 1)}
                 disabled={!pagination.hasPrevPage}
               >
@@ -214,7 +212,7 @@ const Page = () => {
                 Page {pagination.page} of {pagination.totalPages}
               </span>
               <Button
-                className="bg-[#0B132B]"
+                className="bg-[#0B132B] hover:cursor-pointer"
                 onClick={() => handlePageChange(currentPage + 1)}
                 disabled={!pagination.hasNextPage}
               >

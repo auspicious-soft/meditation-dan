@@ -83,7 +83,6 @@ const Page = () => {
                 <TableHead className="py-4">User Name</TableHead>
                 <TableHead className="py-4">Email Id</TableHead>
                 {/* <TableHead className="py-4">Birthday</TableHead> */}
-                <TableHead className="py-4">Gender</TableHead>
                 <TableHead className="text-right py-4">Action</TableHead>
               </TableRow>
             </TableHeader>
@@ -136,10 +135,9 @@ const Page = () => {
                     <TableCell className="py-4">{user.firstName} {user.lastName}</TableCell>
                     <TableCell className="py-4">{user.email}</TableCell>
                     {/* <TableCell className="py-4">{formatDate(user.dob)}</TableCell> */}
-                    <TableCell className="py-4">{user.gender || "N/A"}</TableCell>
                     <TableCell className="text-right py-4">
                       <Button
-                        className="px-3 !py-0 w-16 h-6 !bg-[#1a3f70] rounded inline-flex justify-center items-center text-white text-sm !font-normal !leading-tight !tracking-tight"
+                        className="px-3 !py-0 w-16 h-6 !bg-[#1a3f70] rounded inline-flex justify-center items-center text-white text-sm !font-normal !leading-tight !tracking-tight hover:cursor-pointer"
                         onClick={() => handleViewClick(user._id)}
                       >
                         View
@@ -154,7 +152,7 @@ const Page = () => {
           {/* Pagination Controls */}
           <div className="flex justify-end items-center gap-2 mt-4">
             <Button
-              className="bg-[#0B132B]"
+              className="bg-[#0B132B] hover:cursor-pointer"
               onClick={() => handlePageChange(currentPage - 1)}
               disabled={currentPage === 1 || isLoading}
             >
@@ -164,7 +162,7 @@ const Page = () => {
               Page {currentPage} of {totalPages}
             </span>
             <Button
-              className="bg-[#0B132B]"
+              className="bg-[#0B132B] hover:cursor-pointer"
               onClick={() => handlePageChange(currentPage + 1)}
               disabled={currentPage === totalPages || isLoading}
             >

@@ -198,17 +198,17 @@ const RecentNewUsers = () => {
           {/* Pagination Controls */}
           <div className="flex justify-end items-center gap-2 mt-4">
             <Button
-              className="bg-[#0B132B]"
+              className="bg-[#0B132B] hover:cursor-pointer"
               onClick={() => handlePageChange(currentPage - 1)}
               disabled={currentPage === 1 || isLoading}
             >
               Previous
             </Button>
-            <span className="text-white text-sm">
+            <span className="text-white text-sm ">
               Page {currentPage} of {totalPages}
             </span>
             <Button
-              className="bg-[#0B132B]"
+              className="bg-[#0B132B] hover:cursor-pointer"
               onClick={() => handlePageChange(currentPage + 1)}
               disabled={currentPage === totalPages || isLoading}
             >
