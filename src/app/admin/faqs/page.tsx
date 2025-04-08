@@ -34,8 +34,10 @@ export default function Page() {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedFaq, setSelectedFaq] = useState<FAQ | null>(null);
-  const [question, setQuestion] = useState("");
-  const [answer, setAnswer] = useState("");
+  const [question, setQuestion] = useState(""); // For Edit dialog
+  const [answer, setAnswer] = useState(""); // For Edit dialog
+  const [newQuestion, setNewQuestion] = useState(""); // For Add New dialog
+  const [newAnswer, setNewAnswer] = useState(""); // For Add New dialog
   const [isLoading, setIsLoading] = useState(true);
 
   // Fetch FAQs on mount and when page changes
@@ -64,22 +66,22 @@ export default function Page() {
   // Handle add new FAQ
   const handleAddFaq = async (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
-    if (!question.trim() || !answer.trim()) {
+    if (!newQuestion.trim() || !newAnswer.trim()) {
       toast.error("Both question and answer are required.");
       return;
     }
     try {
       const payload = {
-        question: question.trim(),
-        answer: answer.trim(),
-      }
-      console.log('payload:', payload);
+        question: newQuestion.trim(),
+        answer: newAnswer.trim(),
+      };
+      console.log("payload:", payload);
       const response = await addFaq("/admin/FAQs", payload);
       if (response.data.success) {
         toast.success("FAQ added successfully");
         setIsAddOpen(false);
-        setQuestion("");
-        setAnswer("");
+        setNewQuestion("");
+        setNewAnswer("");
         await fetchFaqs();
       } else {
         toast.error("Failed to add FAQ");
@@ -255,8 +257,8 @@ export default function Page() {
                 type="text"
                 className="self-stretch h-12 px-4 py-3.5 bg-[#0B132B] rounded-lg text-neutral-400 text-base font-normal focus:outline-none"
                 placeholder="Type question here"
-                value={question}
-                onChange={(e) => setQuestion(e.target.value)}
+                value={newQuestion}
+                onChange={(e) => setNewQuestion(e.target.value)}
               />
             </div>
             <div className="self-stretch inline-flex flex-col justify-start items-start gap-3.5">
@@ -266,8 +268,8 @@ export default function Page() {
               <textarea
                 className="self-stretch h-24 px-4 py-3.5 bg-[#0B132B] rounded-lg text-neutral-400 text-base font-normal focus:outline-none"
                 placeholder="Type answer here"
-                value={answer}
-                onChange={(e) => setAnswer(e.target.value)}
+                value={newAnswer}
+                onChange={(e) => setNewAnswer(e.target.value)}
               />
             </div>
             <DialogFooter className="flex justify-end gap-[12px] mt-6">
