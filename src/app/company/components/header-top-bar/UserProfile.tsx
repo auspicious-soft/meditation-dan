@@ -8,6 +8,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { signOut } from "next-auth/react";
 import { useSession } from "next-auth/react";
 import { getImageUrlOfS3 } from "@/actions";
+import CompanyLogo from "../../../../../public/images/3.png"
 
 const UserProfile = () => {
      const { data: session } = useSession();
@@ -35,7 +36,7 @@ return (
    <DropdownMenuTrigger asChild>
     <Button variant="outline" className="ring-0 cursor-pointer border-0 bg-transparent hover:bg-transparent outline-none p-0 h-auto w-auto [&_svg]:size-10 focus:outline-none focus:ring-0 focus:ring-ring focus:ring-offset-0">
      <Avatar>
-     <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
+     <AvatarImage src={CompanyLogo.src} alt="@shadcn" />
            <AvatarFallback>SS</AvatarFallback>
      </Avatar>
     </Button>
@@ -44,8 +45,7 @@ return (
     <DropdownMenuGroup>
      <div className="flex items-center p-[8px]">
       <Avatar>
-       {/* <AvatarImage src={profilePicUrl} alt="User Avatar" /> */}
-       <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
+       <AvatarImage src={CompanyLogo.src} alt="User Avatar" />
        <AvatarFallback>SS</AvatarFallback>
       </Avatar>
       <div className="ml-2">

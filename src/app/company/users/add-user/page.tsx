@@ -8,6 +8,17 @@ import { createUserAccount } from "@/services/company-services";
 import { toast } from "sonner";
 import { useSession } from "next-auth/react";
 
+// Function to generate a random password
+const generateRandomPassword = (length = 12) => {
+  const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
+  let password = "";
+  for (let i = 0; i < length; i++) {
+    const randomIndex = Math.floor(Math.random() * charset.length);
+    password += charset[randomIndex];
+  }
+  return password;
+};
+
 const Page = () => {
   const { data: session } = useSession();
   const router = useRouter();
@@ -17,25 +28,17 @@ const Page = () => {
     firstName: "",
     lastName: "",
     email: "",
-    gender: "",
-    companyName: "",  
+    // gender: "",
+    // companyName: "",  
     // birthday: "",
-    password: "",
+    // password: "",
   });
 
-  // Set companyName from session when available
-  useEffect(() => {
-    if (session?.user?.fullName) {
-      setFormData((prevData) => ({
-        ...prevData,
-        companyName: session.user.fullName,  // Set from session data
-      }));
-    }
-  }, [session]);
-
+  // State to manage companyName and loading/error states
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [companyName, setCompanyName] = useState("");
 
   const handleChange = (field: string, value: string) => {
     setFormData({
@@ -43,16 +46,22 @@ const Page = () => {
       [field]: value,
     });
   };
+  
+  useEffect(() => {
+    if (session?.user?.fullName) {
+      setCompanyName(session.user.fullName);
+    }
+  }, [session]);
 
   const validateForm = () => {
     const requiredFields = [
       "firstName",
       "lastName",
       "email",
-      "gender",
-      "companyName",
+      // "gender",
+      // "companyName",
       // "birthday",
-      "password"
+      // "password"
     ];
     for (const field of requiredFields) {
       if (!formData[field as keyof typeof formData]) {
@@ -66,16 +75,12 @@ const Page = () => {
   };
 
   const isFormComplete = () => {
-    return (
-      formData.firstName.trim() !== "" &&
-      formData.lastName.trim() !== "" &&
-      formData.email.trim() !== "" &&
-      formData.gender.trim() !== "" &&
-      formData.companyName.trim() !== "" &&
-      // formData.birthday.trim() !== "" &&
-      formData.password.trim() !== ""
-    );
-  };
+      return (
+        formData.firstName.trim() !== "" &&
+        formData.lastName.trim() !== "" &&
+        formData.email.trim() !== ""
+      );
+    };
 
   const handleSave = async () => {
     setError(null);
@@ -88,16 +93,16 @@ const Page = () => {
     }
 
     setIsLoading(true);
-
+    const randomPassword = generateRandomPassword();
     try {
       const payload = {
         firstName: formData.firstName,
         lastName: formData.lastName,
         email: formData.email,
-        gender: formData.gender,
-        companyName: formData.companyName,  
+        // gender: formData.gender,
+        companyName: companyName,  
         // dob: formData.birthday,
-        password: formData.password,
+        password: randomPassword,
       };
       const response = await createUserAccount("/company/users", payload);
       console.log('response: ', response);
@@ -157,52 +162,6 @@ const Page = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <Label htmlFor="gender" className="text-white dm-sans text-base font-normal">
-                Gender
-              </Label>
-              <Input
-                id="gender"
-                type="text"
-                value={formData.gender}
-                onChange={(e) => handleChange("gender", e.target.value)}
-                className="bg-[#0f172a] h-12 border-none text-white"
-                disabled={isLoading}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="companyName" className="text-white dm-sans text-base font-normal">
-                Company Name
-              </Label>
-              <Input
-                id="companyName"
-                type="text"
-                value={formData.companyName}  // This will be the value set from the session
-                onChange={() => { }}
-                className="bg-[#0f172a] h-12 border-none text-white"
-                disabled={true}  // Make this field disabled to prevent editing
-                required
-              />
-            </div>
-
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* <div className="space-y-2">
-              <Label htmlFor="birthday" className="text-white dm-sans text-base font-normal">
-                Birthday
-              </Label>
-              <Input
-                id="birthday"
-                type="date"
-                value={formData.birthday}
-                onChange={(e) => handleChange("birthday", e.target.value)}
-                className="bg-[#0f172a] h-12 border-none text-white"
-                disabled={isLoading}
-                required
-              />
-            </div> */}
-            <div className="space-y-2">
               <Label htmlFor="email" className="text-white dm-sans text-base font-normal">
                 Email Address
               </Label>
@@ -216,32 +175,40 @@ const Page = () => {
                 required
               />
             </div>
-            <div className="space-y-2  ">
-              <Label htmlFor="password" className="text-white dm-sans text-base font-normal">
-                Password
-              </Label>
-              <Input
-                id="password"
-                type="password"
-                value={formData.password}
-                onChange={(e) => handleChange("password", e.target.value)}
-                className="bg-[#0f172a] h-12 border-none text-white w-full"
-                disabled={isLoading}
-                required
-              />
-            </div>
-
           </div>
-
-
 
           <div>
             <Button
-              className="mt-4 bg-[#1A3F70] w-28 h-11 hover:bg-[#1A3F70] dm-sans text-white"
+              className="mt-4 bg-[#1A3F70] w-28 h-11 hover:bg-[#1A3F70] dm-sans text-white hover:cursor-pointer relative"
               onClick={handleSave}
               disabled={isLoading || !isFormComplete()}
             >
-              {isLoading ? "Saving..." : "Save"}
+              {isLoading ? (
+                <div className="flex items-center justify-center">
+                  <svg
+                    className="animate-spin h-5 w-5 mr-2 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                </div>
+              ) : (
+                "Save"
+              )}
             </Button>
           </div>
         </div>
