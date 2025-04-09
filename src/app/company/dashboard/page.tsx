@@ -66,7 +66,7 @@ const RecentNewUsers = () => {
                 </TableHeader>
                 <TableBody>
                   {isLoading ? (
-                    Array(5).fill(null).map((_, index) => (
+                    Array(5).fill(null)?.map((_, index) => (
                       <TableRow key={index} className="border-0">
                         <TableCell className="py-4">
                           <SkeletonTheme baseColor="#ebebeb" highlightColor="#1b2236" borderRadius={10}>
@@ -90,14 +90,14 @@ const RecentNewUsers = () => {
                         </TableCell>
                       </TableRow>
                     ))
-                  ) : transactions.data.length === 0 ? (
+                  ) : (transactions?.data?.length === 0 || !transactions?.data) ? (
                     <TableRow>
                       <TableCell colSpan={4} className="text-center py-4">
                         No transactions found
                       </TableCell>
                     </TableRow>
                   ) : (
-                    transactions.data.map((invoice: any) => (
+                    transactions?.data?.map((invoice: any) => (
                       <TableRow key={invoice.transactionId} className="border-0 text-sm font-normal hover:bg-transparent">
                         <TableCell className="py-4">{invoice.transactionId}</TableCell>
                         <TableCell className="text-center py-4">
@@ -133,7 +133,7 @@ const RecentNewUsers = () => {
                 </TableHeader>
                 <TableBody>
                   {isLoading ? (
-                    Array(5).fill(null).map((_, index) => (
+                    Array(5).fill(null)?.map((_, index) => (
                       <TableRow key={index} className="border-0">
                         <TableCell className="py-4">
                           <SkeletonTheme baseColor="#ebebeb" highlightColor="#1b2236" borderRadius={10}>
@@ -162,14 +162,14 @@ const RecentNewUsers = () => {
                         </TableCell>
                       </TableRow>
                     ))
-                  ) : recentUsers.length === 0 ? (
+                  ) : recentUsers?.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={5} className="text-center py-4">
                         No users found
                       </TableCell>
                     </TableRow>
                   ) : (
-                    recentUsers.map((user: any) => (
+                    recentUsers?.map((user: any) => (
                       <TableRow key={user.identifier} className="border-0 text-sm font-normal hover:bg-transparent">
                         <TableCell className="py-4">{user.identifier}</TableCell>
                         <TableCell className="py-4">

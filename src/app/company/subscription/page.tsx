@@ -3,7 +3,7 @@ import React, { useState, useTransition } from "react";
 import Image from "next/image";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import useSWR from "swr";
-import { buyPlan, getAllSubcriptionPlans, getAllTransactionsPlans, getUserInfo } from "@/services/company-services";
+import { buyPlan, getAllSubcriptionPlans, getAllTransactionsPlans, getCompanyDetails, getUserInfo } from "@/services/company-services";
 import { loadStripe } from "@stripe/stripe-js";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
@@ -63,14 +63,7 @@ const SubscriptionModal = ({ isOpen, onClose, onContinue, planType, price, descr
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null); // State for error message
 
-  // Set numberOfUsers once totalUsers is available
-  // React.useEffect(() => {
-  //   if (totalUsers !== undefined) {
-  //     setNumberOfUsers(totalUsers || 1); // Default to 1 if totalUsers is 0 or undefined
-  //   }
-  // }, [totalUsers]);
-
-  // if (!isOpen) return null;
+  
   React.useEffect(() => {
     if (totalUsers !== undefined) {
       setNumberOfUsers(totalUsers || 1); // Default to 1 if totalUsers is 0 or undefined
@@ -154,7 +147,7 @@ const SubscriptionModal = ({ isOpen, onClose, onContinue, planType, price, descr
         <div className="w-full mt-6 flex justify-between gap-[12px]">
           <button
             onClick={onClose}
-            className="w-[45%] bg-[#1a3f70] text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition"
+            className="w-[45%] bg-[#1a3f70] text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition hover:cursor-pointer"
           >
             Cancel
           </button>
@@ -166,7 +159,7 @@ const SubscriptionModal = ({ isOpen, onClose, onContinue, planType, price, descr
                 setTimeout(() => setIsLoading(false), 2000);
               }
             }}
-            className="w-full bg-[#14ab00] text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 transition flex items-center justify-center"
+            className="w-full bg-[#14ab00] text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 transition flex items-center justify-center hover:cursor-pointer"
             disabled={isLoading || numberOfUsers === null} // Disable if loading or numberOfUsers is null
           >
             {isLoading ? "Loading..." : "Continue"}
@@ -222,11 +215,21 @@ const CancelSubscriptionModal = ({ isOpen, onClose, onConfirm, isLoading, userNa
 
 const Page = () => {
   const session = useSession();
+  console.log('session: ', session);
   const { data: subscriptionData, error, isLoading, mutate } = useSWR(
     "/company/products?status=active",
     getAllSubcriptionPlans,
     { revalidateOnFocus: false, refreshInterval: 0 }
   );
+  const { data: companyData } = useSWR(
+    session?.data?.user?.id 
+    ? `/company/company-details/${session?.data?.user.id}` 
+    : null,
+    getCompanyDetails,
+    { revalidateOnFocus: false, refreshInterval: 0 }
+  );
+  console.log('companyData: ', companyData?.data?.data?.totalUsers);
+  const currentActiveUsers = companyData?.data?.data?.totalUsers;
   const { data: transactionData, error: transactionError, isLoading: transactionLoading } = useSWR(
     "/company/transactions",
     getAllTransactionsPlans
@@ -373,7 +376,7 @@ const userName = data?.user?.fullName || "User";
                     <span className={`${priceTextColor} text-5xl font-bold font-['SF_Pro_Display']`}>${price}</span>
                     <span className={`${priceTextColor} text-lg font-medium font-['SF_Pro_Display']`}>/user</span>
                   </div>
-                  <div className={`mt-6 self-stretch h-15 ${descriptionColor} text-sm font-normal flex flex-col gap-3 w-full`}>
+                  <div className={`mt-6 self-stretch h-15 text-ellipsis ${descriptionColor} text-sm font-normal flex flex-col gap-3 w-full`}>
                     {product.description}
                   </div>
                   {isCurrentPlan && numberOfUsers && (
@@ -415,7 +418,8 @@ const userName = data?.user?.fullName || "User";
                   )}
                 </div>
               );
-            })
+            }
+          )
           )}
         </div>
         <SubscriptionModal
@@ -425,7 +429,7 @@ const userName = data?.user?.fullName || "User";
           planType={selectedPlanDetails.planType}
           price={selectedPlanDetails.price}
           description={selectedPlanDetails.description}
-          totalUsers={selectedPlanDetails.totalUsers}
+          totalUsers={currentActiveUsers}
         />
         <CancelSubscriptionModal
           isOpen={isCancelModalOpen}
