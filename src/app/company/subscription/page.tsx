@@ -63,7 +63,7 @@ const SubscriptionModal = ({ isOpen, onClose, onContinue, planType, price, descr
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null); // State for error message
 
-  
+
   React.useEffect(() => {
     if (totalUsers !== undefined) {
       setNumberOfUsers(totalUsers || 1); // Default to 1 if totalUsers is 0 or undefined
@@ -171,7 +171,7 @@ const SubscriptionModal = ({ isOpen, onClose, onContinue, planType, price, descr
 };
 
 
-const CancelSubscriptionModal = ({ isOpen, onClose, onConfirm, isLoading, userName }: { isOpen: boolean; onClose: () => void; onConfirm: () => void; isLoading: boolean ,userName:string }) => {
+const CancelSubscriptionModal = ({ isOpen, onClose, onConfirm, isLoading, userName }: { isOpen: boolean; onClose: () => void; onConfirm: () => void; isLoading: boolean, userName: string }) => {
   React.useEffect(() => {
     if (isOpen) {
       document.body.classList.add('no-scroll');
@@ -222,9 +222,9 @@ const Page = () => {
     { revalidateOnFocus: false, refreshInterval: 0 }
   );
   const { data: companyData } = useSWR(
-    session?.data?.user?.id 
-    ? `/company/company-details/${session?.data?.user.id}` 
-    : null,
+    session?.data?.user?.id
+      ? `/company/company-details/${session?.data?.user.id}`
+      : null,
     getCompanyDetails,
     { revalidateOnFocus: false, refreshInterval: 0 }
   );
@@ -246,15 +246,15 @@ const Page = () => {
   const handlePlanSelect = (planType: string, price: string, planId: string, description: string) => {
     const selectedProduct = filteredProducts.find((product: any) => product.id === planId);
     const isCurrentPlanDetails = filteredProducts.find((product: any) => product.currentPlan);
-  const isCurrentPlan = !!selectedProduct?.currentPlan;
-  const totalUsers = isCurrentPlanDetails ? isCurrentPlanDetails.currentPlan.totalUsers || 1 : 1;
- 
+    const isCurrentPlan = !!selectedProduct?.currentPlan;
+    const totalUsers = isCurrentPlanDetails ? isCurrentPlanDetails.currentPlan.totalUsers || 1 : 1;
 
-  setSelectedPlanDetails({ planType, price, planId, description, totalUsers });
+
+    setSelectedPlanDetails({ planType, price, planId, description, totalUsers });
     setIsModalOpen(true);
   };
-const {data} = useSession();
-const userName = data?.user?.fullName || "User";
+  const { data } = useSession();
+  const userName = data?.user?.fullName || "User";
   const handleContinue = async (numberOfUsers: number) => {
     setIsModalOpen(false);
     setSelectedPlanId(selectedPlanDetails.planId);
@@ -311,115 +311,120 @@ const userName = data?.user?.fullName || "User";
   if (transactionError) return <div>Error loading transactions.</div>;
 
   const products = subscriptionData?.data.products || [];
-  
+
   // Check if the user has a lifetime plan
   const hasLifetimePlan = products.some((product: any) => product.currentPlan?.name === "Lifetime");
-  
+
   // Filter products: if lifetime plan exists, only show the lifetime plan
   const filteredProducts = hasLifetimePlan
-  ? products.filter((product: any) => product.currentPlan?.name === "Lifetime")
-  : products;
-  
+    ? products.filter((product: any) => product.currentPlan?.name === "Lifetime")
+    : products;
+
   return (
     <>
       <div className="py-[30px] px-[36px] h-auto bg-[#1B2236] rounded-[20px] max-w-full">
         <div className="mb-[20px] text-white text-2xl text-left">Subscription Plan</div>
 
-        <div className={`flex flex-wrap lg:flex-nowrap ${ filteredProducts.length === 1 ? "justify-left" : "justify-center"} gap-10`}>
+        <div className={`flex flex-wrap lg:flex-nowrap ${filteredProducts.length === 1 ? "justify-left" : "justify-center"} gap-10`}>
           {isLoading || showSkeletonAfterCancel ? (
             Array(3).fill(0).map((_, index) => <SkeletonCard key={index} />)
           ) : (
             filteredProducts.length === 0 ? (
               <div className="text-white text-center col-span-full">No subscription plans available.</div>
             ) :
-            filteredProducts.map((product: any) => {
-              const activePrice = product.prices.find((price: any) => price.active);
-              const price = activePrice ? (activePrice.unit_amount / 100).toFixed(0) : "N/A";
-              const interval = activePrice?.recurring?.interval || "month";
-              const isCurrentPlan = !!product.currentPlan;
-              const expiryDate = (isCurrentPlan && product.currentPlan.expiryDate)
-                ? new Date(product.currentPlan.expiryDate).toLocaleDateString()
-                : (isCurrentPlan && product.currentPlan.planType === "lifetime") ? "Lifetime" : null;
-              const numberOfUsers = product.currentPlan?.numUsersForPlan || 0;
-              const planType = product.name.split(" ")[0].toLowerCase();
-              const isCardLoading = isPending && selectedPlanId === product.id;
-              const isLifetime = product.currentPlan?.planType === "lifetime";
-              const isCardCanceling = isCanceling;
+              filteredProducts.map((product: any) => {
+                const activePrice = product.prices.find((price: any) => price.active);
+                const price = activePrice ? (activePrice.unit_amount / 100).toFixed(0) : "N/A";
+                const interval = activePrice?.recurring?.interval || "month";
+                const isCurrentPlan = !!product.currentPlan;
+                const expiryDate = (isCurrentPlan && product.currentPlan.expiryDate)
+                  ? new Date(product.currentPlan.expiryDate).toLocaleDateString()
+                  : (isCurrentPlan && product.currentPlan.planType === "lifetime") ? "Lifetime" : null;
+                const numberOfUsers = product.currentPlan?.numUsersForPlan || 0;
+                const planType = product.name.split(" ")[0].toLowerCase();
+                const isCardLoading = isPending && selectedPlanId === product.id;
+                const isLifetime = product.currentPlan?.planType === "lifetime";
+                const isCardCanceling = isCanceling;
 
-              const cardBgColor = isCurrentPlan ? "bg-[#1A3F70]" : "bg-white";
-              const textColor = isCurrentPlan ? "text-white" : "text-black";
-              const descriptionColor = isCurrentPlan ? "text-white" : "text-neutral-400";
-              const priceTextColor = isCurrentPlan ? "text-white" : "text-[#1a3f70]";
-              const buttonBgColor = isCurrentPlan ? "bg-white" : "bg-[#1A3F70]";
-              const buttonTextColor = isCurrentPlan ? "text-[#1A3F70]" : "text-white";
-              const tickImage = isCurrentPlan ? "/whitetick.svg" : "/bluetick.svg";
-              const featureTextColor = isCurrentPlan ? "text-white" : "text-black";
-              const borderColor = isCurrentPlan ? "border-white" : "border-neutral-800";
-              const features = product.name.toLowerCase().includes("gold")
-                ? ["Unlimited Signups", "Unlimited Access", "Unlimited Downloads", "Unlimited"]
-                : Array(4).fill("Limited Access");
+                const cardBgColor = isCurrentPlan ? "bg-[#1A3F70]" : "bg-white";
+                const textColor = isCurrentPlan ? "text-white" : "text-black";
+                const descriptionColor = isCurrentPlan ? "text-white" : "text-neutral-400";
+                const priceTextColor = isCurrentPlan ? "text-white" : "text-[#1a3f70]";
+                const buttonBgColor = isCurrentPlan ? "bg-white" : "bg-[#1A3F70]";
+                const buttonTextColor = isCurrentPlan ? "text-[#1A3F70]" : "text-white";
+                const tickImage = isCurrentPlan ? "/whitetick.svg" : "/bluetick.svg";
+                const featureTextColor = isCurrentPlan ? "text-white" : "text-black";
+                const borderColor = isCurrentPlan ? "border-white" : "border-neutral-800";
+                const features = product.name.toLowerCase().includes("gold")
+                  ? ["Unlimited Signups", "Unlimited Access", "Unlimited Downloads", "Unlimited"]
+                  : Array(4).fill("Limited Access");
 
-              return (
-                <div
-                  key={product.id}
-                  className={`relative w-full max-w-sm h-fit ${cardBgColor} rounded-lg flex flex-col items-left p-6 shadow-lg transition-transform duration-300 hover:scale-105`}
-                >
-                  {isCurrentPlan && (
-                    <div className="absolute top-0 right-0 text-center justify-start bg-white text-[#1a3f70] text-sm font-medium p-2 px-3 rounded-tr-lg rounded-bl-lg shadow-lg">
-                      Current Plan
-                    </div>
-                  )}
-                  <div className={`font-bold flex items-center justify-center w-36 h-9 rounded-lg border ${borderColor}`}>
-                    <div className={`${textColor} text-xl font-medium`}>{product.name}</div>
-                  </div>
-                  <div className="mt-4 text-left text-xl font-medium font-['SF_Pro_Display']">
-                    <span className={`${priceTextColor} text-5xl font-bold font-['SF_Pro_Display']`}>${price}</span>
-                    <span className={`${priceTextColor} text-lg font-medium font-['SF_Pro_Display']`}>/user</span>
-                  </div>
-                  <div className={`mt-6 self-stretch h-15 text-ellipsis ${descriptionColor} text-sm font-normal flex flex-col gap-3 w-full`}>
-                    {product.description}
-                  </div>
-                  {isCurrentPlan && numberOfUsers && (
-                    <div className={`mt-4 text-left text-white text-sm font-normal`}>
-                      Number of Users: {numberOfUsers}
-                    </div>
-                  )}
-                  <div className="mt-8 flex justify-left w-full">
-                    {isCardCanceling || isCardLoading ? (
-                      <div className={`flex justify-center items-center w-full max-w-[200px] h-12 rounded-lg bg-[#1A3F70]`}>
-                        <Loader2 size={24} className="animate-spin text-white" />
+                return (
+                  <div
+                    key={product.id}
+                    className={`relative w-full max-w-sm h-fit ${cardBgColor} rounded-lg flex flex-col items-left p-6 shadow-lg transition-transform duration-300 hover:scale-105`}
+                  >
+                    {isCurrentPlan && (
+                      <div className="absolute top-0 right-0 text-center justify-start bg-white text-[#1a3f70] text-sm font-medium p-2 px-3 rounded-tr-lg rounded-bl-lg shadow-lg">
+                        Current Plan
                       </div>
-                    ) : isCurrentPlan && !isLifetime ? (
-                      <button
-                        onClick={() => setIsCancelModalOpen(true)}
-                        className={`h-12 w-full max-w-[200px] ${buttonBgColor} rounded-lg flex items-center justify-center hover:cursor-pointer`}
-                      >
-                        <span className={`${buttonTextColor} text-lg font-medium font-['SF_Pro_Display']`}>
-                          Cancel Subscription
-                        </span>
-                      </button>
-                    ) : isCurrentPlan && isLifetime ? (
-                      <div className="text-center text-white">Lifetime Plan</div>
-                    ) : (
-                      <button
-                        onClick={() => handlePlanSelect(product.name.split(" ")[0].toLowerCase(), price, product.id, product.description)}
-                        className={`h-12 w-full max-w-[150px] ${buttonBgColor} rounded-lg flex items-center justify-center text-center hover:cursor-pointer`}
-                      >
-                        <span className={`${buttonTextColor} text-base font-medium`}>
-                          Activate Plan
-                        </span>
-                      </button>
+                    )}
+                    <div className={`font-bold flex items-center justify-center w-36 h-9 rounded-lg border ${borderColor}`}>
+                      <div className={`${textColor} text-xl font-medium`}>{product.name}</div>
+                    </div>
+                    <div className="mt-4 text-left text-xl font-medium font-['SF_Pro_Display']">
+                      <span className={`${priceTextColor} text-5xl font-bold font-['SF_Pro_Display']`}>${price}</span>
+                      <span className={`${priceTextColor} text-lg font-medium font-['SF_Pro_Display']`}>/user</span>
+                    </div>
+
+                    <div
+                      className={`mt-6 self-stretch max-h-[60px] overflow-hidden ${descriptionColor} text-sm font-normal flex flex-col gap-3 w-full text-ellipsis `}
+                      style={{ wordBreak: 'break-all' }}
+                    >
+
+                      {product.description}
+                    </div>
+                    {isCurrentPlan && numberOfUsers && (
+                      <div className={`mt-4 text-left text-white text-sm font-normal`}>
+                        Number of Users: {numberOfUsers}
+                      </div>
+                    )}
+                    <div className="mt-8 flex justify-left w-full">
+                      {isCardCanceling || isCardLoading ? (
+                        <div className={`flex justify-center items-center w-full max-w-[200px] h-12 rounded-lg bg-[#1A3F70]`}>
+                          <Loader2 size={24} className="animate-spin text-white" />
+                        </div>
+                      ) : isCurrentPlan && !isLifetime ? (
+                        <button
+                          onClick={() => setIsCancelModalOpen(true)}
+                          className={`h-12 w-full max-w-[200px] ${buttonBgColor} rounded-lg flex items-center justify-center hover:cursor-pointer`}
+                        >
+                          <span className={`${buttonTextColor} text-lg font-medium font-['SF_Pro_Display']`}>
+                            Cancel Subscription
+                          </span>
+                        </button>
+                      ) : isCurrentPlan && isLifetime ? (
+                        <div className="text-center text-white">Lifetime Plan</div>
+                      ) : (
+                        <button
+                          onClick={() => handlePlanSelect(product.name.split(" ")[0].toLowerCase(), price, product.id, product.description)}
+                          className={`h-12 w-full max-w-[150px] ${buttonBgColor} rounded-lg flex items-center justify-center text-center hover:cursor-pointer`}
+                        >
+                          <span className={`${buttonTextColor} text-base font-medium`}>
+                            Activate Plan
+                          </span>
+                        </button>
+                      )}
+                    </div>
+                    {isCurrentPlan && expiryDate && (
+                      <div className={`mt-4 text-left ${textColor} text-xs font-normal`}>
+                        Expires on {expiryDate}
+                      </div>
                     )}
                   </div>
-                  {isCurrentPlan && expiryDate && (
-                    <div className={`mt-4 text-left ${textColor} text-xs font-normal`}>
-                      Expires on {expiryDate}
-                    </div>
-                  )}
-                </div>
-              );
-            }
-          )
+                );
+              }
+              )
           )}
         </div>
         <SubscriptionModal
