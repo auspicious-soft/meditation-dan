@@ -1,17 +1,12 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css"; // Import CSS for skeleton
 import { getCompanyJoinRequest, updateCompanyJoinRequest } from "@/services/admin-services";
-import { AlertCircle, Loader2 } from "lucide-react"; // Import Loader2 for the loading state
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 
 // Define interface for company join request based on backend response
 interface CompanyJoinRequest {
