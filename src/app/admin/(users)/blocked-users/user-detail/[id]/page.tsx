@@ -13,7 +13,7 @@ import { useParams } from "next/navigation";
 import React, { useState } from "react";
 import useSWR from "swr";
 import { toast } from "sonner"; // Added toast import for feedback
-import { Loader2 } from "lucide-react"; // Import Loader2 for loading states
+import { ChevronLeft, Loader2 } from "lucide-react"; // Import Loader2 for loading states
 
 // Skeleton Component for individual field
 const SkeletonField = () => (
@@ -119,9 +119,18 @@ const Page = () => {
       ) : (
         <>
           <div className="mb-6">
+            <div className="flex items-center gap-4 ">
+            <Button
+            variant="destructive"
+            className="bg-[#303850] hover:bg-[#47557c] p-0 h-7 w-7 hover:cursor-pointer"
+            onClick={() => (window.location.href = "/admin/blocked-users")}
+          >
+            <ChevronLeft  />
+          </Button>
             <h2 className="text-white text-xl font-medium">
               {userData.firstName} {userData.lastName}
             </h2>
+            </div>
             <p className="opacity-80">{userData.email}</p>
           </div>
 

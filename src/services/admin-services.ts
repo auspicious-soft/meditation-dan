@@ -137,9 +137,9 @@ export const getCompanyJoinRequest = async (route: string) => {
     const axiosInstance = await getAxiosInstance();
     return axiosInstance.get(route);
 };
-export const updateCompanyJoinRequest = async (route: string) => {
+export const updateCompanyJoinRequest = async (route: string,payload:any) => {
     const axiosInstance = await getAxiosInstance();
-    return axiosInstance.put(route);
+    return axiosInstance.put(route,payload);
 };
 export const getAllFaq = async (route: string) => {
     const axiosInstance = await getAxiosInstance();
@@ -210,4 +210,8 @@ export const sendReminder = async (route: string) => {
 export const getSubscriptionReminder = async (route: string,params:any = {}) => {
   const axiosInstance = await getAxiosInstance();
   return axiosInstance.get(route,{params});
+};      
+export const updateSubscriptionPlan = async (route: string,payload:any) => {
+  const axiosInstance = await getAxiosInstance();
+  return axiosInstance.post(route,payload);
 };      

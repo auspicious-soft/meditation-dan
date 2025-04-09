@@ -9,7 +9,9 @@ import { toast } from "sonner";
 import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css"; // Import CSS for skeleton
 import { getCompanyJoinRequest, updateCompanyJoinRequest } from "@/services/admin-services";
-import { Loader2 } from "lucide-react"; // Import Loader2 for the loading state
+import { AlertCircle, Loader2 } from "lucide-react"; // Import Loader2 for the loading state
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 
 // Define interface for company join request based on backend response
 interface CompanyJoinRequest {
@@ -34,6 +36,7 @@ const Page = () => {
   const [selectedRequestId, setSelectedRequestId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [approvingRequestId, setApprovingRequestId] = useState<string | null>(null); // New state for approval loading
+  const [denialReason, setDenialReason] = useState(""); // New state for denial reason
 
   // Fetch company join requests on mount
   useEffect(() => {
@@ -73,14 +76,13 @@ const Page = () => {
   const handleApprove = async (requestId: string) => {
     setApprovingRequestId(requestId); // Set loading state for this request
     try {
-      const response = await updateCompanyJoinRequest(
-        `/admin/company-join-requests/${requestId}?status=approve`
-      );
+      const payload = { status: "approve" };
+      const response = await updateCompanyJoinRequest(`/admin/company-join-requests/${requestId}`, payload);
       if (response.data.success) {
         toast.success("Request approved successfully");
         await fetchRequests(); // Refetch to update UI
       } else {
-        toast.error("Failed to approve request");
+        toast.error("Failed to approve request: " + (response.data.message || "Unknown error"));
       }
     } catch (error) {
       console.error("Error approving request:", error);
@@ -94,18 +96,19 @@ const Page = () => {
   const handleDeny = async () => {
     if (!selectedRequestId) return;
     try {
-      const response = await updateCompanyJoinRequest(
-        `/admin/company-join-requests/${selectedRequestId}?status=deny`
-      );
+      const payload = { status: "deny", description: denialReason };
+      const response = await updateCompanyJoinRequest(`/admin/company-join-requests/${selectedRequestId}`, payload);
       if (response.data.success) {
         toast.success("Request denied successfully");
         setIsDialogOpen(false);
         setSelectedRequestId(null);
+        setDenialReason(""); // Reset denial reason
         await fetchRequests(); // Refetch to update UI
       } else {
-        toast.error("Failed to deny request");
+        toast.error("Failed to deny request: " + (response.data.message || "Unknown error"));
       }
     } catch (error: any) {
+      console.error("Error denying request:", error);
       if (typeof error === "object" && error !== null && "response" in error && (error as any).response?.data?.message) {
         toast.error((error as any).response.data.message);
       } else {
@@ -158,7 +161,7 @@ const Page = () => {
     <SkeletonTheme baseColor="#0B132B" highlightColor="#1B2236" borderRadius="0.5rem">
       <div className="grid grid-cols-12 gap-4 h-screen">
         <div className="col-span-12 space-y-6 bg-[#1b2236] rounded-[12px] md:rounded-[20px] py-4 px-4 md:py-8 md:px-9">
-          <h2 className="text-white text-lg sm:text-xl md:text-2xl font-bold mb-3">Users</h2>
+          <h2 className="text-white text-lg sm:text-xl md:text-2xl font-bold mb-3">Company</h2>
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
@@ -238,23 +241,30 @@ const Page = () => {
 
         {/* Denial Confirmation Dialog */}
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogContent className="bg-[#141B2D] border-[#1F2937] w-full max-w-[450px] p-6 flex flex-col items-center text-white rounded-lg">
-            <DialogHeader className="text-center">
-              <div className="flex justify-center mb-4">
-                <Image src="/error.svg" alt="error" width={20} height={20} />
+          <DialogContent className="bg-[#141B2D] border-[#1F2937] p-6 flex flex-col items-center text-white rounded-lg">
+            <DialogHeader className="flex flex-col items-center">
+              <div className="p-3 bg-[#FEF3F2] rounded-full">
+                <AlertCircle size={40} className="text-red-500" />
               </div>
-              <DialogTitle className="text-lg font-semibold text-center">Delete ?</DialogTitle>
-              <DialogDescription className="text-sm text-gray-400">
-                Are you sure you want to deny this request? This action cannot be undone.
-              </DialogDescription>
+              <DialogTitle className="text-lg font-semibold text-center">Decline ?</DialogTitle>
+              <div className="w-full">
+                <Label>Reason to decline</Label>
+                <Textarea
+                  className="mt-4 w-full bg-[#0B132B] border-none rounded-lg p-2 text-white resize-none"
+                  placeholder="Please provide a reason for declining the request."
+                  value={denialReason}
+                  onChange={(e) => setDenialReason(e.target.value)}
+                />
+              </div>
             </DialogHeader>
             <DialogFooter className="flex justify-center gap-4 mt-4">
               <Button
                 variant="outline"
-                className="bg-[#1A3F70] border-[#0c4a6e] hover:bg-[#1A3F70] w-32 sm:w-44 h-10 sm:h-11"
+                className="bg-[#1A3F70] cursor-pointer hover:text-white border-[#0c4a6e] hover:bg-[#1A3F70] w-32 sm:w-44 h-10 sm:h-11"
                 onClick={() => {
                   setIsDialogOpen(false);
                   setSelectedRequestId(null);
+                  setDenialReason(""); // Reset denial reason on cancel
                 }}
               >
                 Cancel
@@ -263,8 +273,9 @@ const Page = () => {
                 variant="destructive"
                 className="w-32 sm:w-44 hover:cursor-pointer h-10 sm:h-11"
                 onClick={handleDeny}
+                disabled={!denialReason.trim()} // Disable if reason is empty
               >
-                Delete
+                Decline
               </Button>
             </DialogFooter>
           </DialogContent>

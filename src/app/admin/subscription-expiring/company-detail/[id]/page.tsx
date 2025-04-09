@@ -165,7 +165,6 @@ const Page = () => {
         <h2 className="text-white text-xl font-medium">
           {userData?.companyName || "Fortunate Tech Solutions Inc."}
         </h2>
-
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
             <Label htmlFor="companyName" className="text-white opacity-80 dm-sans text-base font-normal">

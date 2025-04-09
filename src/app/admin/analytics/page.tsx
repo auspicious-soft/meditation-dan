@@ -25,10 +25,10 @@ interface User {
 }
 
 interface Subscription {
-  Id: string;
-  CompanyName: string;
-  RegisterDate: string;
-  Action: string;
+  _id: string;
+  identifier: string;
+  companyName: string;
+  createdAt: string;
 }
 
 interface Payment {
@@ -234,7 +234,7 @@ const Page = () => {
     { label: "Total Users", value: analyticsData.totalUser.toString() },
     { label: "Active Users", value: analyticsData.activeUsers.toString() },
     { label: "Total Downloads", value: analyticsData.totalDownload.toString() },
-    { label: "Audio Plays", value: analyticsData.totalAudioPlays.toString() },
+    { label: "Audio Played", value: analyticsData.totalAudioPlays.toString() },
   ];
 
   const indexOfLastInvoice = currentPage * PAGE_SIZE;
@@ -243,11 +243,11 @@ const Page = () => {
     indexOfFirstInvoice,
     indexOfLastInvoice
   );
-  const subscriptionExpiringToday = analyticsData.subscriptionExpireToday;
+  const subscriptionExpireToday = analyticsData.subscriptionExpireToday;
   const paymentToday = analyticsData.paymentToday;
 
-  const handleViewClick = () => {
-    router.push(`/company/users/details`);
+  const handleViewClick = (id: string) => {
+    router.push(`/admin/subscription-expiring/company-detail/${id}`);
   };
 
   return (
@@ -319,7 +319,7 @@ const Page = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {subscriptionExpiringToday.length === 0 ? (
+                    {subscriptionExpireToday.length === 0 ? (
                       <TableRow key="no-subscriptions">
                         <TableCell
                           colSpan={4}
@@ -329,26 +329,26 @@ const Page = () => {
                         </TableCell>
                       </TableRow>
                     ) : (
-                      subscriptionExpiringToday.map((subscription) => (
+                      subscriptionExpireToday.map((subscription) => (
                         <TableRow
-                          key={subscription.Id}
+                          key={subscription._id}
                           className="border-0 text-sm font-normal hover:bg-transparent"
                         >
                           <TableCell className="py-4">
-                            {subscription.Id}
+                            {subscription.identifier}
                           </TableCell>
                           <TableCell className="py-4">
-                            {subscription.CompanyName}
+                            {subscription.companyName}
                           </TableCell>
                           <TableCell className="py-4">
-                            {subscription.RegisterDate}
+                            {new Date(subscription.createdAt).toLocaleDateString()}
                           </TableCell>
                           <TableCell className="text-right py-4">
                             <Button
                               className="px-3 !py-0 h-6 !bg-[#1a3f70] rounded inline-flex justify-center items-center text-white text-sm !font-normal !leading-tight !tracking-tight"
-                              onClick={handleViewClick}
+                              onClick={() => handleViewClick(subscription._id)}
                             >
-                              {subscription.Action}
+                              View
                             </Button>
                           </TableCell>
                         </TableRow>

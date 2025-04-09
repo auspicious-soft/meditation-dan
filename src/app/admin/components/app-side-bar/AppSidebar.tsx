@@ -30,6 +30,7 @@ const data = {
       icon: UsersIcon,
       items: [
         { title: "Company Lists", url: "/admin/company-lists" },
+        { title: "Declined Companies", url: "/admin/declined-companies" },
         { title: "User Lists", url: "/admin/user-lists" },
         { title: "Blocked Users", url: "/admin/blocked-users" },
       ],
