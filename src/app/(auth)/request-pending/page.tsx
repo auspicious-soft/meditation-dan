@@ -29,7 +29,7 @@ const RequestDeclinePage: React.FC = () => {
         <h1 className="text-5xl font-bold mb-2">Request Pending!</h1>
         <p className="text-m mb-5 w-[40%]">If you do not receive an approval email in 48 hours, please contact us at support@inscape.life.</p>
         
-        <button onClick={handleOk} className="px-4 py-2 bg-[#1a3f70] text-white rounded-lg hover:bg-blue-700 transition">Please Wait for Approval</button>
+        <button onClick={handleOk} className="px-4 py-2 bg-[#1a3f70] text-white rounded-lg hover:bg-blue-700 transition hover:cursor-pointer">Please Wait for Approval</button>
       </div>
     </>
   );
