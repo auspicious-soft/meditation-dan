@@ -46,9 +46,6 @@ const SkeletonRow = () => (
       <div className="h-4 bg-gray-600 rounded w-16 animate-pulse"></div>
     </TableCell>
     <TableCell className="py-4">
-      <div className="h-4 bg-gray-600 rounded w-40 animate-pulse"></div>
-    </TableCell>
-    <TableCell className="py-4">
       <div className="h-6 bg-gray-600 rounded w-16 ml-auto animate-pulse"></div>
     </TableCell>
   </TableRow>

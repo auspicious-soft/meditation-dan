@@ -53,9 +53,7 @@ const SkeletonRow = () => (
     <TableCell>
       <div className="h-4 bg-gray-700 rounded animate-pulse w-16"></div>
     </TableCell>
-    <TableCell>
-      <div className="h-4 bg-gray-700 rounded animate-pulse w-40"></div>
-    </TableCell>
+
     <TableCell>
       <div className="h-8 bg-gray-700 rounded animate-pulse w-16"></div>
     </TableCell>
