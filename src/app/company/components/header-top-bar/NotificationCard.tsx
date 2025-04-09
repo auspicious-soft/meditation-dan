@@ -128,7 +128,7 @@ const NotificationsPanel: React.FC = () => {
                   Yesterday and Past
                 </h2>
                 {Array.isArray(pastNotifications) && pastNotifications.map((notification: any) => (
-                  <div key={notification.id} className="flex items-start mb-5">
+                  <div key={notification._id} className="flex items-start mb-5">
                     <div className="mr-3 mt-1 bg-white/10 rounded p-[10px]">
                       {renderIcon(notification.icon || "bell")}
                     </div>

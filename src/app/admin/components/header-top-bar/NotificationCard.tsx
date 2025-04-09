@@ -64,7 +64,8 @@ const NotificationsPanel: React.FC = () => {
       default:
         return <Bell className="w-5 h-5 text-white" />; // Default to bell
     }
-  };
+  }; 
+  console.log('todayNotifications:', todayNotifications);
 
   return (
     <Sheet>
@@ -96,6 +97,7 @@ const NotificationsPanel: React.FC = () => {
           </div>
         </SheetHeader>
         <hr className="opacity-[0.30] bg-[#666666]"></hr>
+           
 
         <ScrollArea className="h-[calc(100vh-150px)]">
           <div className="pt-0 px-4 md:px-9 pb-2">
@@ -128,7 +130,7 @@ const NotificationsPanel: React.FC = () => {
                   Yesterday and Past
                 </h2>
                 {Array.isArray(pastNotifications) && pastNotifications.map((notification: any) => (
-                  <div key={notification.id} className="flex items-start mb-5">
+                  <div key={notification._id} className="flex items-start mb-5">
                     <div className="mr-3 mt-1 bg-white/10 rounded p-[10px]">
                       {renderIcon(notification.icon || "bell")}
                     </div>
