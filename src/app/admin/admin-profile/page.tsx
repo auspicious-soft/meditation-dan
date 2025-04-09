@@ -10,6 +10,7 @@ import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { signIn } from "next-auth/react"; // Import signIn for session update
+import { useRouter } from "next/navigation";
 
 const Page = () => {
   const [formData, setFormData] = useState({
@@ -21,6 +22,7 @@ const Page = () => {
   const [imagePreview, setImagePreview] = useState<string>("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   // Fetch admin profile on mount
   useEffect(() => {
@@ -151,7 +153,7 @@ const Page = () => {
           <Button
             variant="destructive"
             className="bg-[#343741] hover:bg-[#343741] p-0 h-7 w-7 hover:cursor-pointer"
-            onClick={() => (window.location.href = "/admin/dashboard")}
+            onClick={() => router.back()}
           >
             <ChevronLeft  />
           </Button>
