@@ -148,7 +148,9 @@ body {
   color: #fff;
   font-weight: 300;
 }
-
+.no-scroll {
+  overflow: hidden;
+}
 input{
   font-family: "SF Pro Display", sans-serif;
   font-weight: 400;

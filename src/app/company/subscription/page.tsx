@@ -64,14 +64,33 @@ const SubscriptionModal = ({ isOpen, onClose, onContinue, planType, price, descr
   const [errorMessage, setErrorMessage] = useState<string | null>(null); // State for error message
 
   // Set numberOfUsers once totalUsers is available
+  // React.useEffect(() => {
+  //   if (totalUsers !== undefined) {
+  //     setNumberOfUsers(totalUsers || 1); // Default to 1 if totalUsers is 0 or undefined
+  //   }
+  // }, [totalUsers]);
+
+  // if (!isOpen) return null;
   React.useEffect(() => {
     if (totalUsers !== undefined) {
       setNumberOfUsers(totalUsers || 1); // Default to 1 if totalUsers is 0 or undefined
     }
   }, [totalUsers]);
 
-  if (!isOpen) return null;
+  // Prevent body scroll when modal is open
+  React.useEffect(() => {
+    if (isOpen) {
+      document.body.classList.add('no-scroll');
+    } else {
+      document.body.classList.remove('no-scroll');
+    }
+    // Cleanup on unmount
+    return () => {
+      document.body.classList.remove('no-scroll');
+    };
+  }, [isOpen]);
 
+  if (!isOpen) return null;
   const totalAmount = numberOfUsers !== null ? (Number(price) * numberOfUsers).toFixed(2) : "0.00";
 
   const handleNumberOfUsersChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -86,7 +105,7 @@ const SubscriptionModal = ({ isOpen, onClose, onContinue, planType, price, descr
   };
 
   return (
-    <div className="fixed inset-0 bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 overflow-y-none">
       <div className="bg-[#1b2236] rounded-lg p-6 w-[50%] shadow-lg border border-gray-700">
         <h2 className="text-white text-xl font-semibold mb-6 text-center">Activate Your Plan</h2>
         <div className="space-y-4">
@@ -160,6 +179,18 @@ const SubscriptionModal = ({ isOpen, onClose, onContinue, planType, price, descr
 
 
 const CancelSubscriptionModal = ({ isOpen, onClose, onConfirm, isLoading, userName }: { isOpen: boolean; onClose: () => void; onConfirm: () => void; isLoading: boolean ,userName:string }) => {
+  React.useEffect(() => {
+    if (isOpen) {
+      document.body.classList.add('no-scroll');
+    } else {
+      document.body.classList.remove('no-scroll');
+    }
+    // Cleanup on unmount
+    return () => {
+      document.body.classList.remove('no-scroll');
+    };
+  }, [isOpen]);
+
   if (!isOpen) return null;
   return (
     <div className="fixed inset-0 bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50">

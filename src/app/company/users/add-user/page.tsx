@@ -29,7 +29,7 @@ const Page = () => {
     lastName: "",
     email: "",
     // gender: "",
-    // companyName: "",  
+    // companyName: "",
     // birthday: "",
     // password: "",
   });
@@ -45,8 +45,12 @@ const Page = () => {
       ...formData,
       [field]: value,
     });
+    // Clear error specifically when email is cleared
+    if (field === "email" && value.trim() === "") {
+      setError(null);
+    }
   };
-  
+
   useEffect(() => {
     if (session?.user?.fullName) {
       setCompanyName(session.user.fullName);
@@ -75,12 +79,12 @@ const Page = () => {
   };
 
   const isFormComplete = () => {
-      return (
-        formData.firstName.trim() !== "" &&
-        formData.lastName.trim() !== "" &&
-        formData.email.trim() !== ""
-      );
-    };
+    return (
+      formData.firstName.trim() !== "" &&
+      formData.lastName.trim() !== "" &&
+      formData.email.trim() !== ""
+    );
+  };
 
   const handleSave = async () => {
     setError(null);
@@ -100,7 +104,7 @@ const Page = () => {
         lastName: formData.lastName,
         email: formData.email,
         // gender: formData.gender,
-        companyName: companyName,  
+        companyName: companyName,
         // dob: formData.birthday,
         password: randomPassword,
       };
@@ -121,9 +125,7 @@ const Page = () => {
     <div className="flex flex-1 flex-col gap-4">
       <div className="bg-[#1B2236] rounded-[20px]">
         <div className="space-y-6 py-[30px] px-[36px]">
-          {error && (
-            <div className="text-red-500 text-sm">{error}</div>
-          )}
+          
           {success && (
             <div className="text-green-500 text-sm">{success}</div>
           )}
@@ -174,6 +176,9 @@ const Page = () => {
                 disabled={isLoading}
                 required
               />
+              {error && formData.email.trim() !== "" && ( // Show error only if email is not empty
+                <div className="text-red-500 text-sm">{error}</div>
+              )}
             </div>
           </div>
 
