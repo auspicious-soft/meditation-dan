@@ -9,8 +9,56 @@ import { generateSignedUrlForAdminProfile, getImageUrlOfS3 } from "@/actions";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { signIn } from "next-auth/react"; // Import signIn for session update
+import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+
+// Validation utility function
+const validateForm = (formData: { firstName: string; lastName: string; email: string }, originalEmail: string) => {
+  const errors: { [key: string]: string } = {};
+
+  // Validate First Name
+  const nameRegex = /^[A-Za-z\s]+$/;
+  if (!formData.firstName.trim()) {
+    errors.firstName = "First name is required";
+  } else if (!nameRegex.test(formData.firstName)) {
+    errors.firstName = "First name should contain only letters and spaces";
+  }
+
+  // Validate Last Name
+  if (!formData.lastName.trim()) {
+    errors.lastName = "Last name is required";
+  } else if (!nameRegex.test(formData.lastName)) {
+    errors.lastName = "Last name should contain only letters and spaces";
+  }
+
+  // Validate Email
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!formData.email.trim()) {
+    errors.email = "Email is required";
+  } else if (!emailRegex.test(formData.email)) {
+    errors.email = "Please enter a valid email address";
+  } else if (formData.email !== originalEmail) {
+    errors.email = "Email cannot be changed"; // Restrict email changes unless backend supports it
+  }
+
+  return errors;
+};
+
+// Image validation function
+const validateImage = (file: File | null): string | null => {
+  if (!file) return null;
+
+  const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+  const allowedTypes = ["image/jpeg", "image/png"];
+
+  if (!allowedTypes.includes(file.type)) {
+    return "Only JPEG and PNG images are allowed";
+  }
+  if (file.size > maxSize) {
+    return "Image size must not exceed 5MB";
+  }
+  return null;
+};
 
 const Page = () => {
   const [formData, setFormData] = useState({
@@ -22,6 +70,11 @@ const Page = () => {
   const [imagePreview, setImagePreview] = useState<string>("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [imageError, setImageError] = useState<string | null>(null);
+  const [originalEmail, setOriginalEmail] = useState<string>("");
+  const [hadInitialImage, setHadInitialImage] = useState<boolean>(false);
+  const [imageRemoved, setImageRemoved] = useState<boolean>(false);
   const router = useRouter();
 
   // Fetch admin profile on mount
@@ -36,12 +89,13 @@ const Page = () => {
           lastName: adminData.lastName || "",
           email: adminData.email || "",
         });
-
+        setOriginalEmail(adminData.email || "");
         // Get the full S3 URL for the profile image
         if (adminData.profilePic) {
           const s3Url = await getImageUrlOfS3(adminData.profilePic);
           setProfileImage(adminData.profilePic);
           setImagePreview(s3Url);
+          setHadInitialImage(true);
         }
       } catch (error) {
         console.error("Error fetching admin profile:", error);
@@ -59,24 +113,65 @@ const Page = () => {
       ...formData,
       [field]: value,
     });
+    // Validate on change
+    const newErrors = validateForm({ ...formData, [field]: value }, originalEmail);
+    setErrors(newErrors);
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
+      const validationError = validateImage(file);
+      if (validationError) {
+        setImageError(validationError);
+        setImagePreview("");
+        setSelectedFile(null);
+        toast.error(validationError);
+        return;
+      }
+      setImageError(null); // Clear previous error
       const imageUrl = URL.createObjectURL(file);
       setImagePreview(imageUrl);
       setSelectedFile(file);
+      setImageRemoved(false); // Reset the removed flag when a new image is selected
     }
   };
 
   const handleRemoveImage = () => {
     setImagePreview("");
     setSelectedFile(null);
+    
+    // If there was an initial image and no new file is selected, mark as removed
+    if (hadInitialImage) {
+      setImageRemoved(true);
+      setImageError("Profile image is required. Please upload a new image.");
+    }
+    
     setProfileImage("");
   };
 
+  // Validate profile completeness including image
+  const validateProfileCompleteness = () => {
+    const validationErrors = validateForm(formData, originalEmail);
+    
+    // Check if image is required but missing
+    if (imageRemoved && !selectedFile) {
+      setImageError("Profile image is required. Please upload a new image.");
+      return { ...validationErrors, image: "Profile image is required" };
+    }
+    
+    return validationErrors;
+  };
+
   const handleSave = async () => {
+    const validationErrors = validateProfileCompleteness();
+    
+    if (Object.keys(validationErrors).length > 0 || imageError) {
+      setErrors(validationErrors);
+      toast.error("Please fix the validation errors before saving");
+      return;
+    }
+
     setIsLoading(true);
     try {
       // Update profile data and capture response
@@ -112,10 +207,14 @@ const Page = () => {
           if (imageUpdateResponse && imageUpdateResponse.data.success) {
             setProfileImage(key);
             setSelectedFile(null);
-            successMessage += " and profile picture updated successfully"; // Append message
+            setImageRemoved(false);
+            successMessage += " and profile picture updated";
           } else {
             throw new Error(imageUpdateResponse?.data?.message || "Failed to update profile picture");
           }
+        } else if (imageRemoved) {
+          // This case should be prevented by validation, but as a fallback:
+          throw new Error("Profile image is required. Please upload a new image.");
         }
 
         // Update session with the latest data if all updates are successful
@@ -130,7 +229,7 @@ const Page = () => {
           redirect: false,
         });
 
-        toast.success(successMessage); // Single toast with combined message
+        toast.success(successMessage.trim()); // Single toast with combined message
         setTimeout(() => {
           window.location.reload();
         }, 1000);
@@ -155,9 +254,9 @@ const Page = () => {
             className="bg-[#343741] hover:bg-[#343741] p-0 h-7 w-7 hover:cursor-pointer"
             onClick={() => router.back()}
           >
-            <ChevronLeft  />
+            <ChevronLeft />
           </Button>
-          <p className=" text-zinc-300 text-base SF Pro Display font-normal">Profile Image</p>
+          <p className="text-zinc-300 text-base SF Pro Display font-normal">Profile Image</p>
           </div>
           <div className="flex flex-wrap items-end gap-4 mb-4">
             <Card className="w-44 min-h-40 flex items-center justify-center bg-[#0B132B] border-none rounded-lg relative">
@@ -194,10 +293,11 @@ const Page = () => {
                   accept="image/jpeg,image/png"
                   onChange={handleImageChange}
                 />
-                <div className="border p-1 px-4 rounded-sm hover:cursor-pointer border-white text-gray-300 cursor-pointer">
+                <div className="border p-1 px-4 rounded-sm max-w-36 hover:cursor-pointer border-white text-gray-300 cursor-pointer">
                   {imagePreview ? "Change Image" : "Choose Image"}
                 </div>
               </label>
+              {imageError && <p className="text-red-500 text-sm mt-1">{imageError}</p>}
             </div>
           </div>
         </div>
@@ -215,6 +315,7 @@ const Page = () => {
               className="bg-[#1B2236] h-12 border-none text-white"
               disabled={isLoading}
             />
+            {errors.firstName && <p className="text-red-500 text-sm">{errors.firstName}</p>}
           </div>
 
           <div className="space-y-2">
@@ -229,6 +330,7 @@ const Page = () => {
               className="bg-[#1B2236] h-12 border-none text-white"
               disabled={isLoading}
             />
+            {errors.lastName && <p className="text-red-500 text-sm">{errors.lastName}</p>}
           </div>
         </div>
 
@@ -245,6 +347,7 @@ const Page = () => {
               className="bg-[#1B2236] h-12 border-none text-white"
               disabled={isLoading}
             />
+            {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
           </div>
         </div>
 
@@ -252,7 +355,7 @@ const Page = () => {
           <Button
             className="mt-4 bg-[#1A3F70] w-28 h-11 hover:cursor-pointer hover:bg-[#1A3F70] dm-sans text-white"
             onClick={handleSave}
-            disabled={isLoading}
+            disabled={isLoading || Object.keys(errors).length > 0 || !!imageError}
           >
             {isLoading ? "Saving..." : "Save"}
           </Button>
