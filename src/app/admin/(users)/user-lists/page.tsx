@@ -117,7 +117,6 @@ const Page = () => {
                 <TableHead>ID</TableHead>
                 <TableHead>Name of Customer</TableHead>
                 <TableHead>Company Name</TableHead>
-                <TableHead>Gender</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Action</TableHead>
               </TableRow>
@@ -154,7 +153,6 @@ const Page = () => {
                     <TableCell>{user.identifier}</TableCell>
                     <TableCell>{`${user.firstName} ${user.lastName}`}</TableCell>
                     <TableCell>{user.companyName || "N/A"}</TableCell>
-                    <TableCell>{user.gender}</TableCell>
                     <TableCell>{user.email}</TableCell>
                     <TableCell>
                       <Button
