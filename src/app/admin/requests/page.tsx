@@ -241,26 +241,27 @@ const Page = () => {
 
         {/* Denial Confirmation Dialog */}
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogContent className="bg-[#141B2D] border-[#1F2937]  p-6 flex flex-col items-center text-white rounded-lg">
-            <DialogHeader className="flex flex-col items-center">
+          <DialogContent className="bg-[#141B2D] border-[#1F2937] w-[60%] p-6 flex flex-col items-center text-white rounded-lg">
+            <DialogHeader className="flex flex-col items-center w-full">
               <div className="p-3 bg-[#FEF3F2] rounded-full">
                 <AlertCircle size={40} className="text-red-500" />
               </div>
               <DialogTitle className="text-lg font-semibold text-center">Decline ?</DialogTitle>
-              <div className="min-w-80">
+              <div className="w-full">
                 <Label>Reason to decline</Label>
                 <Textarea
                   className="mt-4 w-full bg-[#0B132B] border-none rounded-lg p-2 text-white resize-none"
-                  placeholder="Please provide a reason for declining the request."
+                  placeholder=""
                   value={denialReason}
                   onChange={(e) => setDenialReason(e.target.value)}
                 />
               </div>
             </DialogHeader>
-            <DialogFooter className="flex justify-center gap-4 mt-4">
+            <DialogFooter className="flex justify-center  w-full gap-4 mt-4">
+              <div className="flex flex-col sm:flex-row gap-2 w-full">
               <Button
                 variant="outline"
-                className="bg-[#1A3F70] cursor-pointer hover:text-white border-[#0c4a6e] hover:bg-[#1A3F70] w-32 sm:w-44 h-10 sm:h-11"
+                className="bg-[#1A3F70]   cursor-pointer hover:text-white border-[#0c4a6e] hover:bg-[#1A3F70] w-full sm:max-w-52 h-10 sm:h-11"
                 onClick={() => {
                   setIsDialogOpen(false);
                   setSelectedRequestId(null);
@@ -271,12 +272,13 @@ const Page = () => {
               </Button>
               <Button
                 variant="destructive"
-                className="w-32 sm:w-44 hover:cursor-pointer h-10 sm:h-11"
+                className="w-full sm:max-w-52  hover:cursor-pointer h-10 sm:h-11"
                 onClick={handleDeny}
                 disabled={!denialReason.trim()} // Disable if reason is empty
               >
                 Decline
               </Button>
+              </div>
             </DialogFooter>
           </DialogContent>
         </Dialog>
