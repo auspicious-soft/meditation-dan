@@ -136,18 +136,18 @@ const Page = () => {
                       <div className="flex gap-x-2 justify-end">
                         <Button 
                           onClick={() => handleApproveClick(request.userId?._id)} 
-                          className="bg-[#14AB00] hover:cursor-pointer"
+                          className="bg-[#14AB00] hover:cursor-pointer hover:bg-[#14AB00]"
                           disabled={loadingApprove === request.userId?._id}
                         >
                           {loadingApprove === request.userId?._id ? (
                             <Loader2 size={20} className="animate-spin text-white" />
                           ) : (
-                            <Image src="/GreenTick.svg" alt="Check" width={20} height={20} />
+                            <Image src="/GreenTick.svg" alt="Check" width={20} height={20} className="bg-[#14AB00] hover:cursor-pointer hover:bg-[#14AB00]" />
                           )}
                         </Button>
                         <Button 
                           onClick={() => setIsDialogOpen(true)} 
-                          className="bg-[#FF4747] hover:cursor-pointer"
+                          className="bg-[#FF4747] hover:cursor-pointer hover:bg-[#FF4747]"
                           disabled={loadingDeny === request.userId?._id}
                         >
                           {loadingDeny === request.userId?._id ? (
