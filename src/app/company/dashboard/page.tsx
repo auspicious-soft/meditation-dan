@@ -90,7 +90,7 @@ const RecentNewUsers = () => {
                         </TableCell>
                       </TableRow>
                     ))
-                  ) : transactions.length === 0 ? (
+                  ) : transactions.data.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={4} className="text-center py-4">
                         No transactions found

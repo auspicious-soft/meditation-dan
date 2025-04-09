@@ -28,6 +28,11 @@ const data = {
       url: "/company/users",
       icon: UsersIcon,
     },
+    {
+      title: "Blocked Users",
+      url: "/company/blocked-users",
+      icon: UsersIcon,
+    },
 
     {
       title: "Subscription",

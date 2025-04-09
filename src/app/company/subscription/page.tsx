@@ -54,14 +54,36 @@ const SkeletonTable = () => (
   </div>
 );
 
-// SubscriptionModal and CancelSubscriptionModal (unchanged)
-const SubscriptionModal = ({ isOpen, onClose, onContinue, planType, price, description }: any) => {
-  const [numberOfUsers, setNumberOfUsers] = useState(1);
+
+
+
+
+const SubscriptionModal = ({ isOpen, onClose, onContinue, planType, price, description, totalUsers }: any) => {
+  const [numberOfUsers, setNumberOfUsers] = useState<number | null>(null); // Start with null to indicate loading
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null); // State for error message
+
+  // Set numberOfUsers once totalUsers is available
+  React.useEffect(() => {
+    if (totalUsers !== undefined) {
+      setNumberOfUsers(totalUsers || 1); // Default to 1 if totalUsers is 0 or undefined
+    }
+  }, [totalUsers]);
 
   if (!isOpen) return null;
 
-  const totalAmount = (Number(price) * numberOfUsers).toFixed(2);
+  const totalAmount = numberOfUsers !== null ? (Number(price) * numberOfUsers).toFixed(2) : "0.00";
+
+  const handleNumberOfUsersChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value) || totalUsers;
+    if (value < totalUsers) {
+      setErrorMessage(`Number of users cannot be less than the current ${totalUsers} users.`);
+      setNumberOfUsers(totalUsers); // Reset to totalUsers
+    } else {
+      setErrorMessage(null); // Clear error if valid
+      setNumberOfUsers(value);
+    }
+  };
 
   return (
     <div className="fixed inset-0 bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50">
@@ -82,17 +104,28 @@ const SubscriptionModal = ({ isOpen, onClose, onContinue, planType, price, descr
           </div>
           <div>
             <p className="self-stretch opacity-80 text-white text-base font-normal">Select number of users</p>
-            <input
-              type="number"
-              min="1"
-              value={numberOfUsers}
-              onChange={(e) => setNumberOfUsers(Math.max(1, parseInt(e.target.value) || 1))}
-              className="w-full mt-[15px] bg-slate-900 rounded-lg px-4 py-3.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1A3F70]"
-            />
+            <div className="relative">
+              {numberOfUsers === null ? (
+                <div className="w-full mt-[15px] bg-slate-900 rounded-lg px-4 py-3.5 flex items-center justify-center">
+                  <Loader2 size={20} className="animate-spin text-white" />
+                </div>
+              ) : (
+                <input
+                  type="number"
+                  min={totalUsers} // Set minimum to totalUsers
+                  value={numberOfUsers}
+                  onChange={handleNumberOfUsersChange} // Use custom handler
+                  className="w-full mt-[15px] bg-slate-900 rounded-lg px-4 py-3.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1A3F70]"
+                />
+              )}
+              {errorMessage && (
+                <p className="text-red-500 text-sm mt-1">{errorMessage}</p> // Display error message
+              )}
+            </div>
           </div>
           <div className="flex justify-between items-center">
             <p className="opacity-80 text-white text-base font-normal">Total Amount</p>
-            <div className="opacity-80 text-white text-base font-normal">${price} * {numberOfUsers}</div>
+            <div className="opacity-80 text-white text-base font-normal">${price} * {numberOfUsers ?? '...'}</div>
           </div>
           <div className="flex justify-end">
             <hr className="w-[50%] opacity-[0.30]" />
@@ -108,12 +141,14 @@ const SubscriptionModal = ({ isOpen, onClose, onContinue, planType, price, descr
           </button>
           <button
             onClick={() => {
-              setIsLoading(true);
-              onContinue(numberOfUsers);
-              setTimeout(() => setIsLoading(false), 2000);
+              if (numberOfUsers !== null) { // Only proceed if numberOfUsers is set
+                setIsLoading(true);
+                onContinue(numberOfUsers);
+                setTimeout(() => setIsLoading(false), 2000);
+              }
             }}
             className="w-full bg-[#14ab00] text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 transition flex items-center justify-center"
-            disabled={isLoading}
+            disabled={isLoading || numberOfUsers === null} // Disable if loading or numberOfUsers is null
           >
             {isLoading ? "Loading..." : "Continue"}
           </button>
@@ -122,6 +157,7 @@ const SubscriptionModal = ({ isOpen, onClose, onContinue, planType, price, descr
     </div>
   );
 };
+
 
 const CancelSubscriptionModal = ({ isOpen, onClose, onConfirm, isLoading, userName }: { isOpen: boolean; onClose: () => void; onConfirm: () => void; isLoading: boolean ,userName:string }) => {
   if (!isOpen) return null;
@@ -171,10 +207,16 @@ const Page = () => {
   const [showSkeletonAfterCancel, setShowSkeletonAfterCancel] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
-  const [selectedPlanDetails, setSelectedPlanDetails] = useState({ planType: "", price: "", planId: "", description: "" });
+  const [selectedPlanDetails, setSelectedPlanDetails] = useState({ planType: "", price: "", planId: "", description: "", totalUsers: 0 });
 
   const handlePlanSelect = (planType: string, price: string, planId: string, description: string) => {
-    setSelectedPlanDetails({ planType, price, planId, description });
+    const selectedProduct = filteredProducts.find((product: any) => product.id === planId);
+    const isCurrentPlanDetails = filteredProducts.find((product: any) => product.currentPlan);
+  const isCurrentPlan = !!selectedProduct?.currentPlan;
+  const totalUsers = isCurrentPlanDetails ? isCurrentPlanDetails.currentPlan.totalUsers || 1 : 1;
+ 
+
+  setSelectedPlanDetails({ planType, price, planId, description, totalUsers });
     setIsModalOpen(true);
   };
 const {data} = useSession();
@@ -238,14 +280,12 @@ const userName = data?.user?.fullName || "User";
   
   // Check if the user has a lifetime plan
   const hasLifetimePlan = products.some((product: any) => product.currentPlan?.name === "Lifetime");
-  console.log('hasLifetimePlan: ', hasLifetimePlan);
   
   // Filter products: if lifetime plan exists, only show the lifetime plan
   const filteredProducts = hasLifetimePlan
   ? products.filter((product: any) => product.currentPlan?.name === "Lifetime")
   : products;
   
-  console.log('filteredProducts: ', filteredProducts.length);
   return (
     <>
       <div className="py-[30px] px-[36px] h-auto bg-[#1B2236] rounded-[20px] max-w-full">
@@ -255,6 +295,9 @@ const userName = data?.user?.fullName || "User";
           {isLoading || showSkeletonAfterCancel ? (
             Array(3).fill(0).map((_, index) => <SkeletonCard key={index} />)
           ) : (
+            filteredProducts.length === 0 ? (
+              <div className="text-white text-center col-span-full">No subscription plans available.</div>
+            ) :
             filteredProducts.map((product: any) => {
               const activePrice = product.prices.find((price: any) => price.active);
               const price = activePrice ? (activePrice.unit_amount / 100).toFixed(0) : "N/A";
@@ -351,6 +394,7 @@ const userName = data?.user?.fullName || "User";
           planType={selectedPlanDetails.planType}
           price={selectedPlanDetails.price}
           description={selectedPlanDetails.description}
+          totalUsers={selectedPlanDetails.totalUsers}
         />
         <CancelSubscriptionModal
           isOpen={isCancelModalOpen}
@@ -380,6 +424,13 @@ const userName = data?.user?.fullName || "User";
                   </TableRow>
                 </TableHeader>
                 <TableBody>
+                  {transactionData?.data.data.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={4} className="text-center py-4">
+                        No transactions found
+                      </TableCell>
+                    </TableRow>
+                  ) : null}
                   {transactionData?.data.data.map((invoice: any) => (
                     <TableRow key={invoice.transactionId} className="border-0 text-sm font-normal hover:bg-transparent">
                       <TableCell className="py-4 pr-15">{invoice.transactionId}</TableCell>

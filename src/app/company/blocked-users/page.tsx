@@ -18,7 +18,7 @@ const Page = () => {
 
   // Fetch data using SWR with pagination parameters
   const { data, error, isLoading, mutate } = useSWR(
-    `/company/users?description=${searchParams}&page=${currentPage}&limit=${PAGE_SIZE}&isBlocked=false`, // Override the API's default limit
+    `/company/users?description=${searchParams}&page=${currentPage}&limit=${PAGE_SIZE}&isBlocked=true`, // Override the API's default limit
     getAllUsers,
     {
       revalidateOnFocus: false,
@@ -68,12 +68,12 @@ const Page = () => {
           <h2 className="text-white text-[20px] md:text-2xl font-bold mb-3">User Lists</h2>
 
           <div className="flex gap-[10px]">
-          <div
+          {/* <div
             className="px-5 py-2 bg-[#1A3F70] rounded-[20px] inline-flex justify-center items-center gap-2.5 hover:cursor-pointer"
             onClick={handleAddUserClick}
           >
             <div className="text-center justify-start text-white text-sm font-normal">+ Add New User</div>
-          </div>
+          </div> */}
           <SearchBar setQuery={setsearchParams} query={searchParams} />
           </div>
         </div>
@@ -145,12 +145,12 @@ const Page = () => {
                       >
                         View
                       </Button>
-                      <Button
+                      {/* <Button
                         className="px-3 !py-0 w-16 h-6 !bg-blue-400 rounded inline-flex justify-center items-center text-white text-sm !font-normal !leading-tight !tracking-tight hover:cursor-pointer"
                         onClick={() => handleEditClick(user._id)}
                       >
                         Edit
-                      </Button>
+                      </Button> */}
                     </TableCell>
                   </TableRow>
                 ))
