@@ -28,7 +28,7 @@ const NotificationsPanel: React.FC = () => {
   const allNotifications = data?.data?.data || [];
   
   // Get today's date for comparison (April 8, 2025)
-  const today = new Date("2025-04-08T00:00:00Z"); // Explicitly set to April 8, 2025, midnight UTC
+  const today = new Date(); 
   today.setHours(0, 0, 0, 0); // Reset time to start of day
   
   // Calculate yesterday
