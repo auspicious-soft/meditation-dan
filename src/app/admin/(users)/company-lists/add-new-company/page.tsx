@@ -9,6 +9,7 @@ import * as yup from "yup";// Adjust the import path
 import { toast } from "sonner";
 import { addNewCompanyStats } from "@/services/admin-services";
 import { ChevronLeft } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 // Validation Schema
 const schema = yup.object({
@@ -31,6 +32,7 @@ interface FormData {
 
 const Page = () => {
   const [backendError, setBackendError] = useState<string | null>(null); // State for backend errors
+  const router = useRouter();
 
   const {
     register,
@@ -83,7 +85,7 @@ const Page = () => {
        <Button
             variant="destructive"
             className="bg-[#0B132B] hover:bg-[#0B132B] p-0 h-7 w-7 hover:cursor-pointer"
-            onClick={() => (window.location.href = "/admin/company-lists")}
+            onClick={() => router.back()}
           >
             <ChevronLeft  />
           </Button>

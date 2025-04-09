@@ -2,12 +2,12 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import React, { useState, useEffect } from "react";
 import { getSingleCompanydetailStats, sendReminder } from "@/services/admin-services"; // Import sendReminder
 import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
-import { Loader2 } from "lucide-react"; // Import Loader2 for loading spinner
+import { ChevronLeft, Loader2 } from "lucide-react"; // Import Loader2 for loading spinner
 import { toast } from "sonner"; // Import toast for notifications
 
 // Define the interface for the API response
@@ -26,7 +26,7 @@ interface ApiResponse {
 
 const Page = () => {
   const { id } = useParams();
-  console.log("id:", id);
+  const router = useRouter(); // Use useRouter from next/navigation
 
   const [formData, setFormData] = useState({
     companyName: "",
@@ -162,9 +162,18 @@ const Page = () => {
   return (
     <div className="grid grid-cols-12 gap-4 h-screen w-full">
       <div className="col-span-12 space-y-6 bg-[#1b2236] rounded-[12px] md:rounded-[20px] py-4 px-4 md:py-8 md:px-9">
+        <div className="flex items-center gap-2 mb-4">
+        <Button
+            variant="destructive"
+            className="bg-[#0B132B] hover:bg-[#0B132B] p-0 h-7 w-7 hover:cursor-pointer"
+            onClick={()=> router.back()} 
+          >
+            <ChevronLeft  />
+          </Button>
         <h2 className="text-white text-xl font-medium">
           {userData?.companyName || "Fortunate Tech Solutions Inc."}
         </h2>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
             <Label htmlFor="companyName" className="text-white opacity-80 dm-sans text-base font-normal">
