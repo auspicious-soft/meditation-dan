@@ -107,7 +107,7 @@ const Page = () => {
     <>
       <div className="grid grid-cols-12 gap-4 h-screen w-full">
         <div className="col-span-12 space-y-6 bg-[#1b2236] rounded-[12px] md:rounded-[20px] py-4 px-4 md:py-8 md:px-9">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between flex-wrap space-y-2 mb-4">
             <h2 className="text-white text-[20px] md:text-2xl font-bold">User Lists</h2>
             <SearchBar setQuery={setSearchTerm} query={searchTerm} />
           </div>

@@ -6,6 +6,8 @@ import { toast } from "sonner";
 import { getStripeDetail } from "@/services/admin-services"; // Import the API function
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Upload, Trash2 } from "lucide-react"; // Added for consistency (though not used here)
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 
 const Page = () => {
   interface Plan {
@@ -19,7 +21,6 @@ const Page = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [answer, setAnswer] = useState("");
-  const [question, setQuestion] = useState("$25.99");
   const [isLoading, setIsLoading] = useState(false);
 
   // Fetch Stripe product details on mount
@@ -73,8 +74,7 @@ const Page = () => {
 
   function handleSaveFaq(event: React.MouseEvent<HTMLButtonElement, MouseEvent>): void {
     console.log("FAQ saved:", { answer });
-    setIsEditOpen(false); // Close the dialog after saving
-    setQuestion(""); // Reset the question input
+    setIsEditOpen(false); // Close the dialog after saving // Reset the question input
     setAnswer(""); // Reset the answer input
   }
 
@@ -119,37 +119,7 @@ const Page = () => {
           ))
         ) : (
           <div className="text-white text-center col-span-full">No plans available</div>
-        )}
-
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogContent className="bg-[#141B2D] border-[#1F2937] w-[450px] p-6 flex flex-col items-center text-white rounded-lg">
-            <DialogHeader className="text-center">
-              <div className="flex justify-center mb-4">
-                <Image src="/error.svg" alt="error" width={20} height={20} />
-              </div>
-              <DialogTitle className="text-lg font-semibold text-center">Delete ?</DialogTitle>
-              <DialogDescription className="text-sm text-gray-400 text-center">
-                Are you sure you want to delete this? This action cannot be undone.
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter className="flex justify-center gap-4 mt-4">
-              <Button
-                variant="outline"
-                className="bg-[#1A3F70] border-[#1A3F70] hover:bg-[#1A3F70] hover:text-white hover:cursor-pointer w-44 h-11"
-                onClick={() => setIsDialogOpen(false)}
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="destructive"
-                className="bg-[#D92D20] hover:bg-[#D92D20] hover:cursor-pointer w-44 h-11"
-                onClick={handleDeclineAccount}
-              >
-                Delete
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        )}     
 
         <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
           <DialogContent className="bg-[#1b2236] border-[#1F2937] w-[450px] p-6 flex flex-col items-center text-white rounded-lg">
@@ -159,13 +129,19 @@ const Page = () => {
             </DialogHeader>
 
             <div className="self-stretch inline-flex flex-col justify-start items-start gap-3.5">
-              <label className="self-stretch opacity-80 text-white text-base font-normal">New Price</label>
-              <input
+              <Label className="self-stretch opacity-80 text-white text-base font-normal">Description (Optional)</Label>
+              <Input
                 type="text"
                 className="self-stretch h-12 px-4 py-3.5 bg-[#0B132B] rounded-lg text-neutral-400 text-base font-normal focus:outline-none"
                 placeholder="Type question here"
-                value={question}
-                onChange={(e) => setQuestion(e.target.value)}
+              />
+            </div>
+            <div className="self-stretch inline-flex flex-col justify-start items-start gap-3.5">
+              <Label className="self-stretch opacity-80 text-white text-base font-normal">New Price</Label>
+              <Input
+                type="text"
+                className="self-stretch h-12 px-4 py-3.5 bg-[#0B132B] rounded-lg text-neutral-400 text-base font-normal focus:outline-none"
+                placeholder="Type question here"
               />
             </div>
 
