@@ -93,12 +93,7 @@ const Page = () => {
                       <TableCell className="py-4 w-1/4"><Skeleton height={20} /></TableCell>
                       <TableCell className="py-4 w-1/4"><Skeleton height={20} /></TableCell>
                       <TableCell className="py-4 w-1/4"><Skeleton height={20} /></TableCell>
-                      <TableCell className="text-right py-4 w-1/4 whitespace-nowrap min-w-[120px]">
-                        <div className="flex gap-x-2 justify-end">
-                          <Skeleton height={36} width={36} />
-                          <Skeleton height={36} width={36} />
-                        </div>
-                      </TableCell>
+
                     </TableRow>
                   ))}
                 </TableBody>
