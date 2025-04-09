@@ -75,7 +75,7 @@ const Page = () => {
   if (isLoading) {
     return (
       <SkeletonTheme baseColor="#0B132B" highlightColor="#1B2236" borderRadius="0.5rem">
-        <div className="grid grid-cols-12 gap-4 h-screen">
+        <div className="grid grid-cols-12 gap-4 ">
           <div className="col-span-12 space-y-6 bg-[#1b2236] rounded-[12px] md:rounded-[20px] py-4 px-4 md:py-8 md:px-9">
             <Skeleton height={28} width={200} />
             <div className="overflow-x-auto">
@@ -112,7 +112,7 @@ const Page = () => {
 
   return (
     <SkeletonTheme baseColor="#0B132B" highlightColor="#1B2236" borderRadius="0.5rem">
-      <div className="grid grid-cols-12 gap-4 h-screen">
+      <div className="grid grid-cols-12 gap-4 ">
         <div className="col-span-12 space-y-6 bg-[#1b2236] rounded-[12px] md:rounded-[20px] py-4 px-4 md:py-8 md:px-9">
           <h2 className="text-white text-lg sm:text-xl md:text-2xl font-bold mb-3">Company</h2>
           <div className="overflow-x-auto">

@@ -241,13 +241,13 @@ const Page = () => {
 
         {/* Denial Confirmation Dialog */}
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogContent className="bg-[#141B2D] border-[#1F2937] p-6 flex flex-col items-center text-white rounded-lg">
+          <DialogContent className="bg-[#141B2D] border-[#1F2937]  p-6 flex flex-col items-center text-white rounded-lg">
             <DialogHeader className="flex flex-col items-center">
               <div className="p-3 bg-[#FEF3F2] rounded-full">
                 <AlertCircle size={40} className="text-red-500" />
               </div>
               <DialogTitle className="text-lg font-semibold text-center">Decline ?</DialogTitle>
-              <div className="w-full">
+              <div className="min-w-80">
                 <Label>Reason to decline</Label>
                 <Textarea
                   className="mt-4 w-full bg-[#0B132B] border-none rounded-lg p-2 text-white resize-none"
