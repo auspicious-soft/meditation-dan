@@ -146,11 +146,6 @@ const Page = () => {
             </div>
 
             <div>
-              <p className="text-sm text-slate-400 mb-1">Gender</p>
-              <p className="text-white">{userData?.gender || "N/A"}</p>
-            </div>
-
-            <div>
               <p className="text-sm text-slate-400 mb-1">Email Address</p>
               <p className="text-white">{userData?.email || "N/A"}</p>
             </div>
