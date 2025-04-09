@@ -1,7 +1,7 @@
 "use client";
 import React from 'react';
 import Head from 'next/head';
-import Image from 'next/image'; // Import the Image component
+import Image from 'next/image'; 
 import Wait from "../../../../public/images/waiting.gif"
 import { useRouter } from 'next/navigation';
 const RequestDeclinePage: React.FC = () => {

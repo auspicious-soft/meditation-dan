@@ -144,8 +144,8 @@ const CancelSubscriptionModal = ({ isOpen, onClose, onConfirm, isLoading, userNa
             className="bg-[#ff4444] w-full text-white px-4 py-2 rounded-lg font-medium hover:bg-red-700 transition hover:cursor-pointer "
             disabled={isLoading}
           >
-            {isLoading && <Loader2 size={20} className="animate-spin" />}
-            Yes
+            {isLoading ? <Loader2 size={20} className="animate-spin items-center ml-12" /> : "Yes"}
+
           </button>
         </div>
       </div>
