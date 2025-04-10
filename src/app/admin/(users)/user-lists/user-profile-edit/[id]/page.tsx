@@ -28,10 +28,18 @@ interface UserData {
   lastName: string;
   gender: string;
   email: string;
-  dob: string | null; // Allow dob to be null
+  dob: string | null; // Allow dob to be null, but not editable
   companyName: string;
   totalMeditationListen?: number;
   isBlocked?: boolean;
+}
+
+// Define validation errors interface
+interface ValidationErrors {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  companyName?: string;
 }
 
 // Skeleton Components
@@ -75,6 +83,7 @@ const Page = () => {
     totalMeditationListen: 0,
     isBlocked: false,
   });
+  const [errors, setErrors] = useState<ValidationErrors>({});
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [deleting, setDeleting] = useState<boolean>(false);
   const [togglingBlock, setTogglingBlock] = useState<boolean>(false);
@@ -84,17 +93,68 @@ const Page = () => {
     if (data?.data?.data) {
       setFormData({
         ...data.data.data,
-        dob: data.data.data.dob ? data.data.data.dob.split("T")[0] : "", // Check if dob exists before splitting
+        dob: data.data.data.dob ? data.data.data.dob.split("T")[0] : "",
         isBlocked: data.data.data.isBlocked || false,
       });
     }
   }, [data]);
+
+  // Validation function
+  const validateForm = (): boolean => {
+    const newErrors: ValidationErrors = {};
+    let isValid = true;
+
+    // Validate First Name
+    if (!formData.firstName.trim()) {
+      newErrors.firstName = "First name is required";
+      isValid = false;
+    } else if (formData.firstName.length > 50) {
+      newErrors.firstName = "First name must not exceed 50 characters";
+      isValid = false;
+    }
+
+    // Validate Last Name
+    if (!formData.lastName.trim()) {
+      newErrors.lastName = "Last name is required";
+      isValid = false;
+    } else if (formData.lastName.length > 50) {
+      newErrors.lastName = "Last name must not exceed 50 characters";
+      isValid = false;
+    }
+
+    // Validate Email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!formData.email.trim()) {
+      newErrors.email = "Email is required";
+      isValid = false;
+    } else if (!emailRegex.test(formData.email)) {
+      newErrors.email = "Invalid email format";
+      isValid = false;
+    }
+
+    // Validate Company Name
+    if (!formData.companyName.trim()) {
+      newErrors.companyName = "Company name is required";
+      isValid = false;
+    } else if (formData.companyName.length > 100) {
+      newErrors.companyName = "Company name must not exceed 100 characters";
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
 
   const handleChange = (field: keyof UserData, value: string) => {
     if (field === "totalMeditationListen") return;
     setFormData((prevState) => ({
       ...prevState,
       [field]: value,
+    }));
+    // Clear error for the field being edited
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      [field]: undefined,
     }));
   };
 
@@ -125,9 +185,13 @@ const Page = () => {
   };
 
   const handleSave = async () => {
+    if (!validateForm()) {
+      toast.error("Please fix the validation errors before saving.");
+      return;
+    }
     setSaving(true);
     try {
-      const { totalMeditationListen, ...updateData } = formData;
+      const { totalMeditationListen, dob, gender, ...updateData } = formData; // Exclude dob and gender from update
       await updateUser(`/admin/user/update/${id}`, updateData);
       console.log("User updated successfully:", updateData);
       mutate("/admin/get-all-users");
@@ -179,7 +243,7 @@ const Page = () => {
           <>
             <SkeletonHeader />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {Array(7)
+              {Array(5) // Adjusted to 5 fields instead of 7
                 .fill(0)
                 .map((_, index) => (
                   <SkeletonField key={index} />
@@ -216,12 +280,16 @@ const Page = () => {
                   </Label>
                   <Input
                     id={field}
-                    type={field === "dob" ? "date" : "text"}
+                    type={field === "dob" ? "date" : "text"} // Removed type from fields array, handled inline
                     value={String(formData[field as keyof UserData] || "")}
                     onChange={(e) => handleChange(field as keyof UserData, e.target.value)}
                     className="bg-[#0f172a] h-12 border-none text-white"
                     disabled={field === "totalMeditationListen"}
+                    aria-invalid={errors[field as keyof ValidationErrors] ? "true" : "false"}
                   />
+                  {errors[field as keyof ValidationErrors] && (
+                    <p className="text-red-500 text-sm mt-1">{errors[field as keyof ValidationErrors]}</p>
+                  )}
                 </div>
               ))}
             </div>

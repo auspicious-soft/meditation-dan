@@ -151,13 +151,6 @@ const Page = () => {
             </div>
 
             <div>
-              <p className="text-sm text-slate-400 mb-1">Birthday</p>
-              <p className="text-white">
-                {userData?.dob ? new Date(userData.dob).toLocaleDateString() : "N/A"}
-              </p>
-            </div>
-
-            <div>
               <p className="text-sm text-slate-400 mb-1">Company Name</p>
               <p className="text-white">{userData?.companyName || "N/A"}</p>
             </div>

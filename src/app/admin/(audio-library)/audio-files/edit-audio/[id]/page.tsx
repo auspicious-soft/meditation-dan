@@ -31,10 +31,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"; // Added Dialog components
-import { AlertCircle, ChevronDown, ChevronLeft, Trash2, Upload, X } from "lucide-react";
+import { AlertCircle, ChevronDown, ChevronLeft, Loader2, Trash2, Upload, X } from "lucide-react";
 import Image from "next/image";
 import { toast } from "sonner";
 import {
+  deleteFileFromS3,
   generateSignedUrlForAudioImage,
   generateSignedUrlForAudios,
 } from "@/actions";
@@ -145,6 +146,7 @@ const GetAudio = () => {
   const imageInputRef = useRef<HTMLInputElement>(null);
   const levelsTriggerRef = useRef<HTMLButtonElement>(null);
   const [levelsPopoverWidth, setLevelsPopoverWidth] = useState("auto");
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const {
     register,
@@ -491,12 +493,40 @@ const GetAudio = () => {
   // Delete audio handler with confirmation
   const handleDelete = async () => {
     if (!audioId) return;
-
+    
+    setIsDeleting(true);
     try {
+      // First delete files from S3 if they exist
+      let filesDeleted = true;
+      
+      if (existingAudioUrl) {
+        try {
+          await deleteFileFromS3(existingAudioUrl);
+        } catch (error) {
+          console.error("Error deleting audio file from S3:", error);
+          filesDeleted = false;
+        }
+      }
+      
+      if (existingImageUrl) {
+        try {
+          await deleteFileFromS3(existingImageUrl);
+        } catch (error) {
+          console.error("Error deleting image file from S3:", error);
+          filesDeleted = false;
+        }
+      }
+      
+      // Now delete the audio record from the database
       const response = await deleteAudio(`/admin/delete-audio/${id}`);
+      
       if (response?.data?.success) {
-        toast.success("Audio deleted successfully");
-        setIsDialogOpen(false); // Close dialog on success
+        if (!filesDeleted) {
+          toast.warning("Audio record deleted but some S3 files may remain");
+        } else {
+          toast.success("Audio and associated files deleted successfully");
+        }
+        setIsDialogOpen(false);
         setTimeout(() => {
           window.location.href = "/admin/audio-files";
         }, 1000);
@@ -506,7 +536,9 @@ const GetAudio = () => {
     } catch (error) {
       console.error("Error deleting audio:", error);
       toast.error("Failed to delete audio");
-      setIsDialogOpen(false); // Close dialog on error
+      setIsDialogOpen(false);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -846,6 +878,7 @@ const GetAudio = () => {
                 variant="outline"
                 className="bg-[#1A3F70] border-none hover:cursor-pointer hover:text-white hover:bg-#1A3F70] w-42"
                 onClick={() => setIsDialogOpen(false)}
+                disabled={isDeleting}
               >
                 Cancel
               </Button>
@@ -853,8 +886,13 @@ const GetAudio = () => {
                 variant="destructive"
                 className="bg-[#FF4747] border-none hover:cursor-pointer hover:bg-[#FF4747] w-42"
                 onClick={handleDelete}
-              >
-                Delete
+                disabled={isDeleting} // Disable Delete button during deletion
+                >
+                  {isDeleting ? (
+                    <Loader2 size={20} className="animate-spin text-white" />
+                  ) : (
+                    "Delete"
+                  )}
               </Button>
             </DialogFooter>
           </DialogContent>

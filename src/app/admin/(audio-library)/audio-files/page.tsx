@@ -40,6 +40,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
 import { useDebounce } from "use-debounce";
+import { deleteFileFromS3 } from "@/actions";
 
 interface Audio {
   _id: string;
@@ -95,6 +96,7 @@ const AudioList = () => {
   const [isBestForOpen, setIsBestForOpen] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [debouncedSearchQuery] = useDebounce(searchQuery.trim(), 500);
+  const [deletingAudioId, setDeletingAudioId] = useState<string | null>(null);
   const limit = 10;
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -260,12 +262,43 @@ const AudioList = () => {
   };
 
   const handleDelete = async (id: string) => {
+    setDeletingAudioId(id);
+    // Find the audio object that's being deleted to get the file paths
+    const audioToBeDeleted = audios.find(audio => audio._id === id);
+    
     try {
+      // First delete the record from the database via API
       const response = await deleteAudio(`/admin/delete-audio/${id}`);
-
+  
       if (response?.data?.success) {
+        // If API deletion was successful, try to delete the files from S3
+        
+        // Extract the image and audio keys from the URLs
+        // The S3 key is the part of the URL after the bucket path
+        if (audioToBeDeleted?.imageUrl) {
+          try {
+            await deleteFileFromS3(audioToBeDeleted.imageUrl);
+            console.log("Successfully deleted image from S3");
+          } catch (s3Error) {
+            console.error("Failed to delete image from S3:", s3Error);
+            // We continue even if S3 deletion fails
+          }
+        }
+        
+        if (audioToBeDeleted?.audioUrl) {
+          try {
+            await deleteFileFromS3(audioToBeDeleted.audioUrl);
+            console.log("Successfully deleted audio from S3");
+          } catch (s3Error) {
+            console.error("Failed to delete audio from S3:", s3Error);
+            // We continue even if S3 deletion fails
+          }
+        }
+        
         toast.success("Audio deleted successfully");
-        setAudios((prev) => prev.filter((audio) => audio._id !== id));
+        setTimeout(() => {
+          window.location.reload();
+        },1000)
       } else {
         throw new Error(response?.data?.message || "Failed to delete audio");
       }
@@ -275,6 +308,7 @@ const AudioList = () => {
     } finally {
       setAudioToDelete(null);
       setIsDialogOpen(false);
+      setDeletingAudioId(null);
     }
   };
 
@@ -610,14 +644,20 @@ const AudioList = () => {
             <Button
               className="bg-[#1A3F70] border-none hover:cursor-pointer text-white hover:bg-[#1A3F70] w-42"
               onClick={cancelDelete}
+              disabled={!!deletingAudioId}
             >
               Cancel
             </Button>
             <Button
               className="bg-[#FF4747] border-none hover:cursor-pointer hover:bg-[#FF4747] w-42"
               onClick={() => audioToDelete && handleDelete(audioToDelete)}
+              disabled={!!deletingAudioId}
             >
-              Delete
+              {deletingAudioId === audioToDelete ? (
+                <Loader2 size={20} className="animate-spin text-white" />
+              ) : (
+                "Delete"
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
