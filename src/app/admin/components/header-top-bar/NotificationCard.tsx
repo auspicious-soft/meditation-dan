@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -15,23 +15,29 @@ import { CustomCrossIcon, NotifactionIcon } from "@/lib/svg";
 import useSWR from "swr";
 import { useSession } from "next-auth/react";
 import { formatDate } from "@/lib/utils";
-import { getAdminNotifications } from "@/services/admin-services";
+import { getAdminNotifications, markAllNotificationsReadAdmin } from "@/services/admin-services";
 
 const NotificationsPanel: React.FC = () => {
   const session = useSession();
-  const { data } = useSWR(
+  const { data, mutate } = useSWR(
     `/admin/${session.data?.user?.id}/notifications`,
     getAdminNotifications,
     { revalidateOnFocus: false }
   );
   
   const allNotifications = data?.data?.data || [];
+  const [showBadge, setShowBadge] = useState(false);
+
+  // Check for unread notifications
+  useEffect(() => {
+    const hasUnread = allNotifications.some((notification: any) => !notification.read);
+    setShowBadge(hasUnread);
+  }, [allNotifications]);
+
+  // Get today's date for comparison
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
   
-  // Get today's date for comparison (April 8, 2025)
-  const today = new Date(); 
-  today.setHours(0, 0, 0, 0); // Reset time to start of day
-  
-  // Calculate yesterday
   const yesterday = new Date(today);
   yesterday.setDate(today.getDate() - 1);
 
@@ -40,7 +46,7 @@ const NotificationsPanel: React.FC = () => {
     const notifDate = new Date(notification.date);
     return (
       notifDate.toDateString() === today.toDateString() &&
-      !isNaN(notifDate.getTime()) // Ensure valid date
+      !isNaN(notifDate.getTime())
     );
   });
   
@@ -48,11 +54,10 @@ const NotificationsPanel: React.FC = () => {
     const notifDate = new Date(notification.date);
     return (
       notifDate < today &&
-      !isNaN(notifDate.getTime()) // Ensure valid date
+      !isNaN(notifDate.getTime())
     );
   });
 
-  
   const renderIcon = (iconType: string) => {
     switch (iconType) {
       case "mail":
@@ -62,10 +67,23 @@ const NotificationsPanel: React.FC = () => {
       case "bell":
         return <Bell className="w-5 h-5 text-white" />;
       default:
-        return <Bell className="w-5 h-5 text-white" />; // Default to bell
+        return <Bell className="w-5 h-5 text-white" />;
     }
-  }; 
-  console.log('todayNotifications:', todayNotifications);
+  };
+
+  const handleNotificationClick = async () => {
+    try {
+      const response = await markAllNotificationsReadAdmin(`/admin/${session.data?.user?.id}/notifications`);
+      console.log('response: ', response);
+      if (response?.data.success) {
+        // Update the local cache and trigger revalidation
+        mutate();
+        setShowBadge(false);
+      }
+    } catch (error) {
+      console.error('Error marking notifications as read:', error);
+    }
+  };
 
   return (
     <Sheet>
@@ -74,8 +92,12 @@ const NotificationsPanel: React.FC = () => {
           variant="ghost"
           size="icon"
           className="cursor-pointer border-0 bg-transparent hover:bg-transparent outline-none p-0 h-auto w-auto [&_svg]:!size-6 relative"
+          onClick={handleNotificationClick}
         >
           <NotifactionIcon />
+          {showBadge && (
+            <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full" />
+          )}
         </Button>
       </SheetTrigger>
       <SheetContent className="button-hide w-full !max-w-[692px] p-0 bg-[#1b2236] rounded-tl-[20px] text-white border-0 gap-5 sm:max-w-md crosshide">
@@ -97,11 +119,9 @@ const NotificationsPanel: React.FC = () => {
           </div>
         </SheetHeader>
         <hr className="opacity-[0.30] bg-[#666666]"></hr>
-           
 
         <ScrollArea className="h-[calc(100vh-150px)]">
           <div className="pt-0 px-4 md:px-9 pb-2">
-            {/* Today's Notifications */}
             {todayNotifications.length > 0 && (
               <div className="mb-6">
                 <h2 className="text-[#d7d7d7] text-lg !font-normal mb-5">
@@ -123,7 +143,6 @@ const NotificationsPanel: React.FC = () => {
               </div>
             )}
 
-            {/* Past Notifications */}
             {pastNotifications.length > 0 && (
               <div>
                 <h2 className="text-[#d7d7d7] text-lg !font-normal mb-4">
@@ -145,7 +164,6 @@ const NotificationsPanel: React.FC = () => {
               </div>
             )}
 
-            {/* No Notifications Message */}
             {allNotifications.length === 0 && (
               <div className="text-center py-10">
                 <p className="text-[#d7d7d7] text-base">No notifications available</p>

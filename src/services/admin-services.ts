@@ -202,7 +202,11 @@ export const getStripeDetail = async (route: string,params:any = {}) => {
 export const getAdminNotifications = async (route: string,params:any = {}) => {
   const axiosInstance = await getAxiosInstance();
   return axiosInstance.get(route,{params});
-};      
+};  
+export const markAllNotificationsReadAdmin = async (route: string ,params: any = {}) => {
+    const axiosInstance = await getAxiosInstance()
+    return axiosInstance.put(route)
+}    
 export const sendReminder = async (route: string) => {
   const axiosInstance = await getAxiosInstance();
   return axiosInstance.post(route);
