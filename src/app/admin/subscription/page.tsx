@@ -128,11 +128,6 @@ const Page = () => {
 
   return (
     <>
-      <div className="flex">
-        <div className="px-16 py-3 bg-[#1A3F70] rounded-lg inline-flex justify-center items-center gap-2.5">
-          <div className="text-center justify-start text-white text-base font-normal">All</div>
-        </div>
-      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-[20px]">
         <SkeletonTheme baseColor="#0B132B" highlightColor="#1B2236" borderRadius="0.5rem">

@@ -75,7 +75,7 @@ const PageTitle = () => {
 
   const subscription = /^\/admin\/subscription$/;
   if (subscription.test(pathname)) {
-    pageTitle = "Audio Library";
+    pageTitle = "Subscription";
   }
 
 
