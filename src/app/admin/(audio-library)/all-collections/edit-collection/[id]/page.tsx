@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { ChevronDown, Trash2, Upload, X, AlertCircle, ChevronLeft } from "lucide-react";
+import { ChevronDown, Trash2, Upload, X, AlertCircle, ChevronLeft, Loader2 } from "lucide-react";
 import Image from "next/image";
 import {
   Popover,
@@ -24,7 +24,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { generateSignedUrlForCollectionImage, getImageUrlOfS3 } from "@/actions";
+import { deleteFileFromS3, generateSignedUrlForCollectionImage, getImageUrlOfS3 } from "@/actions";
 import {
   getBestForStats,
   getlevelsStats,
@@ -81,6 +81,7 @@ const EditCollectionForm = () => {
   const [levelsPopoverWidth, setLevelsPopoverWidth] = useState("auto");
   const [bestForPopoverWidth, setBestForPopoverWidth] = useState("auto");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const levelsTriggerRef = useRef<HTMLButtonElement>(null);
   const bestForTriggerRef = useRef<HTMLButtonElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -285,26 +286,47 @@ const EditCollectionForm = () => {
   };
 
   const handleDelete = async () => {
+    setIsDeleting(true); // Start deletion process
     try {
-      const response = await deleteCollectionByID(
-        `/admin/delete-collection/${collectionId}`
-      );
+      let filesDeleted = true;
+
+      // Delete the image file from S3 if it exists
+      if (originalImageKey) {
+        try {
+          await deleteFileFromS3(originalImageKey);
+        } catch (error) {
+          console.error("Error deleting image file from S3:", error);
+          filesDeleted = false;
+        }
+      }
+
+      // Delete the collection record from the database
+      const response = await deleteCollectionByID(`/admin/delete-collection/${collectionId}`);
+
       if (response?.status === 200) {
-        toast.success("Collection deleted successfully");
+        if (!filesDeleted) {
+          toast.warning("Collection deleted but the S3 image may remain");
+        } else {
+          toast.success("Collection and associated image deleted successfully");
+        }
         setIsDialogOpen(false);
         setTimeout(() => {
           router.push("/admin/all-collections");
         }, 1000);
       } else {
-        toast.error(response?.data?.message );
+        toast.error(response?.data?.message || "Failed to delete collection");
         setIsDialogOpen(false);
       }
     } catch (error) {
+      console.error("Error deleting collection:", error);
       if ((error as any)?.response?.data?.message) {
-                toast.error((error as any)?.response?.data?.message);
-              } else {
-                toast.error("An unexpected error occurred.");
-              }
+        toast.error((error as any)?.response?.data?.message);
+      } else {
+        toast.error("An unexpected error occurred while deleting the collection");
+      }
+      setIsDialogOpen(false);
+    } finally {
+      setIsDeleting(false); // End deletion process
     }
   };
 
@@ -663,14 +685,20 @@ const EditCollectionForm = () => {
             <Button
               className="bg-[#1A3F70] text-white hover:cursor-pointer hover:bg-[#1A3F70] w-42"
               onClick={cancelDelete}
+              disabled={isDeleting}
             >
               Cancel
             </Button>
             <Button
               className="bg-[#FF4747] hover:cursor-pointer hover:bg-[#FF4747] w-42"
               onClick={handleDelete}
-            >
-              Delete
+              disabled={isDeleting}
+              >
+                {isDeleting ? (
+                  <Loader2 size={20} className="animate-spin text-white" />
+                ) : (
+                  "Delete"
+                )}
             </Button>
           </DialogFooter>
         </DialogContent>
