@@ -376,18 +376,18 @@ const Page = () => {
                     </div>
 
                     <div
-                      className={`mt-6 self-stretch max-h-[60px] overflow-hidden ${descriptionColor} text-sm font-normal flex flex-col gap-3 w-full text-ellipsis `}
+                      className={`mt-6 self-stretch h-[60px] overflow-hidden ${descriptionColor} text-sm font-normal flex flex-col gap-3 w-full text-ellipsis `}
                       style={{ wordBreak: 'break-all' }}
                     >
 
                       {product.description}
                     </div>
                     {isCurrentPlan && numberOfUsers && (
-                      <div className={`mt-4 text-left text-white text-sm font-normal`}>
+                      <div className={`mt-2 text-left text-white text-sm font-normal`}>
                         Number of Users: {numberOfUsers}
                       </div>
                     )}
-                    <div className="mt-8 flex justify-left w-full">
+                    <div className="mt-6 flex justify-left w-full">
                       {isCardCanceling || isCardLoading ? (
                         <div className={`flex justify-center items-center w-full max-w-[200px] h-12 rounded-lg bg-[#1A3F70]`}>
                           <Loader2 size={24} className="animate-spin text-white" />
