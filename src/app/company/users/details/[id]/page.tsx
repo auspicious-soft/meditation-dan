@@ -255,9 +255,10 @@ const Page = () => {
       console.log("Deactivate requested");
       const response = await deactivateUserAccount(`company/users/${id}/deactivate`);
       if (response?.data?.success) {
+        mutate(); // Revalidate SWR data
         toast.success(response.data.message);
       }
-      mutate(); // Revalidate SWR data
+      router.back();
       console.log("response: ", response);
     } catch (error) {
       toast.error("Failed to deactivate account");
