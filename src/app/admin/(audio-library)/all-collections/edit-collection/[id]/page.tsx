@@ -296,13 +296,15 @@ const EditCollectionForm = () => {
           router.push("/admin/all-collections");
         }, 1000);
       } else {
-        toast.error(response?.data?.message || "Failed to delete collection");
+        toast.error(response?.data?.message );
         setIsDialogOpen(false);
       }
     } catch (error) {
-      console.error("Error deleting collection:", error);
-      toast.error("An error occurred while deleting collection");
-      setIsDialogOpen(false);
+      if ((error as any)?.response?.data?.message) {
+                toast.error((error as any)?.response?.data?.message);
+              } else {
+                toast.error("An unexpected error occurred.");
+              }
     }
   };
 
