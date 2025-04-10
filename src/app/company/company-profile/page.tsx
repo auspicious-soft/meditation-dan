@@ -11,7 +11,6 @@ import { Loader2 } from "lucide-react";
 
 const Page = () => {
   const { data: session, status } = useSession();
-  console.log('session: ', session, 'status: ', status);
 
   // Initialize formData with empty values, will be updated from API
   const [formData, setFormData] = useState({
@@ -31,8 +30,6 @@ const Page = () => {
     { 
       revalidateOnFocus: false,
       onSuccess: (response) => {
-        console.log('API Response:', response); // Log the full response
-        // Handle different possible response structures
         const companyData = response?.data?.data || response?.data || {};
         setFormData({
           email: companyData.email || "",
@@ -53,7 +50,6 @@ const Page = () => {
   // Update formData if session changes and data is available
   useEffect(() => {
     if (status === "authenticated" && data) {
-      console.log('Data in useEffect:', data); // Log data for debugging
       const companyData = data?.data?.data || data?.data || {};
       setFormData({
         email: companyData.email || "",
@@ -81,7 +77,6 @@ const Page = () => {
     try {
       const payload = {
         companyName: formData.companyName,
-        // Email and totalUsers are not included since they are disabled and shouldn't be updated
       };
 
       const response = await updateCompanyDetails(

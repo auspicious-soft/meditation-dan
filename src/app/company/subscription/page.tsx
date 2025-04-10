@@ -215,7 +215,6 @@ const CancelSubscriptionModal = ({ isOpen, onClose, onConfirm, isLoading, userNa
 
 const Page = () => {
   const session = useSession();
-  console.log('session: ', session);
   const { data: subscriptionData, error, isLoading, mutate } = useSWR(
     "/company/products?status=active",
     getAllSubcriptionPlans,
@@ -228,7 +227,6 @@ const Page = () => {
     getCompanyDetails,
     { revalidateOnFocus: false, refreshInterval: 0 }
   );
-  console.log('companyData: ', companyData?.data?.data?.totalUsers);
   const currentActiveUsers = companyData?.data?.data?.totalUsers;
   const { data: transactionData, error: transactionError, isLoading: transactionLoading } = useSWR(
     "/company/transactions",

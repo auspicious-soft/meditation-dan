@@ -7,6 +7,11 @@ export const getCompanyDetails = async (route: string ,params: any = {}) => {
     const axiosInstance = await getCompanyAxiosInstance()
     return axiosInstance.get(route)
 }
+
+export const markAllNotificationsRead = async (route: string ,params: any = {}) => {
+    const axiosInstance = await getCompanyAxiosInstance()
+    return axiosInstance.put(route)
+}
 export const updateCompanyDetails = async (route: string ,payload: any = {}) => {
     const axiosInstance = await getCompanyAxiosInstance()
     return axiosInstance.put(route,payload)
