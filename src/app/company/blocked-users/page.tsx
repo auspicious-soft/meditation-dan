@@ -95,37 +95,29 @@ const Page = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {isLoading ? (
+            {isLoading ? (
                 Array(PAGE_SIZE).fill(null).map((_, index) => (
                   <TableRow key={index} className="border-0">
                     <TableCell className="py-4">
                       <SkeletonTheme baseColor="#ebebeb" highlightColor="#1b2236" borderRadius={10}>
-                        <Skeleton height={16} width={80} />
+                        <Skeleton height={12} width={80} />
                       </SkeletonTheme>
                     </TableCell>
                     <TableCell className="py-4">
                       <SkeletonTheme baseColor="#ebebeb" highlightColor="#1b2236" borderRadius={10}>
-                        <Skeleton height={16} width={120} />
+                        <Skeleton height={12} width={150} />
                       </SkeletonTheme>
                     </TableCell>
                     <TableCell className="py-4">
                       <SkeletonTheme baseColor="#ebebeb" highlightColor="#1b2236" borderRadius={10}>
-                        <Skeleton height={16} width={150} />
-                      </SkeletonTheme>
-                    </TableCell>
-                    <TableCell className="py-4">
-                      <SkeletonTheme baseColor="#ebebeb" highlightColor="#1b2236" borderRadius={10}>
-                        <Skeleton height={16} width={80} />
-                      </SkeletonTheme>
-                    </TableCell>
-                    <TableCell className="py-4">
-                      <SkeletonTheme baseColor="#ebebeb" highlightColor="#1b2236" borderRadius={10}>
-                        <Skeleton height={16} width={60} />
+                        <Skeleton height={12} width={200} />
                       </SkeletonTheme>
                     </TableCell>
                     <TableCell className="text-right py-4">
                       <SkeletonTheme baseColor="#ebebeb" highlightColor="#1b2236" borderRadius={10}>
-                        <Skeleton height={24} width={60} />
+                        <div className="flex justify-end gap-1.5">
+                          <Skeleton height={12} width={60} />
+                        </div>
                       </SkeletonTheme>
                     </TableCell>
                   </TableRow>

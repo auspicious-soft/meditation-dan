@@ -6,11 +6,11 @@ import Image from "next/image";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import useSWR from "swr";
 import { getAllPendingJoinRequests, getApproveOrDeclinePendingJoinRequest } from "@/services/company-services";
-import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import SearchBar from "@/components/ui/SearchBar";
 import { useState } from "react";
 import { Loader2 } from "lucide-react"; // Add this import
+import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
 
 const Page = () => {
   const router = useRouter();
@@ -102,15 +102,37 @@ const Page = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {isLoading ? (
+            {isLoading ? (
                 Array.from({ length: PAGE_SIZE }).map((_, index) => (
                   <TableRow key={index} className="border-0 hover:bg-transparent">
-                    <TableCell className="py-4"><Skeleton className="h-4 w-[80px] bg-gray-700" /></TableCell>
-                    <TableCell className="py-4"><Skeleton className="h-4 w-[150px] bg-gray-700" /></TableCell>
-                    <TableCell className="py-4"><Skeleton className="h-4 w-[200px] bg-gray-700" /></TableCell>
-                    <TableCell className="py-4"><Skeleton className="h-4 w-[180px] bg-gray-700" /></TableCell>
-                    {/* <TableCell className="py-4"><Skeleton className="h-4 w-[80px] bg-gray-700" /></TableCell> */}
-                    <TableCell className="py-4"><Skeleton className="h-4 w-[100px] bg-gray-700 ml-auto" /></TableCell>
+                    <TableCell className="py-4">
+                      <SkeletonTheme baseColor="#ebebeb" highlightColor="#1b2236" borderRadius={10}>
+                        <Skeleton height={12} width={80} />
+                      </SkeletonTheme>
+                    </TableCell>
+                    <TableCell className="py-4">
+                      <SkeletonTheme baseColor="#ebebeb" highlightColor="#1b2236" borderRadius={10}>
+                        <Skeleton height={12} width={150} />
+                      </SkeletonTheme>
+                    </TableCell>
+                    <TableCell className="py-4">
+                      <SkeletonTheme baseColor="#ebebeb" highlightColor="#1b2236" borderRadius={10}>
+                        <Skeleton height={12} width={200} />
+                      </SkeletonTheme>
+                    </TableCell>
+                    <TableCell className="py-4">
+                      <SkeletonTheme baseColor="#ebebeb" highlightColor="#1b2236" borderRadius={10}>
+                        <Skeleton height={12} width={180} />
+                      </SkeletonTheme>
+                    </TableCell>
+                    <TableCell className="text-right py-4">
+                      <SkeletonTheme baseColor="#ebebeb" highlightColor="#1b2236" borderRadius={10}>
+                        <div className="flex justify-end gap-2">
+                          <Skeleton height={30} width={42} />
+                          <Skeleton height={30} width={42} />
+                        </div>
+                      </SkeletonTheme>
+                    </TableCell>
                   </TableRow>
                 ))
               ) : error ? (

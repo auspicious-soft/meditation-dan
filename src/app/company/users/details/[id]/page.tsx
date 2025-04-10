@@ -276,30 +276,51 @@ const Page = () => {
   if (isLoading) {
     return (
       <div className="text-white py-6 w-full h-screen">
-        <div className="mb-6">
+        {/* Header Section */}
+        <div className="mb-2">
           <SkeletonTheme baseColor="#ebebeb" highlightColor="#1b2236" borderRadius={10}>
-            <Skeleton height={24} width={200} />
-            <Skeleton height={16} width={150} className="mt-2 opacity-50" />
+            <Skeleton height={20} width={250} /> {/* Name */}
+            <Skeleton height={14} width={180} className="mt-2 opacity-50" /> {/* Email */}
           </SkeletonTheme>
         </div>
 
+        {/* Grid Section */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6">
-          {Array(6)
-            .fill(null)
-            .map((_, index) => (
-              <div key={index}>
-                <SkeletonTheme baseColor="#ebebeb" highlightColor="#1b2236" borderRadius={10}>
-                  <Skeleton height={14} width={80} className="mb-1 opacity-80" />
-                  <Skeleton height={16} width={120} />
-                </SkeletonTheme>
-              </div>
-            ))}
+          {/* First Name */}
+          <div>
+            <SkeletonTheme baseColor="#ebebeb" highlightColor="#1b2236" borderRadius={10}>
+              <Skeleton height={10} width={80} className="mb-1 opacity-80" /> {/* Label */}
+              <Skeleton height={12} width={120} /> {/* Value */}
+            </SkeletonTheme>
+          </div>
+          {/* Last Name */}
+          <div>
+            <SkeletonTheme baseColor="#ebebeb" highlightColor="#1b2236" borderRadius={10}>
+              <Skeleton height={10} width={80} className="mb-1 opacity-80" /> {/* Label */}
+              <Skeleton height={12} width={120} /> {/* Value */}
+            </SkeletonTheme>
+          </div>
+          {/* Email Address */}
+          <div>
+            <SkeletonTheme baseColor="#ebebeb" highlightColor="#1b2236" borderRadius={10}>
+              <Skeleton height={10} width={100} className="mb-1 opacity-80" /> {/* Label */}
+              <Skeleton height={12} width={200} /> {/* Value */}
+            </SkeletonTheme>
+            </div>
+          {/* Company Name */}
+          <div>
+            <SkeletonTheme baseColor="#ebebeb" highlightColor="#1b2236" borderRadius={10}>
+              <Skeleton height={10} width={100} className="mb-1 opacity-80" /> {/* Label */}
+              <Skeleton height={12} width={180} /> {/* Value */}
+            </SkeletonTheme>
+          </div>
         </div>
 
+        {/* Buttons Section */}
         <div className="flex gap-4 mt-12">
           <SkeletonTheme baseColor="#ebebeb" highlightColor="#1b2236" borderRadius={10}>
-            <Skeleton height={40} width={120} />
-            <Skeleton height={40} width={150} />
+            <Skeleton height={40} width={120} /> {/* Delete Button */}
+            <Skeleton height={40} width={150} /> {/* Block/Unblock Button */}
           </SkeletonTheme>
         </div>
       </div>
