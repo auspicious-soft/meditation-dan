@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -60,6 +60,11 @@ const Page = () => {
   const formatDate = (date: string | undefined) => {
     return date ? new Date(date).toLocaleDateString() : "N/A";
   };
+
+  useEffect(() => {
+    // Revalidate data when searchParams changes
+    mutate();
+  }, []);
 
   return (
     <div className="grid grid-cols-12 gap-4 h-screen w-full">
