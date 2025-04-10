@@ -12,61 +12,69 @@
 // const Page = () => {
 //   const { data: session, status } = useSession();
 
-//   // Initialize formData with empty values, will be updated from API
+//   // Initialize formData with empty values
 //   const [formData, setFormData] = useState({
 //     email: "",
 //     companyName: "",
 //     password: "",
-//     totalUsers: 0, // Add totalUsers to the formData state
+//     totalUsers: 0,
 //   });
 //   const [isLoading, setIsLoading] = useState(false);
-//   const [initialCompanyName, setInitialCompanyName] = useState("");
+//   const [initialData, setInitialData] = useState({
+//     companyName: "",
+//     password: "", // Store initial password for comparison
+//   });
 
-//   // Fetch company details only when session is ready
+//   // Fetch company details
 //   const { data, error: swrError, mutate, isLoading: swrIsLoading } = useSWR(
 //     status === "authenticated" && session?.user?.id 
-//       ? `/company/company-details/${session.user.id}` 
-//       : null,
+//     ? `/company/company-details/${session.user.id}` 
+//     : null,
 //     getCompanyDetails,
 //     { 
 //       revalidateOnFocus: false,
 //       onSuccess: (response) => {
 //         const companyData = response?.data?.data || response?.data || {};
-//         console.log('companyData: ', companyData);
 //         setFormData({
 //           email: companyData.email || "",
-//           password: "",
 //           companyName: companyData.companyName || "",
-//           totalUsers: companyData.totalUsers || 0, // Map totalUsers from API response
+//           password: companyData.password || "", // Store actual password
+//           totalUsers: companyData.totalUsers || 0,
 //         });
-//         setInitialCompanyName(companyData.companyName || "");
+//         setInitialData({
+//           companyName: companyData.companyName || "",
+//           password: companyData.password || "", // Store initial password
+//         });
 //       },
 //       onError: (err) => {
-//         console.error('SWR Error:', err); // Log any errors
+//         console.error('SWR Error:', err);
 //       },
 //     }
 //   );
+//   console.log('data: ', data);
 
-//   // Determine if data is loading (initial fetch)
 //   const isDataLoading = swrIsLoading && !swrError && status === "authenticated";
 
-//   // Update formData if session changes and data is available
 //   useEffect(() => {
 //     if (status === "authenticated" && data) {
 //       const companyData = data?.data?.data || data?.data || {};
 //       setFormData({
 //         email: companyData.email || "",
 //         companyName: companyData.companyName || "",
-//         totalUsers: companyData.totalUsers || 0, // Map totalUsers in useEffect
+//         password: companyData.password || "",
+//         totalUsers: companyData.totalUsers || 0,
 //       });
-//       setInitialCompanyName(companyData.companyName || "");
+//       setInitialData({
+//         companyName: companyData.companyName || "",
+//         password: companyData.password || "",
+//       });
 //     }
 //   }, [status, data]);
 
 //   const handleChange = (field: string, value: string) => {
 //     setFormData({
 //       ...formData,
-//       [field]: field === "totalUsers" ? parseInt(value) || 0 : value, // Parse totalUsers as integer
+//       [field]: field === "totalUsers" ? parseInt(value) || 0 : value,
 //     });
 //   };
 
@@ -78,10 +86,15 @@
 
 //     setIsLoading(true);
 //     try {
-//       const payload = {
+//       // Only include changed fields in the payload
+//       const payload: { companyName: string; password?: string } = {
 //         companyName: formData.companyName,
-
 //       };
+
+//       // Only add password to payload if it has changed
+//       if (formData.password !== initialData.password) {
+//         payload.password = formData.password;
+//       }
 
 //       const response = await updateCompanyDetails(
 //         `/company/update-company/${session?.user.id}`,
@@ -90,14 +103,18 @@
 
 //       if (response?.data?.success) {
 //         toast.success("Company details updated successfully");
-//         mutate(); // Revalidate the data after successful update
-//         setInitialCompanyName(formData.companyName); // Update initial value after successful save
+//         mutate(); // Revalidate data
+//         setInitialData({
+//           companyName: formData.companyName,
+//           password: formData.password, // Update initial password after save
+//         });
 //         await signIn("credentials", {
 //           email: formData.email,
-//           fullName: formData.companyName, // Use companyName as fullName
+//           fullName: formData.companyName,
 //           _id: session.user.id,
 //           role: session.user.role || "company",
 //           redirect: false,
+//           ...(payload.password && { password: formData.password }), // Include password if changed
 //         });
 //       } else {
 //         toast.error(response?.data?.message || "Failed to update company details");
@@ -110,8 +127,13 @@
 //     }
 //   };
 
-//   // Check if there are changes in companyName
-//   const hasChanges = formData.companyName !== initialCompanyName;
+//   // Check if there are any changes
+//   const hasChanges = 
+//     formData.companyName !== initialData.companyName || 
+//     formData.password !== initialData.password;
+
+//   // Mask password for display (show asterisks unless being edited)
+//   const maskedPassword = formData.password ? "*".repeat(formData.password.length) : "";
 
 //   return (
 //     <div className="flex flex-1 flex-col gap-4">
@@ -153,6 +175,24 @@
 //           </div>
 
 //           <div className="space-y-2">
+//             <Label htmlFor="password" className="text-white dm-sans text-base font-normal">
+//               Password
+//             </Label>
+//             {isDataLoading ? (
+//               <div className="w-full h-12 bg-gray-700 animate-pulse rounded-md"></div>
+//             ) : (
+//               <Input
+//                 id="password"
+//                 type="text" // Changed to text to show masked value
+//                 value={formData.password === initialData.password ? maskedPassword : formData.password}
+//                 onChange={(e) => handleChange("password", e.target.value)}
+//                 className="bg-[#1B2236] h-12 border-none text-white"
+//                 placeholder="Enter new password"
+//               />
+//             )}
+//           </div>
+
+//           <div className="space-y-2">
 //             <Label htmlFor="totalUsers" className="text-white dm-sans text-base font-normal">
 //               Total Active Users
 //             </Label>
@@ -165,7 +205,7 @@
 //                 value={formData.totalUsers}
 //                 onChange={(e) => handleChange("totalUsers", e.target.value)}
 //                 className="bg-[#1B2236] h-12 border-none text-white"
-//                 disabled // Disable since it's likely read-only
+//                 disabled
 //               />
 //             )}
 //           </div>
@@ -175,7 +215,7 @@
 //           <Button
 //             className="mt-4 bg-[#1A3F70] w-28 h-11 hover:bg-[#1A3F70] dm-sans text-white flex items-center justify-center hover:cursor-pointer"
 //             onClick={handleSave}
-//             disabled={isLoading || !hasChanges} // Disable if loading or no changes
+//             disabled={isLoading || !hasChanges}
 //           >
 //             {isLoading ? (
 //               <Loader2 size={20} className="animate-spin text-white" />
@@ -190,6 +230,7 @@
 // };
 
 // export default Page;
+
 
 
 "use client";
@@ -216,7 +257,7 @@ const Page = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [initialData, setInitialData] = useState({
     companyName: "",
-    password: "", // Store initial password for comparison
+    password: "",
   });
 
   // Fetch company details
@@ -232,12 +273,12 @@ const Page = () => {
         setFormData({
           email: companyData.email || "",
           companyName: companyData.companyName || "",
-          password: companyData.password || "", // Store actual password
+          password: companyData.password || "",
           totalUsers: companyData.totalUsers || 0,
         });
         setInitialData({
           companyName: companyData.companyName || "",
-          password: companyData.password || "", // Store initial password
+          password: companyData.password || "",
         });
       },
       onError: (err) => {
@@ -245,7 +286,6 @@ const Page = () => {
       },
     }
   );
-  console.log('data: ', data);
 
   const isDataLoading = swrIsLoading && !swrError && status === "authenticated";
 
@@ -280,12 +320,10 @@ const Page = () => {
 
     setIsLoading(true);
     try {
-      // Only include changed fields in the payload
       const payload: { companyName: string; password?: string } = {
         companyName: formData.companyName,
       };
 
-      // Only add password to payload if it has changed
       if (formData.password !== initialData.password) {
         payload.password = formData.password;
       }
@@ -297,10 +335,10 @@ const Page = () => {
 
       if (response?.data?.success) {
         toast.success("Company details updated successfully");
-        mutate(); // Revalidate data
+        mutate();
         setInitialData({
           companyName: formData.companyName,
-          password: formData.password, // Update initial password after save
+          password: formData.password,
         });
         await signIn("credentials", {
           email: formData.email,
@@ -308,7 +346,7 @@ const Page = () => {
           _id: session.user.id,
           role: session.user.role || "company",
           redirect: false,
-          ...(payload.password && { password: formData.password }), // Include password if changed
+          ...(payload.password && { password: formData.password }),
         });
       } else {
         toast.error(response?.data?.message || "Failed to update company details");
@@ -321,13 +359,12 @@ const Page = () => {
     }
   };
 
-  // Check if there are any changes
   const hasChanges = 
     formData.companyName !== initialData.companyName || 
     formData.password !== initialData.password;
 
-  // Mask password for display (show asterisks unless being edited)
-  const maskedPassword = formData.password ? "*".repeat(formData.password.length) : "";
+  // Mask password with a fixed 6 asterisks
+  const maskedPassword = formData.password ? "******" : "";
 
   return (
     <div className="flex flex-1 flex-col gap-4">
@@ -377,7 +414,7 @@ const Page = () => {
             ) : (
               <Input
                 id="password"
-                type="text" // Changed to text to show masked value
+                type="text"
                 value={formData.password === initialData.password ? maskedPassword : formData.password}
                 onChange={(e) => handleChange("password", e.target.value)}
                 className="bg-[#1B2236] h-12 border-none text-white"

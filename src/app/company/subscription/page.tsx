@@ -323,7 +323,7 @@ const Page = () => {
       <div className="py-[30px] px-[36px] h-auto bg-[#1B2236] rounded-[20px] max-w-full">
         <div className="mb-[20px] text-white text-2xl text-left">Subscription Plan</div>
 
-        <div className={`flex flex-wrap lg:flex-nowrap ${filteredProducts.length === 1 ? "justify-left" : "justify-center"} gap-10`}>
+        <div className={`flex flex-wrap lg:flex-nowrap ${filteredProducts.length === 1 ? "justify-left" : "justify-center"} gap-5`}>
           {isLoading || showSkeletonAfterCancel ? (
             Array(3).fill(0).map((_, index) => <SkeletonCard key={index} />)
           ) : (
@@ -360,14 +360,14 @@ const Page = () => {
                 return (
                   <div
                     key={product.id}
-                    className={`relative w-full max-w-sm h-fit ${cardBgColor} rounded-lg flex flex-col items-left p-6 shadow-lg transition-transform duration-300 hover:scale-105`}
+                    className={`relative w-full max-w-sm h-fit ${isCurrentPlan ? "md:min-w-[240px]": ""} ${cardBgColor} rounded-lg flex flex-col items-left p-6 shadow-lg transition-transform duration-300 hover:scale-105`}
                   >
                     {isCurrentPlan && (
                       <div className="absolute top-0 right-0 text-center justify-start bg-white text-[#1a3f70] text-sm font-medium p-2 px-3 rounded-tr-lg rounded-bl-lg shadow-lg">
                         Current Plan
                       </div>
                     )}
-                    <div className={`font-bold flex items-center justify-center w-36 h-9 rounded-lg border ${borderColor}`}>
+                    <div className={`font-bold flex items-center  ${isCurrentPlan? "w-28" : "w-36"} justify-center  h-9 rounded-lg border ${borderColor}`}>
                       <div className={`${textColor} text-xl font-medium`}>{product.name}</div>
                     </div>
                     <div className="mt-4 text-left text-xl font-medium font-['SF_Pro_Display']">

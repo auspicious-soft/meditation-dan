@@ -25,7 +25,7 @@ const Page = () => {
       refreshInterval: 0,
     }
   );
-  console.log('data: ', data);
+
 
   // Log data for debugging (remove in production)
 

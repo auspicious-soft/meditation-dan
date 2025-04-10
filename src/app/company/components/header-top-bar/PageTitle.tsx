@@ -14,20 +14,25 @@ const PageTitle = () => {
   const UserDetailPattern = /^\/company\/users\/details\/[0-9a-fA-F]{24}$/;
   const UserEditPattern = /^\/company\/users\/edit\/[0-9a-fA-F]{24}$/;
   const UserAddPattern = /^\/company\/users\/add-user$/;
+  const companyProfilePattern = /^\/company\/company-profile$/;
   
   const isUserDetail = UserDetailPattern.test(pathname);
   const isUserEdit = UserEditPattern.test(pathname);
   const isUserAdd = UserAddPattern.test(pathname);
+  const isCompanyProfile = companyProfilePattern.test(pathname);
   if (isUserDetail) {
     pageTitle = "User Detail";
   }
   if (isUserEdit) {
     pageTitle = "Edit User";
   }
+  if (isCompanyProfile) {
+    pageTitle = "Company Profile";
+  }
 
   return (
     <div className="flex items-center gap-2">
-      {(isUserDetail || isUserEdit || isUserAdd) && (
+      {(isUserDetail || isUserEdit || isUserAdd || isCompanyProfile) && (
         <Button
           variant="destructive"
           className="bg-[#0B132B] hover:bg-[#0B132B] p-0 h-7 w-7 hover:cursor-pointer"
