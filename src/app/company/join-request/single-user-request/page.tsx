@@ -28,7 +28,7 @@ const Page = () => {
 //   console.log("Deactivate requested");
 //  };
  return (
-  <div className=" text-white py-6 w-full h-screen">
+  <div className=" text-white py-6 w-full ">
    <div className="mb-6">
     <h2 className=" text-white text-xl font-medium ">Alexa Rawles</h2>
     <p className="opacity-50">alexarawles@gmail.com</p>
