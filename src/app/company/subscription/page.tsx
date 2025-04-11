@@ -56,38 +56,33 @@ const SkeletonTable = () => (
 
 
 const SubscriptionModal = ({ isOpen, onClose, onContinue, planType, price, description, totalUsers }: any) => {
-  console.log('totalUsers: ', totalUsers);
-  const [numberOfUsers, setNumberOfUsers] = useState<number | null>(totalUsers===0 ? 1 : totalUsers); // Start with null to allow clearing
+  const [numberOfUsers, setNumberOfUsers] = useState<number | null>(totalUsers === 0 ? 1 : totalUsers);
   const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null); // State for error message
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Initialize numberOfUsers when totalUsers is available
   useEffect(() => {
     if (totalUsers !== undefined) {
-      const initialUsers = Math.max(totalUsers || 1, 1); // Ensure at least 1 or totalUsers
+      const initialUsers = Math.max(totalUsers || 1, 1);
       setNumberOfUsers(initialUsers);
-      setErrorMessage(null); // Clear any error message on open
+      setErrorMessage(null);
     }
   }, [totalUsers]);
 
-  // Prevent body scroll when modal is open
   useEffect(() => {
     if (isOpen) {
       document.body.classList.add("no-scroll");
     } else {
       document.body.classList.remove("no-scroll");
     }
-    // Cleanup on unmount
     return () => {
       document.body.classList.remove("no-scroll");
     };
   }, [isOpen]);
 
-  // Handle modal close and reset state
   const handleClose = () => {
-    setNumberOfUsers(totalUsers===0 ? 1 : totalUsers ); // Reset to totalUsers
-    setErrorMessage(null); // Clear error message
-    onClose(); // Call the provided onClose function
+    setNumberOfUsers(totalUsers === 0 ? 1 : totalUsers);
+    setErrorMessage(null);
+    onClose();
   };
 
   if (!isOpen) return null;
@@ -96,25 +91,48 @@ const SubscriptionModal = ({ isOpen, onClose, onContinue, planType, price, descr
 
   const handleNumberOfUsersChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const rawValue = e.target.value;
+
+    // Handle empty input
     if (rawValue === "") {
-      setNumberOfUsers(null); // Allow clearing the input
-      setErrorMessage(null); // Clear error when empty
+      setNumberOfUsers(null);
+      setErrorMessage(null);
       return;
     }
 
-    const value = parseInt(rawValue); // Parse input
+    // Remove leading zeros (in case of pasting)
+    const cleanedValue = rawValue.replace(/^0+/, "") || "";
+    if (cleanedValue === "") {
+      setNumberOfUsers(null);
+      setErrorMessage("Number of users cannot be less than 1.");
+      return;
+    }
 
-    // Clamp value to 0 or higher
+    const value = parseInt(cleanedValue, 10);
     const clampedValue = isNaN(value) ? 0 : Math.max(value, 0);
+
     setNumberOfUsers(clampedValue);
 
     // Validate the input
     if (clampedValue < 1) {
-      setErrorMessage("Number of users cannot be less than 1."); // Re-enable error for < 1
+      setErrorMessage("Number of users cannot be less than 1.");
     } else if (clampedValue < totalUsers) {
       setErrorMessage(`Number of users cannot be less than the current ${totalUsers} users.`);
     } else {
-      setErrorMessage(null); // Clear error if valid
+      setErrorMessage(null);
+    }
+
+    // Update the input field to reflect the cleaned value
+    e.target.value = cleanedValue;
+  };
+
+  // Prevent typing "0" as the first digit
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const input = e.currentTarget;
+    const currentValue = input.value;
+
+    // Block "0" when the input is empty or at the start
+    if (e.key === "0" && currentValue === "") {
+      e.preventDefault();
     }
   };
 
@@ -138,21 +156,16 @@ const SubscriptionModal = ({ isOpen, onClose, onContinue, planType, price, descr
           <div>
             <p className="self-stretch opacity-80 text-white text-base font-normal">Select number of users</p>
             <div className="relative">
-              {/* {numberOfUsers === null ? (
-                <div className="w-full mt-[15px] bg-slate-900 rounded-lg px-4 py-3.5 flex items-center justify-center">
-                  <Loader2 size={20} className="animate-spin text-white" />
-                </div>
-              ) : ( */}
-                <input
-                  type="number" // Keep type="number" for validation
-                  min="1" // Prevent negative numbers
-                  value={numberOfUsers !== null ? numberOfUsers : ""} // Empty string when cleared
-                  onChange={handleNumberOfUsersChange} // Use custom handler
-                  className="w-full mt-[15px] bg-slate-900 rounded-lg px-4 py-3.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1A3F70] appearance-none [appearance:textfield] [&::-webkit-outer-spin-button]:hidden [&::-webkit-inner-spin-button]:hidden"
-                />
-              {/* )} */}
+              <input
+                type="number"
+                min="1"
+                value={numberOfUsers !== null ? numberOfUsers : ""}
+                onChange={handleNumberOfUsersChange}
+                onKeyDown={handleKeyDown} // Add onKeyDown handler
+                className="w-full mt-[15px] bg-slate-900 rounded-lg px-4 py-3.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1A3F70] appearance-none [&::-webkit-outer-spin-button]:hidden [&::-webkit-inner-spin-button]:hidden"
+              />
               {errorMessage && (
-                <p className="text-red-500 text-sm mt-1">{errorMessage}</p> // Display error message
+                <p className="text-red-500 text-sm mt-1">{errorMessage}</p>
               )}
             </div>
           </div>
@@ -179,14 +192,13 @@ const SubscriptionModal = ({ isOpen, onClose, onContinue, planType, price, descr
           <button
             onClick={() => {
               if (numberOfUsers !== null && !errorMessage && numberOfUsers >= totalUsers && numberOfUsers >= 1) {
-                // Only proceed if numberOfUsers is set and no error
                 setIsLoading(true);
                 onContinue(numberOfUsers);
                 setTimeout(() => setIsLoading(false), 2000);
               }
             }}
             className="w-full bg-[#14ab00] text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 transition flex items-center justify-center hover:cursor-pointer disabled:bg-green-700"
-            disabled={isLoading || numberOfUsers === null || !!errorMessage} // Disable if loading, numberOfUsers is null, or error exists
+            disabled={isLoading || numberOfUsers === null || !!errorMessage}
           >
             {isLoading ? "Loading..." : "Continue"}
           </button>
@@ -195,8 +207,6 @@ const SubscriptionModal = ({ isOpen, onClose, onContinue, planType, price, descr
     </div>
   );
 };
-
-
 const CancelSubscriptionModal = ({ isOpen, onClose, onConfirm, isLoading, userName }: { isOpen: boolean; onClose: () => void; onConfirm: () => void; isLoading: boolean, userName: string }) => {
   React.useEffect(() => {
     if (isOpen) {
