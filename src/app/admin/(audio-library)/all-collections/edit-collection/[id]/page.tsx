@@ -34,6 +34,7 @@ import {
 } from "@/services/admin-services";
 import { toast } from "sonner";
 import { useRouter, useParams } from "next/navigation";
+import { uploadCompressedCollectionImage } from "@/actions/uploadCollectionImage";
 
 // Updated Validation Schema with imagePreview included
 const schema = yup.object({
@@ -366,36 +367,22 @@ const EditCollectionForm = () => {
       }
 
       if (data.imageFile) {
-        // If a new image is uploaded, upload it and get the new key
-        const image = data.imageFile;
-        const bestForNames = data.bestFor
-          .map(
-            (id) =>
-              bestForOptions.find((option) => option.id === id)?.name.toLowerCase() || ""
-          )
-          .join("-");
-        const collectionName = data.collectionName;
-        const imageFileName = `${image.name}`;
+        // If a new image is uploaded, upload the compressed version
+        const formData = new FormData();
+        formData.append("image", data.imageFile);
+        formData.append("collectionName", data.collectionName);
+        const { key } = await uploadCompressedCollectionImage(formData);
+        imageKey = key; // Update with the new compressed image key
 
-        const { signedUrl, key } = await generateSignedUrlForCollectionImage(
-          collectionName,
-          new Date().toISOString(),
-          imageFileName,
-          image.type
-        );
-
-        const imageUploadResponse = await fetch(signedUrl, {
-          method: "PUT",
-          body: image,
-          headers: {
-            "Content-Type": image.type,
-          },
-        });
-
-        if (!imageUploadResponse.ok) {
-          throw new Error("Failed to upload image to S3");
+        // Delete the original image from S3 if it exists and is different
+        if (originalImageKey && originalImageKey !== imageKey) {
+          try {
+            await deleteFileFromS3(originalImageKey);
+          } catch (error) {
+            console.error("Error deleting original image from S3:", error);
+            toast.warning("Updated successfully, but failed to delete old image from S3");
+          }
         }
-        imageKey = key; // Update imageKey with the new uploaded key
       } else if (!imageKey) {
         // If no new image is uploaded and no original key exists, throw an error
         setError("imageFile", { type: "manual", message: "An image is required" });
@@ -436,20 +423,20 @@ const EditCollectionForm = () => {
       className="p-6 bg-[#1B2236] text-white rounded-lg shadow-md"
     >
       <div className="flex items-center mb-4 gap-2">
-      <Button
-            variant="destructive"
-            className="bg-[#0B132B] hover:bg-[#0B132B] p-0 h-7 w-7 hover:cursor-pointer"
-            onClick={() => (window.location.href = "/admin/all-collections")}
-          >
-            <ChevronLeft  />
-          </Button>
-      <h2 className="text-xl font-semibold">Edit Collection</h2>
+        <Button
+          variant="destructive"
+          className="bg-[#0B132B] hover:bg-[#0B132B] p-0 h-7 w-7 hover:cursor-pointer"
+          onClick={() => (window.location.href = "/admin/all-collections")}
+        >
+          <ChevronLeft />
+        </Button>
+        <h2 className="text-xl font-semibold">Edit Collection</h2>
       </div>
       <Label className="text-gray-300 mb-3 block">Collection Name</Label>
       <Input
         {...register("collectionName")}
         placeholder="Enter Collection Name"
-        className="mb-2 bg-[#0B132B] border-none h-12 text-white "
+        className="mb-2 bg-[#0B132B] border-none h-12 text-white"
       />
       {errors.collectionName && (
         <p className="text-red-500 text-sm">{errors.collectionName.message}</p>
@@ -693,12 +680,12 @@ const EditCollectionForm = () => {
               className="bg-[#FF4747] hover:cursor-pointer hover:bg-[#FF4747] w-42"
               onClick={handleDelete}
               disabled={isDeleting}
-              >
-                {isDeleting ? (
-                  <Loader2 size={20} className="animate-spin text-white" />
-                ) : (
-                  "Delete"
-                )}
+            >
+              {isDeleting ? (
+                <Loader2 size={20} className="animate-spin text-white" />
+              ) : (
+                "Delete"
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>

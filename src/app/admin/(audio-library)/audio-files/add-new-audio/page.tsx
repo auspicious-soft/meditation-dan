@@ -29,7 +29,8 @@ import {
   generateSignedUrlForAudios,
 } from "@/actions";
 import { getAllCollectionStats, getBestForStats, getlevelsStats, uploadAudioStats } from "@/services/admin-services";
-import { AxiosError } from "axios";
+import { AxiosError } from "axios";// Import the server action
+import { uploadCompressedImage } from "@/actions/uploadImage";
 
 // Interface for the collection data from the backend
 interface Collection {
@@ -113,11 +114,11 @@ const AddNewAudio = () => {
     watch,
     setValue,
     setError,
-    clearErrors, // Added clearErrors
+    clearErrors,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
     resolver: yupResolver(schema),
-    mode: "onChange", // Changed to onChange for real-time validation
+    mode: "onChange",
     defaultValues: {
       collectionType: "",
       songName: "",
@@ -135,8 +136,7 @@ const AddNewAudio = () => {
   const imageFile = watch("imageFile");
 
   const getAudioDuration = async (file: File) => {
-    const audioContext = new (window.AudioContext ||
-      (window as any).webkitAudioContext)();
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
     const arrayBuffer = await file.arrayBuffer();
     const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
     return audioBuffer.duration;
@@ -231,7 +231,7 @@ const AddNewAudio = () => {
     if (audioFile && audioFile.length > 0) {
       const audioUrl = URL.createObjectURL(audioFile[0]);
       setAudioPreview(audioUrl);
-      clearErrors("audioFile"); // Clear error when file is selected
+      clearErrors("audioFile");
       return () => URL.revokeObjectURL(audioUrl);
     } else {
       setAudioPreview(null);
@@ -242,7 +242,7 @@ const AddNewAudio = () => {
     if (imageFile && imageFile.length > 0) {
       const imageUrl = URL.createObjectURL(imageFile[0]);
       setImagePreview(imageUrl);
-      clearErrors("imageFile"); // Clear error when file is selected
+      clearErrors("imageFile");
       return () => URL.revokeObjectURL(imageUrl);
     } else {
       setImagePreview(null);
@@ -254,8 +254,8 @@ const AddNewAudio = () => {
       audioInputRef.current.value = "";
     }
     setAudioPreview(null);
-    setValue("audioFile", undefined); // Clear form state
-    setError("audioFile", { type: "manual", message: "Audio file is required" }); // Re-set error if required
+    setValue("audioFile", undefined);
+    setError("audioFile", { type: "manual", message: "Audio file is required" });
   };
 
   const handleRemoveImage = () => {
@@ -263,8 +263,8 @@ const AddNewAudio = () => {
       imageInputRef.current.value = "";
     }
     setImagePreview(null);
-    setValue("imageFile", undefined); // Clear form state
-    setError("imageFile", { type: "manual", message: "Image file is required" }); // Re-set error if required
+    setValue("imageFile", undefined);
+    setError("imageFile", { type: "manual", message: "Image file is required" });
   };
 
   const debounce = (
@@ -295,7 +295,7 @@ const AddNewAudio = () => {
 
   const removeLevel = (levelId: string) => {
     const newLevels = selectedLevels.filter((id) => id !== levelId);
-    setValue("levels", newLevels, { shouldValidate: true }); // Trigger validation
+    setValue("levels", newLevels, { shouldValidate: true });
   };
 
   const onSubmit = async (data: FormValues) => {
@@ -356,30 +356,12 @@ const AddNewAudio = () => {
 
       if (data.imageFile && data.imageFile.length > 0) {
         const image = data.imageFile[0];
-        const selectedCollection = collections.find((col) => col._id === data.collectionType);
-        if (!selectedCollection) {
-          toast.error("Selected collection not found");
-          return;
-        }
-        const collectionNameForAWS = selectedCollection.name.toLowerCase();
-        const songName = data.songName.toLowerCase();
-        const imageFileName = `${image.name}`;
-        const { signedUrl, key } = await generateSignedUrlForAudioImage(
-          songName,
-          new Date().toISOString(),
-          imageFileName,
-          image.type
-        );
-        const imageUploadResponse = await fetch(signedUrl, {
-          method: "PUT",
-          body: image,
-          headers: { "Content-Type": image.type },
-        });
-
-        if (!imageUploadResponse.ok) {
-          throw new Error("Failed to upload image to S3");
-        }
+        const formData = new FormData();
+        formData.append("image", image);
+        formData.append("songName", data.songName.toLowerCase());
+        const { key } = await uploadCompressedImage(formData);
         imageKey = key;
+        
       }
 
       console.log("imageKey:", imageKey);
@@ -393,7 +375,7 @@ const AddNewAudio = () => {
         levels: data.levels,
         bestFor: data.bestFor,
       };
-      console.log('payload:', payload);
+      console.log("payload:", payload);
 
       const response = await uploadAudioStats("/admin/upload-audio", payload);
 
@@ -421,15 +403,15 @@ const AddNewAudio = () => {
       className="p-6 bg-[#1B2236] text-white rounded-lg shadow-md"
     >
       <div className="flex items-center mb-4 gap-2">
-      <Button
-            variant="destructive"
-            className="bg-[#0B132B] hover:bg-[#0B132B] p-0 h-7 w-7 hover:cursor-pointer"
-            onClick={() => (window.location.href = "/admin/all-collections")}
-          >
-            <ChevronLeft  />
-          </Button>
-      <h2 className="text-xl font-semibold">Add New Audio</h2>
-</div>
+        <Button
+          variant="destructive"
+          className="bg-[#0B132B] hover:bg-[#0B132B] p-0 h-7 w-7 hover:cursor-pointer"
+          onClick={() => (window.location.href = "/admin/all-collections")}
+        >
+          <ChevronLeft />
+        </Button>
+        <h2 className="text-xl font-semibold">Add New Audio</h2>
+      </div>
       <Label className="text-gray-300 mb-3 block">Collection Type</Label>
       <Controller
         name="collectionType"

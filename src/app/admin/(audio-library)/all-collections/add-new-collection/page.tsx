@@ -23,7 +23,7 @@ import {
   uploadCollectionStats,
 } from "@/services/admin-services";
 import { toast } from "sonner";
-import { timeStamp } from "console";
+import { uploadCompressedCollectionImage } from "@/actions/uploadCollectionImage";
 
 // Validation Schema
 const schema = yup.object({
@@ -41,7 +41,6 @@ const schema = yup.object({
     .required("Best for field is required"),
   imageFile: yup
     .mixed<File>()
-    .nullable()
     .nullable()
     .test("fileRequired", "Image file is required", (value) => {
       return value instanceof File && value.size > 0;
@@ -252,34 +251,10 @@ const AddCollectionForm = () => {
       }
 
       if (data.imageFile) {
-        const image = data.imageFile;
-        const bestForNames = data.bestFor
-          .map(
-            (id) =>
-              bestForOptions.find((option) => option.id === id)?.name.toLowerCase() || ""
-          )
-          .join("-");
-        const collectionName = data.collectionName;
-        const imageFileName = `${imageFile.name}`;
-
-        const { signedUrl, key } = await generateSignedUrlForCollectionImage(
-          collectionName,
-          new Date().toISOString(),
-          imageFileName,
-          image.type
-        );
-
-        const imageUploadResponse = await fetch(signedUrl, {
-          method: "PUT",
-          body: image,
-          headers: {
-            "Content-Type": image.type,
-          },
-        });
-
-        if (!imageUploadResponse.ok) {
-          throw new Error("Failed to upload image to S3");
-        }
+        const formData = new FormData();
+        formData.append("image", imageFile);
+        formData.append("collectionName", data.collectionName);
+        const { key } = await uploadCompressedCollectionImage(formData);
         imageKey = key;
       }
 
@@ -290,7 +265,7 @@ const AddCollectionForm = () => {
         bestFor: data.bestFor,
         description: data.description,
       };
-      console.log('collectionData:', collectionData);
+      console.log("collectionData:", collectionData);
 
       const response = await uploadCollectionStats(
         "/admin/upload-collection",
@@ -317,20 +292,20 @@ const AddCollectionForm = () => {
       className="p-6 bg-[#1B2236] text-white rounded-lg shadow-md"
     >
       <div className="flex items-center mb-4 gap-2">
-            <Button
-                  variant="destructive"
-                  className="bg-[#0B132B] hover:bg-[#0B132B] p-0 h-7 w-7 hover:cursor-pointer"
-                  onClick={() => (window.location.href = "/admin/all-collections")}
-                >
-                  <ChevronLeft  />
-                </Button>
-      <h2 className="text-xl font-semibold ">Add New Collection</h2>
-</div>
+        <Button
+          variant="destructive"
+          className="bg-[#0B132B] hover:bg-[#0B132B] p-0 h-7 w-7 hover:cursor-pointer"
+          onClick={() => (window.location.href = "/admin/all-collections")}
+        >
+          <ChevronLeft />
+        </Button>
+        <h2 className="text-xl font-semibold">Add New Collection</h2>
+      </div>
       <Label className="text-gray-300 mb-3 block">Collection Name</Label>
       <Input
         {...register("collectionName")}
         placeholder="Enter Collection Name"
-        className="mb-2 bg-[#0B132B] border-none h-12 text-white "
+        className="mb-2 bg-[#0B132B] border-none h-12 text-white"
       />
       {errors.collectionName && (
         <p className="text-red-500 text-sm mt-[-7px]">{errors.collectionName.message}</p>
@@ -492,7 +467,7 @@ const AddCollectionForm = () => {
                 alt="Preview"
                 width={300}
                 height={300}
-                className=" object-cover"
+                className="object-cover"
               />
               <Button
                 variant="ghost"

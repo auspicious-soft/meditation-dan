@@ -30,7 +30,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"; // Added Dialog components
+} from "@/components/ui/dialog";
 import { AlertCircle, ChevronDown, ChevronLeft, Loader2, Trash2, Upload, X } from "lucide-react";
 import Image from "next/image";
 import { toast } from "sonner";
@@ -48,6 +48,7 @@ import {
   updateAudioStats,
 } from "@/services/admin-services";
 import { AxiosError } from "axios";
+import { uploadCompressedAudioImage } from "@/actions/uploadAudioImage";
 
 // Interfaces for type safety
 interface Collection {
@@ -423,6 +424,16 @@ const GetAudio = () => {
           throw new Error(`Failed to upload audio: ${errorText}`);
         }
         audioKey = key;
+
+        // Delete the original audio from S3 if it exists and is different
+        if (existingAudioUrl && existingAudioUrl !== audioKey) {
+          try {
+            await deleteFileFromS3(existingAudioUrl);
+          } catch (error) {
+            console.error("Error deleting original audio from S3:", error);
+            toast.warning("Updated successfully, but failed to delete old audio from S3");
+          }
+        }
       }
 
       // Handle image file
@@ -441,23 +452,22 @@ const GetAudio = () => {
           return;
         }
         const songName = data.songName.toLowerCase();
-        const imageFileName = `${image.name}`;
-        const { signedUrl, key } = await generateSignedUrlForAudioImage(
-          songName,
-          new Date().toISOString(),
-          imageFileName,
-          image.type
-        );
-        const imageUploadResponse = await fetch(signedUrl, {
-          method: "PUT",
-          body: image,
-          headers: { "Content-Type": image.type },
-        });
 
-        if (!imageUploadResponse.ok) {
-          throw new Error("Failed to upload image to S3");
-        }
+        const formData = new FormData();
+        formData.append("image", image);
+        formData.append("songName", songName);
+        const { key } = await uploadCompressedAudioImage(formData);
         imageKey = key;
+
+        // Delete the original image from S3 if it exists and is different
+        if (existingImageUrl && existingImageUrl !== imageKey) {
+          try {
+            await deleteFileFromS3(existingImageUrl);
+          } catch (error) {
+            console.error("Error deleting original image from S3:", error);
+            toast.warning("Updated successfully, but failed to delete old image from S3");
+          }
+        }
       }
 
       // Prepare payload with bestFor as an array of strings
@@ -475,18 +485,20 @@ const GetAudio = () => {
       const response = await updateAudioStats(`/admin/update/audio/${audioId}`, payload);
 
       if (response?.status === 200) {
-        toast.success("Collection updated successfully");
+        toast.success("Audio updated successfully");
         setImagePreview(null);
+        setAudioPreview(null);
         setExistingAudioUrl(null);
+        setExistingImageUrl(null);
         setTimeout(() => {
           window.location.href = "/admin/audio-files";
         }, 1000);
       } else {
-        toast.error(response?.data?.message || "Failed to update collection");
+        toast.error(response?.data?.message || "Failed to update audio");
       }
     } catch (error) {
-      console.log("error while updating collection:", error);
-      toast.error("An error occurred while updating collection");
+      console.log("error while updating audio:", error);
+      toast.error("An error occurred while updating audio");
     }
   };
 
@@ -567,13 +579,13 @@ const GetAudio = () => {
       className="p-6 bg-[#1B2236] text-white rounded-lg shadow-md"
     >
       <div className="flex gap-2 items-center mb-4">
-      <Button
-            variant="destructive"
-            className="bg-[#0B132B] hover:bg-[#0B132B] p-0 h-7 w-7 hover:cursor-pointer"
-            onClick={() => (window.location.href = "/admin/all-collections")}
-          >
-            <ChevronLeft  />
-          </Button>
+        <Button
+          variant="destructive"
+          className="bg-[#0B132B] hover:bg-[#0B132B] p-0 h-7 w-7 hover:cursor-pointer"
+          onClick={() => (window.location.href = "/admin/all-collections")}
+        >
+          <ChevronLeft />
+        </Button>
         <h2 className="text-xl font-semibold">Edit Audio</h2>
       </div>
 
@@ -760,26 +772,26 @@ const GetAudio = () => {
               )}
             </Card>
             <label htmlFor="audio-upload">
-  <input
-    type="file"
-    className="hidden"
-    id="audio-upload"
-    accept=".mp3,.aac,.ogg,.wav"
-    onChange={(e: ChangeEvent<HTMLInputElement>) => {
-      const files = e.target.files;
-      if (files) {
-        setValue("audioFile", files); // Update the form value
-        const audioUrl = URL.createObjectURL(files[0]);
-        setAudioPreview(audioUrl); // Update the preview
-        clearErrors("audioFile"); // Clear validation error
-      }
-    }}
-    ref={audioInputRef}
-  />
-  <div className="border p-1 px-4 rounded-sm border-white text-gray-300 cursor-pointer">
-    {audioPreview ? "Change Audio File" : "Choose Audio File"}
-  </div>
-</label>
+              <input
+                type="file"
+                className="hidden"
+                id="audio-upload"
+                accept=".mp3,.aac,.ogg,.wav"
+                onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                  const files = e.target.files;
+                  if (files) {
+                    setValue("audioFile", files); // Update the form value
+                    const audioUrl = URL.createObjectURL(files[0]);
+                    setAudioPreview(audioUrl); // Update the preview
+                    clearErrors("audioFile"); // Clear validation error
+                  }
+                }}
+                ref={audioInputRef}
+              />
+              <div className="border p-1 px-4 rounded-sm border-white text-gray-300 cursor-pointer">
+                {audioPreview ? "Change Audio File" : "Choose Audio File"}
+              </div>
+            </label>
           </div>
           <p className="text-xs text-gray-500 mb-4">Max size: 30 MB</p>
           {errors.audioFile && (
@@ -814,26 +826,26 @@ const GetAudio = () => {
               )}
             </Card>
             <label htmlFor="image-upload">
-  <input
-    type="file"
-    className="hidden"
-    id="image-upload"
-    accept="image/jpeg,image/png"
-    onChange={(e: ChangeEvent<HTMLInputElement>) => {
-      const files = e.target.files;
-      if (files) {
-        setValue("imageFile", files); // Update the form value
-        const imageUrl = URL.createObjectURL(files[0]);
-        setImagePreview(imageUrl); // Update the preview
-        clearErrors("imageFile"); // Clear validation error
-      }
-    }}
-    ref={imageInputRef}
-  />
-  <div className="border p-1 px-4 rounded-sm border-white text-gray-300 cursor-pointer">
-    {imagePreview ? "Change Image" : "Choose Image"}
-  </div>
-</label>
+              <input
+                type="file"
+                className="hidden"
+                id="image-upload"
+                accept="image/jpeg,image/png"
+                onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                  const files = e.target.files;
+                  if (files) {
+                    setValue("imageFile", files); // Update the form value
+                    const imageUrl = URL.createObjectURL(files[0]);
+                    setImagePreview(imageUrl); // Update the preview
+                    clearErrors("imageFile"); // Clear validation error
+                  }
+                }}
+                ref={imageInputRef}
+              />
+              <div className="border p-1 px-4 rounded-sm border-white text-gray-300 cursor-pointer">
+                {imagePreview ? "Change Image" : "Choose Image"}
+              </div>
+            </label>
           </div>
           <p className="text-xs text-gray-500 mb-4">Size: 170x170 pixels</p>
           {errors.imageFile && (
@@ -861,22 +873,22 @@ const GetAudio = () => {
             </Button>
           </DialogTrigger>
           <DialogContent className="bg-[#1B2236] text-center w-96 flex flex-col justify-center items-center text-white border border-[#334155]">
-          <DialogHeader className="flex flex-col items-center">
-            <div className="mb-4 p-3 bg-[#FEF3F2] rounded-full">
-              <AlertCircle size={40} className="text-red-500" />
-            </div>
-            <DialogTitle className="text-xl font-semibold">
-              Delete Audio?
-            </DialogTitle>
-            <DialogDescription className="text-gray-400 text-center">
-              Are you sure you want to delete this audio? <br />
-              This action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-            <DialogFooter className="flex  items-center justify-center gap-4">
+            <DialogHeader className="flex flex-col items-center">
+              <div className="mb-4 p-3 bg-[#FEF3F2] rounded-full">
+                <AlertCircle size={40} className="text-red-500" />
+              </div>
+              <DialogTitle className="text-xl font-semibold">
+                Delete Audio?
+              </DialogTitle>
+              <DialogDescription className="text-gray-400 text-center">
+                Are you sure you want to delete this audio? <br />
+                This action cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="flex items-center justify-center gap-4">
               <Button
                 variant="outline"
-                className="bg-[#1A3F70] border-none hover:cursor-pointer hover:text-white hover:bg-#1A3F70] w-42"
+                className="bg-[#1A3F70] border-none hover:cursor-pointer hover:text-white hover:bg-[#1A3F70] w-42"
                 onClick={() => setIsDialogOpen(false)}
                 disabled={isDeleting}
               >
@@ -887,12 +899,12 @@ const GetAudio = () => {
                 className="bg-[#FF4747] border-none hover:cursor-pointer hover:bg-[#FF4747] w-42"
                 onClick={handleDelete}
                 disabled={isDeleting} // Disable Delete button during deletion
-                >
-                  {isDeleting ? (
-                    <Loader2 size={20} className="animate-spin text-white" />
-                  ) : (
-                    "Delete"
-                  )}
+              >
+                {isDeleting ? (
+                  <Loader2 size={20} className="animate-spin text-white" />
+                ) : (
+                  "Delete"
+                )}
               </Button>
             </DialogFooter>
           </DialogContent>
