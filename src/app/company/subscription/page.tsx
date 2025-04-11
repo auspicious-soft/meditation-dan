@@ -56,7 +56,8 @@ const SkeletonTable = () => (
 
 
 const SubscriptionModal = ({ isOpen, onClose, onContinue, planType, price, description, totalUsers }: any) => {
-  const [numberOfUsers, setNumberOfUsers] = useState<number | null>(null); // Start with null to allow clearing
+  console.log('totalUsers: ', totalUsers);
+  const [numberOfUsers, setNumberOfUsers] = useState<number | null>(totalUsers===0 ? 1 : totalUsers); // Start with null to allow clearing
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null); // State for error message
 
@@ -84,7 +85,7 @@ const SubscriptionModal = ({ isOpen, onClose, onContinue, planType, price, descr
 
   // Handle modal close and reset state
   const handleClose = () => {
-    setNumberOfUsers(totalUsers); // Reset to totalUsers
+    setNumberOfUsers(totalUsers===0 ? 1 : totalUsers ); // Reset to totalUsers
     setErrorMessage(null); // Clear error message
     onClose(); // Call the provided onClose function
   };
@@ -177,7 +178,7 @@ const SubscriptionModal = ({ isOpen, onClose, onContinue, planType, price, descr
           </button>
           <button
             onClick={() => {
-              if (numberOfUsers !== null && !errorMessage && numberOfUsers >= totalUsers) {
+              if (numberOfUsers !== null && !errorMessage && numberOfUsers >= totalUsers && numberOfUsers >= 1) {
                 // Only proceed if numberOfUsers is set and no error
                 setIsLoading(true);
                 onContinue(numberOfUsers);
