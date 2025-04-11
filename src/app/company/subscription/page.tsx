@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useTransition } from "react";
+import React, { useEffect, useState, useTransition } from "react";
 import Image from "next/image";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import useSWR from "swr";
@@ -55,45 +55,65 @@ const SkeletonTable = () => (
 );
 
 
-
-
-
 const SubscriptionModal = ({ isOpen, onClose, onContinue, planType, price, description, totalUsers }: any) => {
-  const [numberOfUsers, setNumberOfUsers] = useState<number | null>(null); // Start with null to indicate loading
+  const [numberOfUsers, setNumberOfUsers] = useState<number | null>(null); // Start with null to allow clearing
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null); // State for error message
 
-
-  React.useEffect(() => {
+  // Initialize numberOfUsers when totalUsers is available
+  useEffect(() => {
     if (totalUsers !== undefined) {
-      setNumberOfUsers(totalUsers || 1); // Default to 1 if totalUsers is 0 or undefined
+      const initialUsers = Math.max(totalUsers || 1, 1); // Ensure at least 1 or totalUsers
+      setNumberOfUsers(initialUsers);
+      setErrorMessage(null); // Clear any error message on open
     }
   }, [totalUsers]);
 
   // Prevent body scroll when modal is open
-  React.useEffect(() => {
+  useEffect(() => {
     if (isOpen) {
-      document.body.classList.add('no-scroll');
+      document.body.classList.add("no-scroll");
     } else {
-      document.body.classList.remove('no-scroll');
+      document.body.classList.remove("no-scroll");
     }
     // Cleanup on unmount
     return () => {
-      document.body.classList.remove('no-scroll');
+      document.body.classList.remove("no-scroll");
     };
   }, [isOpen]);
 
+  // Handle modal close and reset state
+  const handleClose = () => {
+    setNumberOfUsers(totalUsers); // Reset to totalUsers
+    setErrorMessage(null); // Clear error message
+    onClose(); // Call the provided onClose function
+  };
+
   if (!isOpen) return null;
+
   const totalAmount = numberOfUsers !== null ? (Number(price) * numberOfUsers).toFixed(2) : "0.00";
 
   const handleNumberOfUsersChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(e.target.value) || totalUsers;
-    if (value < totalUsers) {
+    const rawValue = e.target.value;
+    if (rawValue === "") {
+      setNumberOfUsers(null); // Allow clearing the input
+      setErrorMessage(null); // Clear error when empty
+      return;
+    }
+
+    const value = parseInt(rawValue); // Parse input
+
+    // Clamp value to 0 or higher
+    const clampedValue = isNaN(value) ? 0 : Math.max(value, 0);
+    setNumberOfUsers(clampedValue);
+
+    // Validate the input
+    if (clampedValue < 1) {
+      setErrorMessage("Number of users cannot be less than 1."); // Re-enable error for < 1
+    } else if (clampedValue < totalUsers) {
       setErrorMessage(`Number of users cannot be less than the current ${totalUsers} users.`);
-      setNumberOfUsers(totalUsers); // Reset to totalUsers
     } else {
       setErrorMessage(null); // Clear error if valid
-      setNumberOfUsers(value);
     }
   };
 
@@ -117,19 +137,19 @@ const SubscriptionModal = ({ isOpen, onClose, onContinue, planType, price, descr
           <div>
             <p className="self-stretch opacity-80 text-white text-base font-normal">Select number of users</p>
             <div className="relative">
-              {numberOfUsers === null ? (
+              {/* {numberOfUsers === null ? (
                 <div className="w-full mt-[15px] bg-slate-900 rounded-lg px-4 py-3.5 flex items-center justify-center">
                   <Loader2 size={20} className="animate-spin text-white" />
                 </div>
-              ) : (
+              ) : ( */}
                 <input
-                  type="number"
-                  min={totalUsers} // Set minimum to totalUsers
-                  value={numberOfUsers}
+                  type="number" // Keep type="number" for validation
+                  min="1" // Prevent negative numbers
+                  value={numberOfUsers !== null ? numberOfUsers : ""} // Empty string when cleared
                   onChange={handleNumberOfUsersChange} // Use custom handler
-                  className="w-full mt-[15px] bg-slate-900 rounded-lg px-4 py-3.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1A3F70]"
+                  className="w-full mt-[15px] bg-slate-900 rounded-lg px-4 py-3.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1A3F70] appearance-none [appearance:textfield] [&::-webkit-outer-spin-button]:hidden [&::-webkit-inner-spin-button]:hidden"
                 />
-              )}
+              {/* )} */}
               {errorMessage && (
                 <p className="text-red-500 text-sm mt-1">{errorMessage}</p> // Display error message
               )}
@@ -137,30 +157,35 @@ const SubscriptionModal = ({ isOpen, onClose, onContinue, planType, price, descr
           </div>
           <div className="flex justify-between items-center">
             <p className="opacity-80 text-white text-base font-normal">Total Amount</p>
-            <div className="opacity-80 text-white text-base font-normal">${price} * {numberOfUsers ?? '...'}</div>
+            <div className="opacity-80 text-white text-base font-normal">
+              ${price} * {numberOfUsers ?? "..."}
+            </div>
           </div>
           <div className="flex justify-end">
             <hr className="w-[50%] opacity-[0.30]" />
           </div>
-          <div className="self-stretch text-right text-white text-2xl font-semibold leading-10">${totalAmount}</div>
+          <div className="self-stretch text-right text-white text-2xl font-semibold leading-10">
+            ${totalAmount}
+          </div>
         </div>
         <div className="w-full mt-6 flex justify-between gap-[12px]">
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="w-[45%] bg-[#1a3f70] text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition hover:cursor-pointer"
           >
             Cancel
           </button>
           <button
             onClick={() => {
-              if (numberOfUsers !== null) { // Only proceed if numberOfUsers is set
+              if (numberOfUsers !== null && !errorMessage && numberOfUsers >= totalUsers) {
+                // Only proceed if numberOfUsers is set and no error
                 setIsLoading(true);
                 onContinue(numberOfUsers);
                 setTimeout(() => setIsLoading(false), 2000);
               }
             }}
-            className="w-full bg-[#14ab00] text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 transition flex items-center justify-center hover:cursor-pointer"
-            disabled={isLoading || numberOfUsers === null} // Disable if loading or numberOfUsers is null
+            className="w-full bg-[#14ab00] text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 transition flex items-center justify-center hover:cursor-pointer disabled:bg-green-700"
+            disabled={isLoading || numberOfUsers === null || !!errorMessage} // Disable if loading, numberOfUsers is null, or error exists
           >
             {isLoading ? "Loading..." : "Continue"}
           </button>
