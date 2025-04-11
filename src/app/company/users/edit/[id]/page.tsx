@@ -348,8 +348,8 @@ const Page = () => {
     <div className="flex flex-1 flex-col gap-4">
       <div className="bg-[#1B2236] rounded-[20px]">
         <div className="space-y-6 py-[30px] px-[36px]">
-          {error && <div className="text-red-500 text-sm">{error}</div>}
-          {success && <div className="text-green-500 text-sm">{success}</div>}
+          {/* {error && <div className="text-red-500 text-sm">{error}</div>} */}
+          {/* {success && <div className="text-green-500 text-sm">{success}</div>} */}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
@@ -397,6 +397,7 @@ const Page = () => {
                 disabled={isLoading}
                 required
               />
+            {error && <div className="text-red-500 text-sm">{error}</div>}
             </div>
           </div>
 
