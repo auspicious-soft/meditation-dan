@@ -208,7 +208,7 @@ const Page = () => {
             setProfileImage(key);
             setSelectedFile(null);
             setImageRemoved(false);
-            successMessage += " and profile picture updated";
+            successMessage += " ";
           } else {
             throw new Error(imageUpdateResponse?.data?.message || "Failed to update profile picture");
           }
