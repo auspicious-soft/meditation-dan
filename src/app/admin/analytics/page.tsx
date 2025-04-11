@@ -34,6 +34,7 @@ interface Subscription {
 interface Payment {
   id: string;
   CompanyName: string;
+  identifier: string;
   customerDetails: {
     name: string;
     id: string;
@@ -392,7 +393,7 @@ const Page = () => {
                           className="border-0 text-sm font-normal hover:bg-transparent"
                         >
                           <TableCell className="py-4">
-                            {payment.customerDetails.id}
+                            {payment.identifier}
                           </TableCell>
                           <TableCell className="py-4">
                             {payment.customerDetails.name}
