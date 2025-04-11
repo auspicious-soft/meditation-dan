@@ -14,7 +14,7 @@ export async function uploadCompressedImage(formData: FormData) {
   const imageBuffer = Buffer.from(await imageFile.arrayBuffer());
 
   const compressedBuffer = await sharp(imageBuffer)
-    .resize({ width: 800 }) // Adjust width as needed
+    .resize({ width: 170, height: 170, fit: "cover" }) // Match the 170x170 pixel requirement
     .toFormat("jpeg", { quality: 80 }) // Adjust quality as needed
     .toBuffer();
 
