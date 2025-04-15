@@ -35,8 +35,9 @@ const Page = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedRequestId, setSelectedRequestId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [approvingRequestId, setApprovingRequestId] = useState<string | null>(null); // New state for approval loading
-  const [denialReason, setDenialReason] = useState(""); // New state for denial reason
+  const [approvingRequestId, setApprovingRequestId] = useState<string | null>(null); // State for approval loading
+  const [denialReason, setDenialReason] = useState(""); // State for denial reason
+  const [isDenying, setIsDenying] = useState(false); // New state for denial loading
 
   // Fetch company join requests on mount
   useEffect(() => {
@@ -95,8 +96,9 @@ const Page = () => {
   // Handle denial
   const handleDeny = async () => {
     if (!selectedRequestId) return;
+    setIsDenying(true); // Set loading state for denial
     try {
-      const payload = { status: "deny", description: denialReason };
+      const payload = { status: "deny", description: "Request denied by admin" };
       const response = await updateCompanyJoinRequest(`/admin/company-join-requests/${selectedRequestId}`, payload);
       if (response.data.success) {
         toast.success("Request denied successfully");
@@ -114,6 +116,8 @@ const Page = () => {
       } else {
         toast.error("Failed to deny request");
       }
+    } finally {
+      setIsDenying(false); // Reset loading state
     }
   };
 
@@ -247,7 +251,7 @@ const Page = () => {
                 <AlertCircle size={40} className="text-red-500" />
               </div>
               <DialogTitle className="text-lg font-semibold text-center">Decline ?</DialogTitle>
-              <div className="w-full">
+              {/* <div className="w-full">
                 <Label>Reason to decline</Label>
                 <Textarea
                   className="mt-4 w-full bg-[#0B132B] border-none rounded-lg p-2 text-white resize-none"
@@ -255,29 +259,33 @@ const Page = () => {
                   value={denialReason}
                   onChange={(e) => setDenialReason(e.target.value)}
                 />
-              </div>
+              </div> */}
             </DialogHeader>
-            <DialogFooter className="flex justify-center  w-full gap-4 mt-4">
+            <DialogFooter className="flex justify-center w-full gap-4 mt-4">
               <div className="flex flex-col sm:flex-row gap-2 w-full">
-              <Button
-                variant="outline"
-                className="bg-[#1A3F70]   cursor-pointer hover:text-white border-[#0c4a6e] hover:bg-[#1A3F70] w-full sm:max-w-52 h-10 sm:h-11"
-                onClick={() => {
-                  setIsDialogOpen(false);
-                  setSelectedRequestId(null);
-                  setDenialReason(""); // Reset denial reason on cancel
-                }}
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="destructive"
-                className="w-full sm:max-w-52  hover:cursor-pointer h-10 sm:h-11"
-                onClick={handleDeny}
-                disabled={!denialReason.trim()} // Disable if reason is empty
-              >
-                Decline
-              </Button>
+                <Button
+                  variant="outline"
+                  className="bg-[#1A3F70] cursor-pointer hover:text-white border-[#0c4a6e] hover:bg-[#1A3F70] w-full sm:max-w-52 h-10 sm:h-11"
+                  onClick={() => {
+                    setIsDialogOpen(false);
+                    setSelectedRequestId(null);
+                    setDenialReason(""); // Reset denial reason on cancel
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="destructive"
+                  className="w-full sm:max-w-52 hover:cursor-pointer h-10 sm:h-11"
+                  onClick={handleDeny}
+                  // disabled={!denialReason.trim() || isDenying} // Disable if reason is empty or denying
+                >
+                  {isDenying ? (
+                    <Loader2 size={20} className="animate-spin text-white" />
+                  ) : (
+                    "Decline"
+                  )}
+                </Button>
               </div>
             </DialogFooter>
           </DialogContent>
