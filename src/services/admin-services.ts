@@ -219,3 +219,8 @@ export const updateSubscriptionPlan = async (route: string,payload:any) => {
   const axiosInstance = await getAxiosInstance();
   return axiosInstance.post(route,payload);
 };      
+export const deleteMultipleUsers = async (route: string,payload:any) => {
+    console.log('payload:', payload);
+  const axiosInstance = await getAxiosInstance();
+  return axiosInstance.post(route,payload);
+};

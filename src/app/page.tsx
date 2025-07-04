@@ -23,16 +23,7 @@ export default function LoginPage() {
   const router = useRouter();
   const { data: session } = useSession();
 
-  useEffect(() => {
-    if (session) {
-      if ((session as any)?.user?.role === "company") {
-        router.push("/company/dashboard");
-      } else {
-        router.push("/admin/dashboard");
-      }
-    }
-  }, [session, router]);
-
+ 
   // Toggle password visibility
   const togglePasswordVisibility = useCallback(() => {
     setShowPassword((prev) => !prev);

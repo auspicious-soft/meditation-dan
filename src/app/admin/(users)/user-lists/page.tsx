@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import useSWR from "swr";
 import { Button } from "@/components/ui/button";
@@ -11,11 +11,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { getAllUsers } from "@/services/admin-services";
-import { Loader2 } from "lucide-react"; // Import Loader2 for loading state
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { deleteMultipleUsers, getAllUsers } from "@/services/admin-services";
+import { Loader2, Trash2 } from "lucide-react";
 import SearchBar from "@/components/ui/SearchBar";
-
-const PAGE_SIZE = 10;
+import { toast } from "sonner";
 
 const fetcher = (url: string) => getAllUsers(url);
 
@@ -39,8 +45,16 @@ interface ApiResponse {
   message?: string;
 }
 
-const SkeletonRow = () => (
+type SortField = 'identifier' | 'firstName' | 'companyName' | 'email';
+type SortDirection = 'asc' | 'desc';
+
+const SkeletonRow = ({ hasCheckbox }: { hasCheckbox: boolean }) => (
   <TableRow className="border-none">
+    {hasCheckbox && (
+      <TableCell>
+        <div className="h-4 w-4 bg-gray-700 rounded animate-pulse"></div>
+      </TableCell>
+    )}
     <TableCell>
       <div className="h-4 bg-gray-700 rounded animate-pulse w-24"></div>
     </TableCell>
@@ -53,7 +67,6 @@ const SkeletonRow = () => (
     <TableCell>
       <div className="h-4 bg-gray-700 rounded animate-pulse w-16"></div>
     </TableCell>
-
     <TableCell>
       <div className="h-8 bg-gray-700 rounded animate-pulse w-16"></div>
     </TableCell>
@@ -63,12 +76,18 @@ const SkeletonRow = () => (
 const Page = () => {
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [viewingUserId, setViewingUserId] = useState<string | null>(null); // State to track loading for View action
-  const [searchTerm, setSearchTerm] = useState<string>(""); // Single search term
+  const [limit, setLimit] = useState<number>(10);
+  const [viewingUserId, setViewingUserId] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [sortField, setSortField] = useState<SortField | null>(null);
+  const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+  console.log('selectedUsers:', selectedUsers);
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
 
   // Fetch data using SWR with search term, page, and limit in the URL
-  const { data, error, isLoading } = useSWR(
-    `/admin/get-all-users?description=${searchTerm}&page=${currentPage}&limit=${PAGE_SIZE}`,
+  const { data, error, isLoading, mutate } = useSWR(
+    `/admin/get-all-users?description=${searchTerm}&page=${currentPage}&limit=${limit}`,
     fetcher,
     {
       revalidateOnFocus: false,
@@ -79,21 +98,124 @@ const Page = () => {
   // Extract users and pagination data from the API response
   const users = data?.data?.data || [];
   const total = data?.data?.total || 0;
-  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const totalPages = Math.max(1, Math.ceil(total / limit));
+
+  // Sort users on frontend
+  const sortedUsers = useMemo(() => {
+    if (!sortField) return users;
+
+    return [...users].sort((a, b) => {
+      let aValue: string | number;
+      let bValue: string | number;
+
+      switch (sortField) {
+        case 'identifier':
+          aValue = a.identifier?.toLowerCase() || '';
+          bValue = b.identifier?.toLowerCase() || '';
+          break;
+        case 'firstName':
+          aValue = `${a.firstName} ${a.lastName}`.toLowerCase();
+          bValue = `${b.firstName} ${b.lastName}`.toLowerCase();
+          break;
+        case 'companyName':
+          aValue = a.companyName?.toLowerCase() || '';
+          bValue = b.companyName?.toLowerCase() || '';
+          break;
+        case 'email':
+          aValue = a.email?.toLowerCase() || '';
+          bValue = b.email?.toLowerCase() || '';
+          break;
+        default:
+          return 0;
+      }
+
+      if (aValue < bValue) {
+        return sortDirection === 'asc' ? -1 : 1;
+      }
+      if (aValue > bValue) {
+        return sortDirection === 'asc' ? 1 : -1;
+      }
+      return 0;
+    });
+  }, [users, sortField, sortDirection]);
+
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  const getSortIcon = (field: SortField) => {
+    if (sortField !== field) {
+      return '↕️';
+    }
+    return sortDirection === 'asc' ? '↑' : '↓';
+  };
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
       setCurrentPage(newPage);
+      setSelectedUsers([]); // Clear selections when changing page
     }
   };
 
+  const handleLimitChange = (value: string) => {
+    setLimit(Number(value));
+    setCurrentPage(1);
+    setSelectedUsers([]); // Clear selections when changing limit
+  };
+
   const handleViewClick = (id: string) => {
-    setViewingUserId(id); // Set loading state for this user
-    // Simulate an async operation (e.g., fetching data before navigation)
+    setViewingUserId(id);
     setTimeout(() => {
       router.push(`/admin/user-lists/user-profile-edit/${id}`);
-      setViewingUserId(null); // Reset loading state after navigation
-    }, 500); // Adjust delay as needed (e.g., if you add an async call)
+      setViewingUserId(null);
+    }, 500);
+  };
+
+  // Checkbox handlers
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedUsers(sortedUsers.map((user: User) => user._id));
+    } else {
+      setSelectedUsers([]);
+    }
+  };
+
+  const handleSelectUser = (userId: string, checked: boolean) => {
+    if (checked) {
+      setSelectedUsers(prev => [...prev, userId]);
+    } else {
+      setSelectedUsers(prev => prev.filter(id => id !== userId));
+    }
+  };
+
+  const isAllSelected = sortedUsers.length > 0 && selectedUsers.length === sortedUsers.length;
+  const isIndeterminate = selectedUsers.length > 0 && selectedUsers.length < sortedUsers.length;
+
+  // Delete handler - you'll need to implement the actual API call
+  const handleDelete = async () => {
+    if (selectedUsers.length === 0) return;
+    const payload = { users: selectedUsers };
+    console.log('payload:', payload);
+    
+    setIsDeleting(true);
+    try {
+     const response = await deleteMultipleUsers("/admin/delete-multiple-user", payload);
+     if(response.status === 200) {
+      toast.success(response.data.message || "Users deleted successfully");
+      await mutate();
+      setSelectedUsers([]);
+     }
+    } catch (error) {
+      console.error('Error deleting users:', error);
+      toast.error((error as any).response?.data.message || "Failed to delete users");
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   if (error) {
@@ -107,15 +229,71 @@ const Page = () => {
         <div className="col-span-12 space-y-6 bg-[#1b2236] rounded-[12px] md:rounded-[20px] py-4 px-4 md:py-8 md:px-9">
           <div className="flex items-center justify-between flex-wrap space-y-2 mb-4">
             <h2 className="text-white text-[20px] md:text-2xl font-bold">User Lists</h2>
-            <SearchBar setQuery={setSearchTerm} query={searchTerm} />
+            <div className="flex items-center gap-4 flex-wrap">
+              {selectedUsers.length > 0 && (
+                <Button
+                  onClick={handleDelete}
+                  disabled={isDeleting}
+                  className="bg-red-600 hover:bg-red-700 text-white flex items-center gap-2"
+                >
+                  {isDeleting ? (
+                    <Loader2 size={16} className="animate-spin" />
+                  ) : (
+                    <Trash2 size={16} />
+                  )}
+                  Delete ({selectedUsers.length})
+                </Button>
+              )}
+              <SearchBar setQuery={setSearchTerm} query={searchTerm} />
+            </div>
           </div>
+          
           <Table className="border-separate border-spacing-0">
             <TableHeader className="border-b border-white">
               <TableRow className="text-white text-sm font-bold dm-sans border-0 border-b border-[#666666] hover:bg-transparent">
-                <TableHead>ID</TableHead>
-                <TableHead>Name of Customer</TableHead>
-                <TableHead>Company Name</TableHead>
-                <TableHead>Email</TableHead>
+                <TableHead className="w-[50px]">
+                  <input
+                    type="checkbox"
+                    checked={isAllSelected}
+                    ref={(input) => {
+                      if (input) input.indeterminate = isIndeterminate;
+                    }}
+                    onChange={(e) => handleSelectAll(e.target.checked)}
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                </TableHead>
+                <TableHead 
+                  className="cursor-pointer hover:bg-[#2a3447] transition-colors"
+                  onClick={() => handleSort('identifier')}
+                >
+                  <div className="flex items-center gap-1">
+                    ID {getSortIcon('identifier')}
+                  </div>
+                </TableHead>
+                <TableHead 
+                  className="cursor-pointer hover:bg-[#2a3447] transition-colors"
+                  onClick={() => handleSort('firstName')}
+                >
+                  <div className="flex items-center gap-1">
+                    User Name {getSortIcon('firstName')}
+                  </div>
+                </TableHead>
+                <TableHead 
+                  className="cursor-pointer hover:bg-[#2a3447] transition-colors"
+                  onClick={() => handleSort('companyName')}
+                >
+                  <div className="flex items-center gap-1">
+                    Company Name {getSortIcon('companyName')}
+                  </div>
+                </TableHead>
+                <TableHead 
+                  className="cursor-pointer hover:bg-[#2a3447] transition-colors"
+                  onClick={() => handleSort('email')}
+                >
+                  <div className="flex items-center gap-1">
+                    Email {getSortIcon('email')}
+                  </div>
+                </TableHead>
                 <TableHead>Action</TableHead>
               </TableRow>
               <tr>
@@ -126,28 +304,32 @@ const Page = () => {
             </TableHeader>
             <TableBody>
               {isLoading ? (
-                // Render skeleton rows while loading
-                Array.from({ length: PAGE_SIZE }).map((_, index) => (
-                  <SkeletonRow key={index} />
+                Array.from({ length: limit }).map((_, index) => (
+                  <SkeletonRow key={index} hasCheckbox={true} />
                 ))
-              ) : users.length === 0 && searchTerm.trim() ? (
-                // Specific message for no data with search query
+              ) : sortedUsers.length === 0 && searchTerm.trim() ? (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center py-4 text-white">
                     No users found for this search query.
                   </TableCell>
                 </TableRow>
-              ) : users.length === 0 ? (
-                // General no data message
+              ) : sortedUsers.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center py-4 text-white">
                     No users found.
                   </TableCell>
                 </TableRow>
               ) : (
-                // Render actual user data when loaded
-                users.map((user: User) => (
+                sortedUsers.map((user: User) => (
                   <TableRow key={user._id} className="border-none">
+                    <TableCell>
+                      <input
+                        type="checkbox"
+                        checked={selectedUsers.includes(user._id)}
+                        onChange={(e) => handleSelectUser(user._id, e.target.checked)}
+                        className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+                      />
+                    </TableCell>
                     <TableCell>{user.identifier}</TableCell>
                     <TableCell>{`${user.firstName} ${user.lastName}`}</TableCell>
                     <TableCell>{user.companyName || "N/A"}</TableCell>
@@ -171,25 +353,44 @@ const Page = () => {
             </TableBody>
           </Table>
 
-          {!isLoading && (
-            <div className="flex justify-end items-center gap-2 mt-4">
-              <Button
-                className="bg-[#0B132B] hover:cursor-pointer"
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage === 1}
-              >
-                Previous
-              </Button>
-              <span className="text-white text-sm">
-                Page {currentPage} of {totalPages}
-              </span>
-              <Button
-                className="bg-[#0B132B] hover:cursor-pointer"
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage === totalPages}
-              >
-                Next
-              </Button>
+          {!isLoading && (totalPages > 1 || limit !== 10) && (
+            <div className="flex justify-end items-center gap-4 mt-4">
+              <div className="flex items-center gap-2">
+                <Select
+                  value={limit.toString()}
+                  onValueChange={handleLimitChange}
+                >
+                  <SelectTrigger className="w-[100px] bg-[#0B132B] text-white border-[#666666]">
+                    <SelectValue placeholder="Items per page" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-[#0B132B] text-white border-[#666666]">
+                    <SelectItem value="10">10</SelectItem>
+                    <SelectItem value="25">25</SelectItem>
+                    <SelectItem value="50">50</SelectItem>
+                    <SelectItem value="100">100</SelectItem>
+                  </SelectContent>
+                </Select>
+                <span className="text-white text-sm">per page</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  className="bg-[#0B132B] hover:cursor-pointer"
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                >
+                  Previous
+                </Button>
+                <span className="text-white text-sm">
+                  Page {currentPage} of {totalPages}
+                </span>
+                <Button
+                  className="bg-[#0B132B] hover:cursor-pointer"
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                >
+                  Next
+                </Button>
+              </div>
             </div>
           )}
         </div>
