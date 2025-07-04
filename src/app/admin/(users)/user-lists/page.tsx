@@ -76,7 +76,7 @@ const SkeletonRow = ({ hasCheckbox }: { hasCheckbox: boolean }) => (
 const Page = () => {
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [limit, setLimit] = useState<number>(10);
+  const [limit, setLimit] = useState<string>("10"); // Changed to string
   const [viewingUserId, setViewingUserId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [sortField, setSortField] = useState<SortField | null>(null);
@@ -85,9 +85,12 @@ const Page = () => {
   console.log('selectedUsers:', selectedUsers);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
 
+  // Calculate API limit - use a very large number for "all" or the actual limit
+  const apiLimit = limit === "all" ? "999999" : limit;
+
   // Fetch data using SWR with search term, page, and limit in the URL
   const { data, error, isLoading, mutate } = useSWR(
-    `/admin/get-all-users?description=${searchTerm}&page=${currentPage}&limit=${limit}`,
+    `/admin/get-all-users?description=${searchTerm}&page=${currentPage}&limit=${apiLimit}`,
     fetcher,
     {
       revalidateOnFocus: false,
@@ -98,7 +101,10 @@ const Page = () => {
   // Extract users and pagination data from the API response
   const users = data?.data?.data || [];
   const total = data?.data?.total || 0;
-  const totalPages = Math.max(1, Math.ceil(total / limit));
+  
+  // Calculate total pages - if limit is "all", set to 1 page
+  const limitNumber = limit === "all" ? total : parseInt(limit);
+  const totalPages = limit === "all" ? 1 : Math.max(1, Math.ceil(total / limitNumber));
 
   // Sort users on frontend
   const sortedUsers = useMemo(() => {
@@ -163,7 +169,8 @@ const Page = () => {
   };
 
   const handleLimitChange = (value: string) => {
-    setLimit(Number(value));
+    console.log("Selected limit:", value); // Debug log
+    setLimit(value);
     setCurrentPage(1);
     setSelectedUsers([]); // Clear selections when changing limit
   };
@@ -196,7 +203,7 @@ const Page = () => {
   const isAllSelected = sortedUsers.length > 0 && selectedUsers.length === sortedUsers.length;
   const isIndeterminate = selectedUsers.length > 0 && selectedUsers.length < sortedUsers.length;
 
-  // Delete handler - you'll need to implement the actual API call
+  // Delete handler
   const handleDelete = async () => {
     if (selectedUsers.length === 0) return;
     const payload = { users: selectedUsers };
@@ -238,6 +245,9 @@ const Page = () => {
     console.error("Error fetching users:", error);
     return <div className="text-white">Error loading users.</div>;
   }
+
+  // Determine if pagination should be shown
+  const showPagination = !isLoading && limit !== "all" && (totalPages > 1 || limit !== "10");
 
   return (
     <>
@@ -320,7 +330,7 @@ const Page = () => {
             </TableHeader>
             <TableBody>
               {isLoading ? (
-                Array.from({ length: limit }).map((_, index) => (
+                Array.from({ length: limit === "all" ? 10 : parseInt(limit) }).map((_, index) => (
                   <SkeletonRow key={index} hasCheckbox={true} />
                 ))
               ) : sortedUsers.length === 0 && searchTerm.trim() ? (
@@ -369,11 +379,11 @@ const Page = () => {
             </TableBody>
           </Table>
 
-          {!isLoading && (totalPages > 1 || limit !== 10) && (
+          {showPagination && (
             <div className="flex justify-end items-center gap-4 mt-4">
               <div className="flex items-center gap-2">
                 <Select
-                  value={limit.toString()}
+                  value={limit}
                   onValueChange={handleLimitChange}
                 >
                   <SelectTrigger className="w-[100px] bg-[#0B132B] text-white border-[#666666]">
@@ -384,6 +394,7 @@ const Page = () => {
                     <SelectItem value="25">25</SelectItem>
                     <SelectItem value="50">50</SelectItem>
                     <SelectItem value="100">100</SelectItem>
+                    <SelectItem value="all">All</SelectItem>
                   </SelectContent>
                 </Select>
                 <span className="text-white text-sm">per page</span>
@@ -409,9 +420,37 @@ const Page = () => {
               </div>
             </div>
           )}
+
+          {/* Always show the Select dropdown, even when showing all items */}
+          {!isLoading && limit === "all" && (
+            <div className="flex justify-end items-center gap-4 mt-4">
+              <div className="flex items-center gap-2">
+                <Select
+                  value={limit}
+                  onValueChange={handleLimitChange}
+                >
+                  <SelectTrigger className="w-[100px] bg-[#0B132B] text-white border-[#666666]">
+                    <SelectValue placeholder="Items per page" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-[#0B132B] text-white border-[#666666]">
+                    <SelectItem value="10">10</SelectItem>
+                    <SelectItem value="25">25</SelectItem>
+                    <SelectItem value="50">50</SelectItem>
+                    <SelectItem value="100">100</SelectItem>
+                    <SelectItem value="all">All</SelectItem>
+                  </SelectContent>
+                </Select>
+                <span className="text-white text-sm">per page</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-white text-sm">
+                  Showing all {total} users
+                </span>
+              </div>
+            </div>
+          )}
         </div>
       </div>
-   
     </>
   );
 };
