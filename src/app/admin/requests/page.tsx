@@ -92,7 +92,7 @@ const Page = () => {
       setApprovingRequestId(null); // Reset loading state
     }
   };
- 
+
   // Handle denial
   const handleDeny = async () => {
     if (!selectedRequestId) return;
