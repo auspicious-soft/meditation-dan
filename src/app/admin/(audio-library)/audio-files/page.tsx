@@ -248,14 +248,30 @@ const AudioList = () => {
         setPlayingAudioId(null);
         setLoadingAudioId(null);
         audioRef.current = null;
-        toast.error("Failed to play audio");
+        toast.error("Failed to play audio", {
+                duration: Infinity,
+                position: "top-center",
+                action: {
+                  label: "OK",
+                  onClick: (toastId : any) => toast.dismiss(toastId),
+                },
+                closeButton: false,
+              });
       };
 
       await newAudio.play();
       setPlayingAudioId(audio._id);
     } catch (err) {
       console.error("Playback failed:", err);
-      toast.error("Failed to play audio");
+      toast.error("Failed to play audio", {
+              duration: Infinity,
+              position: "top-center",
+              action: {
+                label: "OK",
+                onClick: (toastId : any) => toast.dismiss(toastId),
+              },
+              closeButton: false,
+            });
     } finally {
       setLoadingAudioId(null);
     }
@@ -295,7 +311,15 @@ const AudioList = () => {
           }
         }
         
-        toast.success("Audio deleted successfully");
+        toast.success("Audio deleted successfully", {
+        duration: Infinity,
+        position: "top-center",
+        action: {
+          label: "OK",
+          onClick: (toastId : any) => toast.dismiss(toastId),
+        },
+        closeButton: false,
+      });
         setTimeout(() => {
           window.location.reload();
         },1000)
@@ -304,7 +328,15 @@ const AudioList = () => {
       }
     } catch (err) {
       console.error("Error deleting audio:", err);
-      toast.error("Failed to delete audio");
+      toast.error("Failed to delete audio", {
+              duration: Infinity,
+              position: "top-center",
+              action: {
+                label: "OK",
+                onClick: (toastId : any) => toast.dismiss(toastId),
+              },
+              closeButton: false,
+            });
     } finally {
       setAudioToDelete(null);
       setIsDialogOpen(false);

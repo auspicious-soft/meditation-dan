@@ -79,7 +79,15 @@ const AudioLevelsManager = () => {
       }
     } catch (error) {
       console.error('Error fetching data:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to load data');
+      toast.error(error instanceof Error ? error.message : 'Failed to load data', {
+              duration: Infinity,
+              position: "top-center",
+              action: {
+                label: "OK",
+                onClick: (toastId : any) => toast.dismiss(toastId),
+              },
+              closeButton: false,
+            });
     } finally {
       setIsLoading(false);
     }
@@ -102,7 +110,15 @@ const AudioLevelsManager = () => {
 
   const saveEdit = async () => {
     if (!editValue.trim()) {
-      toast.error('Name cannot be empty');
+      toast.error('Name cannot be empty', {
+              duration: Infinity,
+              position: "top-center",
+              action: {
+                label: "OK",
+                onClick: (toastId : any) => toast.dismiss(toastId),
+              },
+              closeButton: false,
+            });
       if (editingLevelId && !audioLevels.some(level => level.id === editingLevelId)) {
         setEditingLevelId(null);
       }
@@ -115,7 +131,15 @@ const AudioLevelsManager = () => {
 
     // Validate character count (limit to 20 characters)
     if (editValue.length > 20) {
-      toast.error('Name cannot exceed 20 characters');
+      toast.error('Name cannot exceed 20 characters', {
+              duration: Infinity,
+              position: "top-center",
+              action: {
+                label: "OK",
+                onClick: (toastId : any) => toast.dismiss(toastId),
+              },
+              closeButton: false,
+            });
       return;
     }
 
@@ -127,7 +151,15 @@ const AudioLevelsManager = () => {
           ? updateLevels(`/admin/level/${editingLevelId}`, payload)
           : createLevels('/admin/create-level', payload));
         if (response?.data?.success) {
-          toast.success(audioLevels.some(level => level.id === editingLevelId) ? 'Level updated successfully' : 'Level created successfully');
+          toast.success(audioLevels.some(level => level.id === editingLevelId) ? 'Level updated successfully' : 'Level created successfully', {
+        duration: Infinity,
+        position: "top-center",
+        action: {
+          label: "OK",
+          onClick: (toastId : any) => toast.dismiss(toastId),
+        },
+        closeButton: false,
+      });
           setEditingLevelId(null);
           await fetchData();
         } else {
@@ -139,7 +171,15 @@ const AudioLevelsManager = () => {
           ? updateBestFor(`/admin/bestfor/${editingCategoryId}`, payload)
           : createBestFor('/admin/create-bestfor', payload));
         if (response?.data?.success) {
-          toast.success(categories.some(cat => cat.id === editingCategoryId) ? 'Category updated successfully' : 'Category created successfully');
+          toast.success(categories.some(cat => cat.id === editingCategoryId) ? 'Category updated successfully' : 'Category created successfully', {
+        duration: Infinity,
+        position: "top-center",
+        action: {
+          label: "OK",
+          onClick: (toastId : any) => toast.dismiss(toastId),
+        },
+        closeButton: false,
+      });
           setEditingCategoryId(null);
           await fetchData();
         } else {
@@ -153,7 +193,15 @@ const AudioLevelsManager = () => {
         error instanceof Error && (error as any)?.response?.data?.message
           ? (error as any).response.data.message
           : 'Failed to save item'
-      );
+      , {
+              duration: Infinity,
+              position: "top-center",
+              action: {
+                label: "OK",
+                onClick: (toastId : any) => toast.dismiss(toastId),
+              },
+              closeButton: false,
+            });
     } finally {
       setIsLoading(false);
     }
@@ -180,7 +228,15 @@ const AudioLevelsManager = () => {
         : await deleteBestFor(`/admin/delete-bestfor/${id}`);
 
       if (response?.data?.success) {
-        toast.success(type === 'level' ? 'Level deleted successfully' : 'Category deleted successfully');
+        toast.success(type === 'level' ? 'Level deleted successfully' : 'Category deleted successfully', {
+        duration: Infinity,
+        position: "top-center",
+        action: {
+          label: "OK",
+          onClick: (toastId : any) => toast.dismiss(toastId),
+        },
+        closeButton: false,
+      });
         await fetchData();
       } else {
         throw new Error(response?.data?.message || `Failed to delete ${type}`);
@@ -189,7 +245,15 @@ const AudioLevelsManager = () => {
       console.error(`Error deleting ${itemToDelete?.type}:`, error);
       toast.error(error instanceof Error && (error as any)?.response?.data?.message 
         ? (error as any).response.data.message 
-        : `Failed to delete ${itemToDelete?.type}`);
+        : `Failed to delete ${itemToDelete?.type}`, {
+                duration: Infinity,
+                position: "top-center",
+                action: {
+                  label: "OK",
+                  onClick: (toastId : any) => toast.dismiss(toastId),
+                },
+                closeButton: false,
+              });
     } finally {
       setIsLoading(false);
       setIsDialogOpen(false);

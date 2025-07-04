@@ -44,11 +44,27 @@ const Page = () => {
       if (response.data.success) {
         setRequests(response.data.data);
       } else {
-        toast.error("Failed to fetch company join requests");
+        toast.error("Failed to fetch company join requests", {
+                duration: Infinity,
+                position: "top-center",
+                action: {
+                  label: "OK",
+                  onClick: (toastId : any) => toast.dismiss(toastId),
+                },
+                closeButton: false,
+              });
       }
     } catch (error) {
       console.error("Error fetching requests:", error);
-      toast.error("Failed to fetch company join requests");
+      toast.error("Failed to fetch company join requests", {
+              duration: Infinity,
+              position: "top-center",
+              action: {
+                label: "OK",
+                onClick: (toastId : any) => toast.dismiss(toastId),
+              },
+              closeButton: false,
+            });
     } finally {
       setIsLoading(false);
     }

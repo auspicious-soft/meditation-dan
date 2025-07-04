@@ -103,7 +103,15 @@ const RecentNewUsers = () => {
         } else {
           setError(data.message || "Failed to fetch company details.");
           console.error(data.message);
-          toast.error(data.message || "Failed to fetch company details.");
+          toast.error(data.message || "Failed to fetch company details.", {
+                  duration: Infinity,
+                  position: "top-center",
+                  action: {
+                    label: "OK",
+                    onClick: (toastId : any) => toast.dismiss(toastId),
+                  },
+                  closeButton: false,
+                });
         }
       } catch (err) {
         setError("Failed to fetch company details.");

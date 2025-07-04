@@ -53,11 +53,27 @@ export default function Page() {
         setFaqs(response.data.data);
         setTotalPages(response.data.pagination.totalPages);
       } else {
-        toast.error("Failed to fetch FAQs");
+        toast.error("Failed to fetch FAQs", {
+                duration: Infinity,
+                position: "top-center",
+                action: {
+                  label: "OK",
+                  onClick: (toastId : any) => toast.dismiss(toastId),
+                },
+                closeButton: false,
+              });
       }
     } catch (error) {
       console.error("Error fetching FAQs:", error);
-      toast.error("Failed to fetch FAQs");
+      toast.error("Failed to fetch FAQs", {
+              duration: Infinity,
+              position: "top-center",
+              action: {
+                label: "OK",
+                onClick: (toastId : any) => toast.dismiss(toastId),
+              },
+              closeButton: false,
+            });
     } finally {
       setIsLoading(false);
     }
@@ -67,7 +83,15 @@ export default function Page() {
   const handleAddFaq = async (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
     if (!newQuestion.trim() || !newAnswer.trim()) {
-      toast.error("Both question and answer are required.");
+      toast.error("Both question and answer are required.", {
+              duration: Infinity,
+              position: "top-center",
+              action: {
+                label: "OK",
+                onClick: (toastId : any) => toast.dismiss(toastId),
+              },
+              closeButton: false,
+            });
       return;
     }
     try {
@@ -78,17 +102,41 @@ export default function Page() {
       console.log("payload:", payload);
       const response = await addFaq("/admin/FAQs", payload);
       if (response.data.success) {
-        toast.success("FAQ added successfully");
+        toast.success("FAQ added successfully", {
+        duration: Infinity,
+        position: "top-center",
+        action: {
+          label: "OK",
+          onClick: (toastId : any) => toast.dismiss(toastId),
+        },
+        closeButton: false,
+      });
         setIsAddOpen(false);
         setNewQuestion("");
         setNewAnswer("");
         await fetchFaqs();
       } else {
-        toast.error("Failed to add FAQ");
+        toast.error("Failed to add FAQ", {
+                duration: Infinity,
+                position: "top-center",
+                action: {
+                  label: "OK",
+                  onClick: (toastId : any) => toast.dismiss(toastId),
+                },
+                closeButton: false,
+              });
       }
     } catch (error) {
       console.error("Error adding FAQ:", error);
-      toast.error("Failed to add FAQ");
+      toast.error("Failed to add FAQ", {
+              duration: Infinity,
+              position: "top-center",
+              action: {
+                label: "OK",
+                onClick: (toastId : any) => toast.dismiss(toastId),
+              },
+              closeButton: false,
+            });
     }
   };
 
@@ -96,25 +144,57 @@ export default function Page() {
   const handleEditFaq = async (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
     if (!selectedFaq || !question.trim() || !answer.trim()) {
-      toast.error("Both question and answer are required.");
+      toast.error("Both question and answer are required.", {
+              duration: Infinity,
+              position: "top-center",
+              action: {
+                label: "OK",
+                onClick: (toastId : any) => toast.dismiss(toastId),
+              },
+              closeButton: false,
+            });
       return;
     }
     try {
       const payload = { question, answer };
       const response = await updateFaq(`/admin/FAQs/${selectedFaq._id}`, payload);
       if (response.data.success) {
-        toast.success("FAQ updated successfully");
+        toast.success("FAQ updated successfully", {
+        duration: Infinity,
+        position: "top-center",
+        action: {
+          label: "OK",
+          onClick: (toastId : any) => toast.dismiss(toastId),
+        },
+        closeButton: false,
+      });
         setIsEditOpen(false);
         setSelectedFaq(null);
         setQuestion("");
         setAnswer("");
         await fetchFaqs();
       } else {
-        toast.error("Failed to update FAQ");
+        toast.error("Failed to update FAQ", {
+                duration: Infinity,
+                position: "top-center",
+                action: {
+                  label: "OK",
+                  onClick: (toastId : any) => toast.dismiss(toastId),
+                },
+                closeButton: false,
+              });
       }
     } catch (error) {
       console.error("Error updating FAQ:", error);
-      toast.error("Failed to update FAQ");
+      toast.error("Failed to update FAQ", {
+              duration: Infinity,
+              position: "top-center",
+              action: {
+                label: "OK",
+                onClick: (toastId : any) => toast.dismiss(toastId),
+              },
+              closeButton: false,
+            });
     }
   };
 
@@ -124,16 +204,40 @@ export default function Page() {
     try {
       const response = await deleteFaq(`/admin/FAQs/${selectedFaq._id}`);
       if (response.data.success) {
-        toast.success("FAQ deleted successfully");
+        toast.success("FAQ deleted successfully", {
+        duration: Infinity,
+        position: "top-center",
+        action: {
+          label: "OK",
+          onClick: (toastId : any) => toast.dismiss(toastId),
+        },
+        closeButton: false,
+      });
         setIsDeleteOpen(false);
         setSelectedFaq(null);
         await fetchFaqs();
       } else {
-        toast.error("Failed to delete FAQ");
+        toast.error("Failed to delete FAQ", {
+                duration: Infinity,
+                position: "top-center",
+                action: {
+                  label: "OK",
+                  onClick: (toastId : any) => toast.dismiss(toastId),
+                },
+                closeButton: false,
+              });
       }
     } catch (error) {
       console.error("Error deleting FAQ:", error);
-      toast.error("Failed to delete FAQ");
+      toast.error("Failed to delete FAQ", {
+              duration: Infinity,
+              position: "top-center",
+              action: {
+                label: "OK",
+                onClick: (toastId : any) => toast.dismiss(toastId),
+              },
+              closeButton: false,
+            });
     }
   };
 

@@ -166,7 +166,15 @@ const AddNewAudio = () => {
         }
       } catch (error) {
         console.error("Error fetching collections:", error);
-        toast.error("Failed to load collections");
+        toast.error("Failed to load collections", {
+                duration: Infinity,
+                position: "top-center",
+                action: {
+                  label: "OK",
+                  onClick: (toastId : any) => toast.dismiss(toastId),
+                },
+                closeButton: false,
+              });
       } finally {
         setLoadingCollections(false);
       }
@@ -320,7 +328,15 @@ const AddNewAudio = () => {
 
         const selectedCollection = collections.find((col) => col._id === data.collectionType);
         if (!selectedCollection) {
-          toast.error("Selected collection not found");
+          toast.error("Selected collection not found", {
+                  duration: Infinity,
+                  position: "top-center",
+                  action: {
+                    label: "OK",
+                    onClick: (toastId : any) => toast.dismiss(toastId),
+                  },
+                  closeButton: false,
+                });
           return;
         }
         const collectionNameForAWS = selectedCollection.name.toLowerCase();
@@ -380,19 +396,51 @@ const AddNewAudio = () => {
       const response = await uploadAudioStats("/admin/upload-audio", payload);
 
       if (response?.status === 201) {
-        toast.success("Audio added successfully");
+        toast.success("Audio added successfully", {
+        duration: Infinity,
+        position: "top-center",
+        action: {
+          label: "OK",
+          onClick: (toastId : any) => toast.dismiss(toastId),
+        },
+        closeButton: false,
+      });
         setTimeout(() => {
           window.location.href = "/admin/audio-files";
         }, 1000);
       } else {
-        toast.error(response?.data?.message || "Failed to add audio");
+        toast.error(response?.data?.message || "Failed to add audio", {
+                duration: Infinity,
+                position: "top-center",
+                action: {
+                  label: "OK",
+                  onClick: (toastId : any) => toast.dismiss(toastId),
+                },
+                closeButton: false,
+              });
       }
     } catch (error) {
       console.log("Error while uploading audio:", error);
       if (error instanceof AxiosError && error.response?.data?.message) {
-        toast.error(error.response.data.message);
+        toast.error(error.response.data.message, {
+                duration: Infinity,
+                position: "top-center",
+                action: {
+                  label: "OK",
+                  onClick: (toastId : any) => toast.dismiss(toastId),
+                },
+                closeButton: false,
+              });
       } else {
-        toast.error(error instanceof Error ? error.message : "An error occurred while adding audio");
+        toast.error(error instanceof Error ? error.message : "An error occurred while adding audio", {
+                duration: Infinity,
+                position: "top-center",
+                action: {
+                  label: "OK",
+                  onClick: (toastId : any) => toast.dismiss(toastId),
+                },
+                closeButton: false,
+              });
       }
     }
   };

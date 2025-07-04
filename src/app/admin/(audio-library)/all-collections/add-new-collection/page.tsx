@@ -273,16 +273,40 @@ const AddCollectionForm = () => {
       );
 
       if (response?.status === 201) {
-        toast.success("Collection added successfully");
+        toast.success("Collection added successfully", {
+        duration: Infinity,
+        position: "top-center",
+        action: {
+          label: "OK",
+          onClick: (toastId : any) => toast.dismiss(toastId),
+        },
+        closeButton: false,
+      });
         setImagePreview(null);
         if (fileInputRef.current) fileInputRef.current.value = "";
         window.location.href = "/admin/all-collections";
       } else {
-        toast.error(response?.data?.message || "Failed to add collection");
+        toast.error(response?.data?.message || "Failed to add collection", {
+                duration: Infinity,
+                position: "top-center",
+                action: {
+                  label: "OK",
+                  onClick: (toastId : any) => toast.dismiss(toastId),
+                },
+                closeButton: false,
+              });
       }
     } catch (error) {
       console.log("error while uploading collection:", error);
-      toast.error("An error occurred while adding collection");
+      toast.error("An error occurred while adding collection", {
+              duration: Infinity,
+              position: "top-center",
+              action: {
+                label: "OK",
+                onClick: (toastId : any) => toast.dismiss(toastId),
+              },
+              closeButton: false,
+            });
     }
   };
 

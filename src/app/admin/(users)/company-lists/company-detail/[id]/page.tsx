@@ -23,6 +23,8 @@ interface CompanyData {
   _id: string;
   companyName: string;
   email: string;
+  firstName?: string;
+  lastName?: string;
   identifier: string;
   createdAt: string;
   updatedAt: string;
@@ -38,6 +40,7 @@ interface CompanyData {
   subscriptionId: string | null;
   subscriptionStartDate: string | null;
   subscriptionExpiryDate: string | null;
+  password?: string; // Assuming password is part of the data
 }
 
 interface ApiResponse {
@@ -54,6 +57,8 @@ const Page = () => {
   const [formData, setFormData] = useState({
     companyName: "",
     email: "",
+    firstName: "",
+    lastName: "",
     password: "", // Assuming you might want to allow password updates
     numberOfUsers: 0,
   });
@@ -68,7 +73,6 @@ const Page = () => {
       try {
         setLoading(true);
         const response = await getSingleCompanydetailStats(`/admin/get-company-by-id/${id}`);
-        console.log("response:", response);
         const data: ApiResponse = response.data;
 
         if (data.success) {
@@ -77,7 +81,9 @@ const Page = () => {
           setFormData({
             companyName: data.data.companyName,
             email: data.data.email,
-            password: "", // Leave empty initially for security
+            firstName: data.data.firstName || "",
+            lastName: data.data.lastName || "",
+            password: data.data.password || "", // Assuming password is part of the data
             numberOfUsers: data.users,
           });
         } else {
@@ -111,17 +117,41 @@ const Page = () => {
     try {
       const response = await deleteCompany(`/admin/delete-company/${id}`);
       if (response.data.success) {
-        toast.success("Company account deleted successfully");
+        toast.success("Company account deleted successfully", {
+        duration: Infinity,
+        position: "top-center",
+        action: {
+          label: "OK",
+          onClick: (toastId : any) => toast.dismiss(toastId),
+        },
+        closeButton: false,
+      });
         setIsDialogOpen(false);
         setTimeout(() => {
           window.location.href = "/admin/company-lists";
         }, 1000);
       } else {
-        toast.error("Failed to delete company account");
+        toast.error("Failed to delete company account", {
+                duration: Infinity,
+                position: "top-center",
+                action: {
+                  label: "OK",
+                  onClick: (toastId : any) => toast.dismiss(toastId),
+                },
+                closeButton: false,
+              });
       }
     } catch (error) {
       console.error("Error deleting company:", error);
-      toast.error("Failed to delete company account");
+      toast.error("Failed to delete company account", {
+              duration: Infinity,
+              position: "top-center",
+              action: {
+                label: "OK",
+                onClick: (toastId : any) => toast.dismiss(toastId),
+              },
+              closeButton: false,
+            });
     } finally {
       setDeleting(false); // Stop loading for delete
     }
@@ -135,6 +165,9 @@ const Page = () => {
       // Assuming there's an updateCompany service function
       const updatePayload = {
         companyName: formData.companyName,
+        email: formData.email,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
       };
 
       // You'll need to implement this service function
@@ -145,13 +178,32 @@ const Page = () => {
           ...userData,
           companyName: formData.companyName,
           email: formData.email,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          password: formData.password,
         });
-        toast.success("Company details updated successfully");
+        toast.success("Company details updated successfully", {
+        duration: Infinity,
+        position: "top-center",
+        action: {
+          label: "OK",
+          onClick: (toastId : any) => toast.dismiss(toastId),
+        },
+        closeButton: false,
+      });
         setTimeout(() => {
           window.location.href = "/admin/company-lists";
         }, 1000);
       } else {
-        toast.error("Failed to update company details");
+        toast.error("Failed to update company details", {
+                duration: Infinity,
+                position: "top-center",
+                action: {
+                  label: "OK",
+                  onClick: (toastId : any) => toast.dismiss(toastId),
+                },
+                closeButton: false,
+              });
       }
     } catch (error) {
       console.error("Error updating company:", error);
@@ -159,7 +211,15 @@ const Page = () => {
         error instanceof Error && (error as any)?.response?.data?.message
           ? (error as any).response.data.message
           : "Failed to save item"
-      );
+      , {
+              duration: Infinity,
+              position: "top-center",
+              action: {
+                label: "OK",
+                onClick: (toastId : any) => toast.dismiss(toastId),
+              },
+              closeButton: false,
+            });
     } finally {
       setSaving(false); // Stop loading for save
     }
@@ -220,22 +280,59 @@ const Page = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-6">
-          <div className="border border-[#5c5b5b] rounded">
-            <Label htmlFor="email" className="text-white mt-1 opacity-80 px-2 text-base font-normal">
+          <div className="space-y-2">
+            <Label htmlFor="email" className="text-white opacity-80 text-base font-normal">
               Email Address
             </Label>
-            <span className="h-12 flex items-center px-2 rounded-md text-[#A1A1A1]">
-              {formData.email || "N/A"}
-            </span>
+            <Input
+              id="email"
+              type="email"
+              value={formData.email}
+              onChange={handleInputChange}
+              className="bg-[#0f172a] h-12 border-none text-white"
+            />
           </div>
-          <div className="border border-[#5c5b5b] rounded">
-            <Label htmlFor="password" className="text-white px-2 mt-1 opacity-80 text-base font-normal">
+          
+          <div className="space-y-2">
+            <Label htmlFor="firstName" className="text-white opacity-80 text-base font-normal">
+              First Name
+            </Label>
+            <Input
+              id="firstName"
+              type="text"
+              value={formData.firstName}
+              onChange={handleInputChange}
+              className="bg-[#0f172a] h-12 border-none text-white"
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="lastName" className="text-white opacity-80 text-base font-normal">
+              Last Name
+            </Label>
+            <Input
+              id="lastName"
+              type="text"
+              value={formData.lastName}
+              onChange={handleInputChange}
+              className="bg-[#0f172a] h-12 border-none text-white"
+            />
+          </div>
+          
+            <div className="space-y-2">
+            <Label htmlFor="password" className="text-white opacity-80 text-base font-normal">
               Login Password
             </Label>
-            <span className="h-12 flex items-center px-2 rounded-md text-[#A1A1A1]">
-              {"*******"}
-            </span>
+            <Input
+              id="password"
+              type="password"
+              value={formData.password}
+              onChange={handleInputChange}
+              placeholder="Enter new password"
+              className="bg-[#0f172a] h-12 border-none text-white"
+            />
           </div>
+          
           <div className="border border-[#5c5b5b] rounded">
             <Label htmlFor="numberOfUsers" className="text-white px-2 mt-1 opacity-80 text-base font-normal">
               Number of users registered

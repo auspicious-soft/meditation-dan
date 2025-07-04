@@ -52,12 +52,28 @@ const Page = () => {
       const response = await getApproveOrDeclinePendingJoinRequest(`/company/join-requests/${id}?status=approve`);
       console.log('response: ', response);
       if (response?.data?.success) {
-        toast.success("Account approved successfully");
+        toast.success("Account approved successfully", {
+        duration: Infinity,
+        position: "top-center",
+        action: {
+          label: "OK",
+          onClick: (toastId : any) => toast.dismiss(toastId),
+        },
+        closeButton: false,
+      });
         mutate();
       }
     } catch (err: any) {
       console.log(err);
-      toast.error(err?.response?.data?.message || "Failed to approve account");
+      toast.error(err?.response?.data?.message || "Failed to approve account", {
+              duration: Infinity,
+              position: "top-center",
+              action: {
+                label: "OK",
+                onClick: (toastId : any) => toast.dismiss(toastId),
+              },
+              closeButton: false,
+            });
     } finally {
       setLoadingApprove(null);
     }
@@ -70,13 +86,37 @@ const Page = () => {
       const response = await getApproveOrDeclinePendingJoinRequest(`/company/join-requests/${id}?status=deny`);
       console.log('response: ', response);
       if (response?.data?.success) {
-        toast.success("Request declined successfully");
+        toast.success("Request declined successfully", {
+        duration: Infinity,
+        position: "top-center",
+        action: {
+          label: "OK",
+          onClick: (toastId : any) => toast.dismiss(toastId),
+        },
+        closeButton: false,
+      });
         mutate();
       } else {
-        toast.error(response?.data?.message || "Failed to declined request");
+        toast.error(response?.data?.message || "Failed to declined request", {
+                duration: Infinity,
+                position: "top-center",
+                action: {
+                  label: "OK",
+                  onClick: (toastId : any) => toast.dismiss(toastId),
+                },
+                closeButton: false,
+              });
       }
     } catch (err: any) {
-      toast.error("Failed to decline request");
+      toast.error("Failed to decline request", {
+              duration: Infinity,
+              position: "top-center",
+              action: {
+                label: "OK",
+                onClick: (toastId : any) => toast.dismiss(toastId),
+              },
+              closeButton: false,
+            });
     } finally {
       setLoadingDeny(null);
       setIsDialogOpen(false);

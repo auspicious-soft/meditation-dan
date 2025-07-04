@@ -99,7 +99,15 @@ const Page = () => {
         }
       } catch (error) {
         console.error("Error fetching admin profile:", error);
-        toast.error("Failed to load admin profile");
+        toast.error("Failed to load admin profile", {
+                duration: Infinity,
+                position: "top-center",
+                action: {
+                  label: "OK",
+                  onClick: (toastId : any) => toast.dismiss(toastId),
+                },
+                closeButton: false,
+              });
       } finally {
         setIsLoading(false);
       }
@@ -126,7 +134,15 @@ const Page = () => {
         setImageError(validationError);
         setImagePreview("");
         setSelectedFile(null);
-        toast.error(validationError);
+        toast.error(validationError, {
+                duration: Infinity,
+                position: "top-center",
+                action: {
+                  label: "OK",
+                  onClick: (toastId : any) => toast.dismiss(toastId),
+                },
+                closeButton: false,
+              });
         return;
       }
       setImageError(null); // Clear previous error
@@ -168,7 +184,15 @@ const Page = () => {
     
     if (Object.keys(validationErrors).length > 0 || imageError) {
       setErrors(validationErrors);
-      toast.error("Please fix the validation errors before saving");
+      toast.error("Please fix the validation errors before saving", {
+              duration: Infinity,
+              position: "top-center",
+              action: {
+                label: "OK",
+                onClick: (toastId : any) => toast.dismiss(toastId),
+              },
+              closeButton: false,
+            });
       return;
     }
 
@@ -229,7 +253,15 @@ const Page = () => {
           redirect: false,
         });
 
-        toast.success(successMessage.trim()); // Single toast with combined message
+        toast.success(successMessage.trim(), {
+        duration: Infinity,
+        position: "top-center",
+        action: {
+          label: "OK",
+          onClick: (toastId : any) => toast.dismiss(toastId),
+        },
+        closeButton: false,
+      }); // Single toast with combined message
         setTimeout(() => {
           window.location.reload();
         }, 1000);
@@ -238,7 +270,15 @@ const Page = () => {
       }
     } catch (error) {
       console.error("Error saving profile:", error);
-      toast.error(error instanceof Error ? error.message : "Failed to save profile");
+      toast.error(error instanceof Error ? error.message : "Failed to save profile", {
+              duration: Infinity,
+              position: "top-center",
+              action: {
+                label: "OK",
+                onClick: (toastId : any) => toast.dismiss(toastId),
+              },
+              closeButton: false,
+            });
     } finally {
       setIsLoading(false);
     }

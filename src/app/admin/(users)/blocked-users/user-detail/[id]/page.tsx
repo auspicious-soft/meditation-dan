@@ -59,7 +59,15 @@ const Page = () => {
       const payload: { isBlocked: boolean } = { isBlocked: false };
       const response = await toggleBlockUser(`/admin/user/${id}/block`, payload);
       if (response.data.success) {
-        toast.success("User unblocked successfully!");
+        toast.success("User unblocked successfully!", {
+        duration: Infinity,
+        position: "top-center",
+        action: {
+          label: "OK",
+          onClick: (toastId : any) => toast.dismiss(toastId),
+        },
+        closeButton: false,
+      });
         mutate(); // Refresh user data after unblocking
         setTimeout(() => {
           window.location.href = "/admin/blocked-users";
@@ -69,7 +77,15 @@ const Page = () => {
       }
     } catch (err) {
       console.error("Error unblocking user:", err);
-      toast.error(err instanceof Error ? err.message : "Failed to unblock user");
+      toast.error(err instanceof Error ? err.message : "Failed to unblock user", {
+              duration: Infinity,
+              position: "top-center",
+              action: {
+                label: "OK",
+                onClick: (toastId : any) => toast.dismiss(toastId),
+              },
+              closeButton: false,
+            });
     } finally {
       setUnblocking(false); // Stop loading for unblock
     }
@@ -82,13 +98,29 @@ const Page = () => {
       console.log("User deleted successfully");
       setIsDialogOpen(false);
       mutate("/admin/get-all-users"); // Refresh the user list
-      toast.success("User deleted successfully!");
+      toast.success("User deleted successfully!", {
+        duration: Infinity,
+        position: "top-center",
+        action: {
+          label: "OK",
+          onClick: (toastId : any) => toast.dismiss(toastId),
+        },
+        closeButton: false,
+      });
       setTimeout(() => {
         window.location.href = "/admin/user-lists";
       }, 1000);
     } catch (err) {
       console.error("Error deleting user:", err);
-      toast.error("Failed to delete user");
+      toast.error("Failed to delete user", {
+              duration: Infinity,
+              position: "top-center",
+              action: {
+                label: "OK",
+                onClick: (toastId : any) => toast.dismiss(toastId),
+              },
+              closeButton: false,
+            });
     } finally {
       setDeleting(false); // Stop loading for delete
     }

@@ -88,20 +88,60 @@ const Page = () => {
       console.log("Reminder response:", response.data); // Debug the response
       // Check if the response indicates success (flexible check)
       if (response.data && (response.data.success === true || response.status === 200)) {
-        toast.success("Reminder sent successfully!");
+        toast.success("Reminder sent successfully!", {
+        duration: Infinity,
+        position: "top-center",
+        action: {
+          label: "OK",
+          onClick: (toastId : any) => toast.dismiss(toastId),
+        },
+        closeButton: false,
+      });
       } else {
-        toast.error("Failed to send reminder: " + (response.data.message || "Unknown error"));
+        toast.error("Failed to send reminder: " + (response.data.message || "Unknown error"), {
+                duration: Infinity,
+                position: "top-center",
+                action: {
+                  label: "OK",
+                  onClick: (toastId : any) => toast.dismiss(toastId),
+                },
+                closeButton: false,
+              });
       }
     } catch (err) {
       console.error("Error sending reminder:", err);
       if (err instanceof Error) {
         if ((err as any).response?.data?.message) {
-          toast.error("Error sending reminder: " + (err as any).response.data.message);
+          toast.error("Error sending reminder: " + (err as any).response.data.message, {
+                  duration: Infinity,
+                  position: "top-center",
+                  action: {
+                    label: "OK",
+                    onClick: (toastId : any) => toast.dismiss(toastId),
+                  },
+                  closeButton: false,
+                });
         } else {
-          toast.error("Error sending reminder: " + err.message);
+          toast.error("Error sending reminder: " + err.message, {
+                  duration: Infinity,
+                  position: "top-center",
+                  action: {
+                    label: "OK",
+                    onClick: (toastId : any) => toast.dismiss(toastId),
+                  },
+                  closeButton: false,
+                });
         }
       } else {
-        toast.error("Error sending reminder: Unknown error");
+        toast.error("Error sending reminder: Unknown error", {
+                duration: Infinity,
+                position: "top-center",
+                action: {
+                  label: "OK",
+                  onClick: (toastId : any) => toast.dismiss(toastId),
+                },
+                closeButton: false,
+              });
       }
     } finally {
       setReminderLoading(null); // Reset loading state

@@ -223,7 +223,15 @@ const GetAudio = () => {
         }
       } catch (error) {
         console.error("Error fetching audio data:", error);
-        toast.error("Failed to load audio data");
+        toast.error("Failed to load audio data", {
+                duration: Infinity,
+                position: "top-center",
+                action: {
+                  label: "OK",
+                  onClick: (toastId : any) => toast.dismiss(toastId),
+                },
+                closeButton: false,
+              });
       }
     };
 
@@ -239,7 +247,15 @@ const GetAudio = () => {
         }
       } catch (error) {
         console.error("Error fetching collections:", error);
-        toast.error("Failed to load collections");
+        toast.error("Failed to load collections", {
+                duration: Infinity,
+                position: "top-center",
+                action: {
+                  label: "OK",
+                  onClick: (toastId : any) => toast.dismiss(toastId),
+                },
+                closeButton: false,
+              });
       } finally {
         setLoadingCollections(false);
       }
@@ -399,7 +415,15 @@ const GetAudio = () => {
           (col) => col._id === data.collectionType
         );
         if (!selectedCollection) {
-          toast.error("Selected collection not found");
+          toast.error("Selected collection not found", {
+                  duration: Infinity,
+                  position: "top-center",
+                  action: {
+                    label: "OK",
+                    onClick: (toastId : any) => toast.dismiss(toastId),
+                  },
+                  closeButton: false,
+                });
           return;
         }
         const songName = data.songName.toLowerCase();
@@ -448,7 +472,15 @@ const GetAudio = () => {
           (col) => col._id === data.collectionType
         );
         if (!selectedCollection) {
-          toast.error("Selected collection not found");
+          toast.error("Selected collection not found", {
+                  duration: Infinity,
+                  position: "top-center",
+                  action: {
+                    label: "OK",
+                    onClick: (toastId : any) => toast.dismiss(toastId),
+                  },
+                  closeButton: false,
+                });
           return;
         }
         const songName = data.songName.toLowerCase();
@@ -485,7 +517,15 @@ const GetAudio = () => {
       const response = await updateAudioStats(`/admin/update/audio/${audioId}`, payload);
 
       if (response?.status === 200) {
-        toast.success("Audio updated successfully");
+        toast.success("Audio updated successfully", {
+        duration: Infinity,
+        position: "top-center",
+        action: {
+          label: "OK",
+          onClick: (toastId : any) => toast.dismiss(toastId),
+        },
+        closeButton: false,
+      });
         setImagePreview(null);
         setAudioPreview(null);
         setExistingAudioUrl(null);
@@ -498,7 +538,15 @@ const GetAudio = () => {
       }
     } catch (error) {
       console.log("error while updating audio:", error);
-      toast.error("An error occurred while updating audio");
+      toast.error("An error occurred while updating audio", {
+              duration: Infinity,
+              position: "top-center",
+              action: {
+                label: "OK",
+                onClick: (toastId : any) => toast.dismiss(toastId),
+              },
+              closeButton: false,
+            });
     }
   };
 
@@ -536,7 +584,15 @@ const GetAudio = () => {
         if (!filesDeleted) {
           toast.warning("Audio record deleted but some S3 files may remain");
         } else {
-          toast.success("Audio and associated files deleted successfully");
+          toast.success("Audio and associated files deleted successfully", {
+        duration: Infinity,
+        position: "top-center",
+        action: {
+          label: "OK",
+          onClick: (toastId : any) => toast.dismiss(toastId),
+        },
+        closeButton: false,
+      });
         }
         setIsDialogOpen(false);
         setTimeout(() => {
@@ -547,7 +603,15 @@ const GetAudio = () => {
       }
     } catch (error) {
       console.error("Error deleting audio:", error);
-      toast.error("Failed to delete audio");
+      toast.error("Failed to delete audio", {
+              duration: Infinity,
+              position: "top-center",
+              action: {
+                label: "OK",
+                onClick: (toastId : any) => toast.dismiss(toastId),
+              },
+              closeButton: false,
+            });
       setIsDialogOpen(false);
     } finally {
       setIsDeleting(false);

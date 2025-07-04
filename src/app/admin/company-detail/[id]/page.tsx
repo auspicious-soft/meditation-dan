@@ -111,17 +111,41 @@ const Page = () => {
     try {
       const response = await deleteCompany(`/admin/delete-company/${id}`);
       if (response.data.success) {
-        toast.success("Company account deleted successfully");
+        toast.success("Company account deleted successfully", {
+        duration: Infinity,
+        position: "top-center",
+        action: {
+          label: "OK",
+          onClick: (toastId : any) => toast.dismiss(toastId),
+        },
+        closeButton: false,
+      });
         setIsDialogOpen(false);
         setTimeout(() => {
           window.location.href = "/admin/company-lists";
         }, 1000);
       } else {
-        toast.error("Failed to delete company account");
+        toast.error("Failed to delete company account", {
+                duration: Infinity,
+                position: "top-center",
+                action: {
+                  label: "OK",
+                  onClick: (toastId : any) => toast.dismiss(toastId),
+                },
+                closeButton: false,
+              });
       }
     } catch (error) {
       console.error("Error deleting company:", error);
-      toast.error("Failed to delete company account");
+      toast.error("Failed to delete company account", {
+              duration: Infinity,
+              position: "top-center",
+              action: {
+                label: "OK",
+                onClick: (toastId : any) => toast.dismiss(toastId),
+              },
+              closeButton: false,
+            });
     } finally {
       setDeleting(false); // Stop loading for delete
     }
@@ -146,12 +170,28 @@ const Page = () => {
           companyName: formData.companyName,
           email: formData.email,
         });
-        toast.success("Company details updated successfully");
+        toast.success("Company details updated successfully", {
+        duration: Infinity,
+        position: "top-center",
+        action: {
+          label: "OK",
+          onClick: (toastId : any) => toast.dismiss(toastId),
+        },
+        closeButton: false,
+      });
         setTimeout(() => {
           window.location.href = "/admin/company-lists";
         }, 1000);
       } else {
-        toast.error("Failed to update company details");
+        toast.error("Failed to update company details", {
+                duration: Infinity,
+                position: "top-center",
+                action: {
+                  label: "OK",
+                  onClick: (toastId : any) => toast.dismiss(toastId),
+                },
+                closeButton: false,
+              });
       }
     } catch (error) {
       console.error("Error updating company:", error);
@@ -159,7 +199,15 @@ const Page = () => {
         error instanceof Error && (error as any)?.response?.data?.message
           ? (error as any).response.data.message
           : "Failed to save item"
-      );
+      , {
+              duration: Infinity,
+              position: "top-center",
+              action: {
+                label: "OK",
+                onClick: (toastId : any) => toast.dismiss(toastId),
+              },
+              closeButton: false,
+            });
     } finally {
       setSaving(false); // Stop loading for save
     }

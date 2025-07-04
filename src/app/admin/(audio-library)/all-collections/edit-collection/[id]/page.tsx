@@ -136,11 +136,27 @@ const EditCollectionForm = () => {
           setValue("imagePreview", imageUrl);
           setOriginalImageKey(collection.imageUrl); // Store the original image key
         } else {
-          toast.error("Failed to load collection data");
+          toast.error("Failed to load collection data", {
+                  duration: Infinity,
+                  position: "top-center",
+                  action: {
+                    label: "OK",
+                    onClick: (toastId : any) => toast.dismiss(toastId),
+                  },
+                  closeButton: false,
+                });
         }
       } catch (error) {
         console.error("Error fetching collection:", error);
-        toast.error("An error occurred while fetching collection data");
+        toast.error("An error occurred while fetching collection data", {
+                duration: Infinity,
+                position: "top-center",
+                action: {
+                  label: "OK",
+                  onClick: (toastId : any) => toast.dismiss(toastId),
+                },
+                closeButton: false,
+              });
       }
     };
 
@@ -308,22 +324,54 @@ const EditCollectionForm = () => {
         if (!filesDeleted) {
           toast.warning("Collection deleted but the S3 image may remain");
         } else {
-          toast.success("Collection and associated image deleted successfully");
+          toast.success("Collection and associated image deleted successfully", {
+        duration: Infinity,
+        position: "top-center",
+        action: {
+          label: "OK",
+          onClick: (toastId : any) => toast.dismiss(toastId),
+        },
+        closeButton: false,
+      });
         }
         setIsDialogOpen(false);
         setTimeout(() => {
           router.push("/admin/all-collections");
         }, 1000);
       } else {
-        toast.error(response?.data?.message || "Failed to delete collection");
+        toast.error(response?.data?.message || "Failed to delete collection", {
+                duration: Infinity,
+                position: "top-center",
+                action: {
+                  label: "OK",
+                  onClick: (toastId : any) => toast.dismiss(toastId),
+                },
+                closeButton: false,
+              });
         setIsDialogOpen(false);
       }
     } catch (error) {
       console.error("Error deleting collection:", error);
       if ((error as any)?.response?.data?.message) {
-        toast.error((error as any)?.response?.data?.message);
+        toast.error((error as any)?.response?.data?.message, {
+                duration: Infinity,
+                position: "top-center",
+                action: {
+                  label: "OK",
+                  onClick: (toastId : any) => toast.dismiss(toastId),
+                },
+                closeButton: false,
+              });
       } else {
-        toast.error("An unexpected error occurred while deleting the collection");
+        toast.error("An unexpected error occurred while deleting the collection", {
+                duration: Infinity,
+                position: "top-center",
+                action: {
+                  label: "OK",
+                  onClick: (toastId : any) => toast.dismiss(toastId),
+                },
+                closeButton: false,
+              });
       }
       setIsDialogOpen(false);
     } finally {
@@ -347,22 +395,54 @@ const EditCollectionForm = () => {
       // Validate all fields before proceeding
       if (!data.collectionName) {
         setError("collectionName", { type: "manual", message: "Collection name is required" });
-        toast.error("Collection name is required");
+        toast.error("Collection name is required", {
+                duration: Infinity,
+                position: "top-center",
+                action: {
+                  label: "OK",
+                  onClick: (toastId : any) => toast.dismiss(toastId),
+                },
+                closeButton: false,
+              });
         return;
       }
       if (!data.description) {
         setError("description", { type: "manual", message: "Description is required" });
-        toast.error("Description is required");
+        toast.error("Description is required", {
+                duration: Infinity,
+                position: "top-center",
+                action: {
+                  label: "OK",
+                  onClick: (toastId : any) => toast.dismiss(toastId),
+                },
+                closeButton: false,
+              });
         return;
       }
       if (!data.levels || data.levels.length === 0) {
         setError("levels", { type: "manual", message: "At least one level is required" });
-        toast.error("At least one level is required");
+        toast.error("At least one level is required", {
+                duration: Infinity,
+                position: "top-center",
+                action: {
+                  label: "OK",
+                  onClick: (toastId : any) => toast.dismiss(toastId),
+                },
+                closeButton: false,
+              });
         return;
       }
       if (!data.bestFor || data.bestFor.length === 0) {
         setError("bestFor", { type: "manual", message: "At least one best for is required" });
-        toast.error("At least one best for is required");
+        toast.error("At least one best for is required", {
+                duration: Infinity,
+                position: "top-center",
+                action: {
+                  label: "OK",
+                  onClick: (toastId : any) => toast.dismiss(toastId),
+                },
+                closeButton: false,
+              });
         return;
       }
 
@@ -386,7 +466,15 @@ const EditCollectionForm = () => {
       } else if (!imageKey) {
         // If no new image is uploaded and no original key exists, throw an error
         setError("imageFile", { type: "manual", message: "An image is required" });
-        toast.error("An image is required");
+        toast.error("An image is required", {
+                duration: Infinity,
+                position: "top-center",
+                action: {
+                  label: "OK",
+                  onClick: (toastId : any) => toast.dismiss(toastId),
+                },
+                closeButton: false,
+              });
         return;
       }
 
@@ -402,18 +490,42 @@ const EditCollectionForm = () => {
       const response = await updateCollectionStats(`/admin/update/collection/${id}`, payload);
 
       if (response?.status === 200) {
-        toast.success("Collection updated successfully");
+        toast.success("Collection updated successfully", {
+        duration: Infinity,
+        position: "top-center",
+        action: {
+          label: "OK",
+          onClick: (toastId : any) => toast.dismiss(toastId),
+        },
+        closeButton: false,
+      });
         setImagePreview(null);
         if (fileInputRef.current) fileInputRef.current.value = "";
         setTimeout(() => {
           router.push("/admin/all-collections");
         }, 1000);
       } else {
-        toast.error(response?.data?.message || "Failed to update collection");
+        toast.error(response?.data?.message || "Failed to update collection", {
+                duration: Infinity,
+                position: "top-center",
+                action: {
+                  label: "OK",
+                  onClick: (toastId : any) => toast.dismiss(toastId),
+                },
+                closeButton: false,
+              });
       }
     } catch (error) {
       console.log("error while updating collection:", error);
-      toast.error("An error occurred while updating collection");
+      toast.error("An error occurred while updating collection", {
+              duration: Infinity,
+              position: "top-center",
+              action: {
+                label: "OK",
+                onClick: (toastId : any) => toast.dismiss(toastId),
+              },
+              closeButton: false,
+            });
     }
   };
 

@@ -21,7 +21,7 @@ import {
 import { deleteMultipleUsers, getAllUsers } from "@/services/admin-services";
 import { Loader2, Trash2 } from "lucide-react";
 import SearchBar from "@/components/ui/SearchBar";
-import { toast } from "sonner";
+import { toast, Toaster } from "sonner";
 
 const fetcher = (url: string) => getAllUsers(url);
 
@@ -206,13 +206,29 @@ const Page = () => {
     try {
      const response = await deleteMultipleUsers("/admin/delete-multiple-user", payload);
      if(response.status === 200) {
-      toast.success(response.data.message || "Users deleted successfully");
+      toast.success(response.data.message || "Users deleted successfully", {
+        duration: Infinity,
+        position: "top-center",
+        action: {
+          label: "OK",
+          onClick: (toastId : any) => toast.dismiss(toastId),
+        },
+        closeButton: false,
+      });
       await mutate();
       setSelectedUsers([]);
      }
     } catch (error) {
       console.error('Error deleting users:', error);
-      toast.error((error as any).response?.data.message || "Failed to delete users");
+      toast.error((error as any).response?.data.message || "Failed to delete users", {
+              duration: Infinity,
+              position: "top-center",
+              action: {
+                label: "OK",
+                onClick: (toastId : any) => toast.dismiss(toastId),
+              },
+              closeButton: false,
+            });
     } finally {
       setIsDeleting(false);
     }
@@ -395,6 +411,7 @@ const Page = () => {
           )}
         </div>
       </div>
+   
     </>
   );
 };

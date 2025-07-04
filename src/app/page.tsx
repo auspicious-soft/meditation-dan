@@ -34,11 +34,27 @@ export default function LoginPage() {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const phoneRegex = /^\d{10}$/;
     if (!emailRegex.test(email) && !phoneRegex.test(email)) {
-      toast.error("Please enter a valid email or phone number.");
+      toast.error("Please enter a valid email or phone number.", {
+        duration: Infinity,
+        position: "top-center",
+        action: {
+          label: "OK",
+          onClick: (toastId : any) => toast.dismiss(toastId),
+        },
+        closeButton: false,
+      });
       return;
     }
     if (!password) {
-      toast.error("Password is required.");
+      toast.error("Password is required.", {
+        duration: Infinity,
+        position: "top-center",
+        action: {
+          label: "OK",
+          onClick: (toastId : any) => toast.dismiss(toastId),
+        },
+        closeButton: false,
+      });
       return;
     }
     startTransition(async () => {
@@ -50,11 +66,27 @@ export default function LoginPage() {
         if (response?.success) {
           const userRole = response?.data?.user?.role;
           if (userRole === "user") {
-            toast.error("You are not authorized to access this page.");
+            toast.error("You are not authorized to access this page.", {
+        duration: Infinity,
+        position: "top-center",
+        action: {
+          label: "OK",
+          onClick: (toastId : any) => toast.dismiss(toastId),
+        },
+        closeButton: false,
+      });
             return;
           } 
          
-              toast.success("Logged in successfully");
+              toast.success("Logged in successfully", {
+        duration: Infinity,
+        position: "top-center",
+        action: {
+          label: "OK",
+          onClick: (toastId : any) => toast.dismiss(toastId),
+        },
+        closeButton: false,
+      });
           router.push(userRole === "company" ? "/company/dashboard" : "/admin/dashboard");
         } else {
           if(response?.message ==="Not verified by Admin yet"){
@@ -63,12 +95,28 @@ export default function LoginPage() {
             router.push("/request-rejected");
           }else{
 
-            toast.error(response?.message || "Invalid email or password.");
+            toast.error(response?.message || "Invalid email or password.", {
+        duration: Infinity,
+        position: "top-center",
+        action: {
+          label: "OK",
+          onClick: (toastId : any) => toast.dismiss(toastId),
+        },
+        closeButton: false,
+      });
           }
         }
       } catch (error) {
         console.error("Login action error:", error);
-        toast.error("Something went wrong! Please try again.");
+        toast.error("Something went wrong! Please try again.", {
+        duration: Infinity,
+        position: "top-center",
+        action: {
+          label: "OK",
+          onClick: (toastId : any) => toast.dismiss(toastId),
+        },
+        closeButton: false,
+      });
       }
     });
   };

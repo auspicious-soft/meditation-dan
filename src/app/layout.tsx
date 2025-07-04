@@ -32,7 +32,11 @@ export default async function RootLayout({
       <body className={`${dmSans.variable}`} suppressHydrationWarning>
         <SessionProvider session={session}>
           <Providers>
-            <Toaster richColors />
+               <Toaster
+  position="top-center" // Centered at the top
+  closeButton // Show close button by default
+  duration={Infinity} // Toasts stay until dismissed
+/>
             <AppRouterCacheProvider>
               {children}
             </AppRouterCacheProvider>

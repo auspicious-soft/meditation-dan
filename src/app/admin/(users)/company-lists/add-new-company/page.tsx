@@ -58,20 +58,44 @@ const Page = () => {
       const response = await addNewCompanyStats("/admin/create-company", payload);
 
       if (response?.status === 201 || response?.status === 200) {
-        toast.success("Company added successfully");
+        toast.success("Company added successfully", {
+        duration: Infinity,
+        position: "top-center",
+        action: {
+          label: "OK",
+          onClick: (toastId : any) => toast.dismiss(toastId),
+        },
+        closeButton: false,
+      });
         reset(); // Reset the form after successful submission
         window.location.href = "/admin/company-lists";
       } else {
         const errorMessage = response?.data?.message || "Failed to add company";
         setBackendError(errorMessage); // Set backend error
-        toast.error(errorMessage);
+        toast.error(errorMessage, {
+                duration: Infinity,
+                position: "top-center",
+                action: {
+                  label: "OK",
+                  onClick: (toastId : any) => toast.dismiss(toastId),
+                },
+                closeButton: false,
+              });
       }
     } catch (error: any) {
       console.error("Error adding company:", error);
       const errorMessage =
         error.response?.data?.message || "An error occurred while adding the company";
       setBackendError(errorMessage); // Set backend error from catch block
-      toast.error(errorMessage);
+      toast.error(errorMessage, {
+              duration: Infinity,
+              position: "top-center",
+              action: {
+                label: "OK",
+                onClick: (toastId : any) => toast.dismiss(toastId),
+              },
+              closeButton: false,
+            });
     }
   };
 

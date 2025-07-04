@@ -165,7 +165,15 @@ const Page = () => {
       const payload: BlockCompanyPayload = { isBlocked: newBlockedState };
       const response = await toggleBlockUser(`/admin/user/${id}/block`, payload);
       if (response.data.success) {
-        toast.success(`User ${newBlockedState ? "blocked" : "unblocked"} successfully!`);
+        toast.success(`User ${newBlockedState ? "blocked" : "unblocked"} successfully!`, {
+        duration: Infinity,
+        position: "top-center",
+        action: {
+          label: "OK",
+          onClick: (toastId : any) => toast.dismiss(toastId),
+        },
+        closeButton: false,
+      });
         setFormData((prevState) => ({
           ...prevState,
           isBlocked: newBlockedState,
@@ -178,7 +186,15 @@ const Page = () => {
       }
     } catch (err) {
       console.error(`Error ${formData.isBlocked ? "unblocking" : "blocking"} user:`, err);
-      toast.error(err instanceof Error ? err.message : `Failed to ${formData.isBlocked ? "unblock" : "block"} user`);
+      toast.error(err instanceof Error ? err.message : `Failed to ${formData.isBlocked ? "unblock" : "block"} user`, {
+              duration: Infinity,
+              position: "top-center",
+              action: {
+                label: "OK",
+                onClick: (toastId : any) => toast.dismiss(toastId),
+              },
+              closeButton: false,
+            });
     } finally {
       setTogglingBlock(false);
     }
@@ -186,7 +202,15 @@ const Page = () => {
 
   const handleSave = async () => {
     if (!validateForm()) {
-      toast.error("Please fix the validation errors before saving.");
+      toast.error("Please fix the validation errors before saving.", {
+              duration: Infinity,
+              position: "top-center",
+              action: {
+                label: "OK",
+                onClick: (toastId : any) => toast.dismiss(toastId),
+              },
+              closeButton: false,
+            });
       return;
     }
     setSaving(true);
@@ -195,13 +219,29 @@ const Page = () => {
       await updateUser(`/admin/user/update/${id}`, updateData);
       console.log("User updated successfully:", updateData);
       mutate("/admin/get-all-users");
-      toast.success("User updated successfully!");
+      toast.success("User updated successfully!", {
+        duration: Infinity,
+        position: "top-center",
+        action: {
+          label: "OK",
+          onClick: (toastId : any) => toast.dismiss(toastId),
+        },
+        closeButton: false,
+      });
       setTimeout(() => {
         window.location.href = "/admin/user-lists";
       }, 1000);
     } catch (err) {
       console.error("Error updating user:", err);
-      toast.error("Failed to update user");
+      toast.error("Failed to update user", {
+              duration: Infinity,
+              position: "top-center",
+              action: {
+                label: "OK",
+                onClick: (toastId : any) => toast.dismiss(toastId),
+              },
+              closeButton: false,
+            });
     } finally {
       setSaving(false);
     }
@@ -214,13 +254,29 @@ const Page = () => {
       console.log("User deleted successfully");
       setIsDialogOpen(false);
       mutate("/admin/get-all-users");
-      toast.success("User deleted successfully!");
+      toast.success("User deleted successfully!", {
+        duration: Infinity,
+        position: "top-center",
+        action: {
+          label: "OK",
+          onClick: (toastId : any) => toast.dismiss(toastId),
+        },
+        closeButton: false,
+      });
       setTimeout(() => {
         window.location.href = "/admin/user-lists";
       }, 1000);
     } catch (err) {
       console.error("Error deleting user:", err);
-      toast.error("Failed to delete user");
+      toast.error("Failed to delete user", {
+              duration: Infinity,
+              position: "top-center",
+              action: {
+                label: "OK",
+                onClick: (toastId : any) => toast.dismiss(toastId),
+              },
+              closeButton: false,
+            });
     } finally {
       setDeleting(false);
     }

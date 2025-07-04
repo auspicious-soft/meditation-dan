@@ -111,11 +111,27 @@ const Page = () => {
       const response = await createUserAccount("/company/users", payload);
       console.log('response: ', response);
       if (response?.data?.success) {
-        toast.success(response.data.message);
+        toast.success(response.data.message, {
+        duration: Infinity,
+        position: "top-center",
+        action: {
+          label: "OK",
+          onClick: (toastId : any) => toast.dismiss(toastId),
+        },
+        closeButton: false,
+      });
         router.push("/company/users");
       }
     } catch (err: any) {
-      toast.error(err.response.data.message || "Failed to create user");
+      toast.error(err.response.data.message || "Failed to create user", {
+              duration: Infinity,
+              position: "top-center",
+              action: {
+                label: "OK",
+                onClick: (toastId : any) => toast.dismiss(toastId),
+              },
+              closeButton: false,
+            });
     } finally {
       setIsLoading(false);
     }

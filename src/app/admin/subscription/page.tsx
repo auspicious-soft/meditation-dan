@@ -64,11 +64,27 @@ const Page = () => {
           });
           setPlans(fetchedPlans);
         } else {
-          toast.error("Failed to load plans");
+          toast.error("Failed to load plans", {
+                  duration: Infinity,
+                  position: "top-center",
+                  action: {
+                    label: "OK",
+                    onClick: (toastId : any) => toast.dismiss(toastId),
+                  },
+                  closeButton: false,
+                });
         }
       } catch (error) {
         console.error("Error fetching plans:", error);
-        toast.error("Failed to load plans");
+        toast.error("Failed to load plans", {
+                duration: Infinity,
+                position: "top-center",
+                action: {
+                  label: "OK",
+                  onClick: (toastId : any) => toast.dismiss(toastId),
+                },
+                closeButton: false,
+              });
       } finally {
         setIsLoading(false);
       }
@@ -84,7 +100,15 @@ const Page = () => {
   // Handle updating the plan
   const handleUpdatePlan = async (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     if (!selectedPlan || !updatedDescription || !updatedPrice) {
-      toast.error("Please fill in all fields");
+      toast.error("Please fill in all fields", {
+              duration: Infinity,
+              position: "top-center",
+              action: {
+                label: "OK",
+                onClick: (toastId : any) => toast.dismiss(toastId),
+              },
+              closeButton: false,
+            });
       return;
     }
 
@@ -108,7 +132,15 @@ const Page = () => {
               : plan
           )
         );
-        toast.success("Plan updated successfully!");
+        toast.success("Plan updated successfully!", {
+        duration: Infinity,
+        position: "top-center",
+        action: {
+          label: "OK",
+          onClick: (toastId : any) => toast.dismiss(toastId),
+        },
+        closeButton: false,
+      });
         setIsEditOpen(false);
         setUpdatedDescription("");
         setUpdatedPrice("");
@@ -116,11 +148,27 @@ const Page = () => {
         window.location.reload(); // Reload the page to reflect changes
       } else if (response.data && response.data.message) {
       } else {
-        toast.error("Failed to update plan: " + (response.data.message || "Unknown error"));
+        toast.error("Failed to update plan: " + (response.data.message || "Unknown error"), {
+                duration: Infinity,
+                position: "top-center",
+                action: {
+                  label: "OK",
+                  onClick: (toastId : any) => toast.dismiss(toastId),
+                },
+                closeButton: false,
+              });
       }
     } catch (error) {
       console.error("Error updating plan:", error);
-      toast.error("Failed to update plan: " + (error instanceof Error ? error.message : "Unknown error"));
+      toast.error("Failed to update plan: " + (error instanceof Error ? error.message : "Unknown error"), {
+              duration: Infinity,
+              position: "top-center",
+              action: {
+                label: "OK",
+                onClick: (toastId : any) => toast.dismiss(toastId),
+              },
+              closeButton: false,
+            });
     } finally {
       setIsLoading(false);
     }

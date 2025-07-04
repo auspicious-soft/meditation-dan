@@ -23,7 +23,15 @@ export default function NewPasswordPage() {
   useEffect(() => {
     const otp = searchParams.get("otp");
     if (!otp) {
-      toast.error("Please enter an OTP first.");
+      toast.error("Please enter an OTP first.", {
+              duration: Infinity,
+              position: "top-center",
+              action: {
+                label: "OK",
+                onClick: (toastId : any) => toast.dismiss(toastId),
+              },
+              closeButton: false,
+            });
       router.push("/forgot-password");
     }
   }, [router, searchParams]);
@@ -33,7 +41,15 @@ export default function NewPasswordPage() {
     const otp = searchParams.get("otp");
 
     if (!otp) {
-      toast.error("OTP is missing.");
+      toast.error("OTP is missing.", {
+              duration: Infinity,
+              position: "top-center",
+              action: {
+                label: "OK",
+                onClick: (toastId : any) => toast.dismiss(toastId),
+              },
+              closeButton: false,
+            });
       return;
     }
 
@@ -60,14 +76,38 @@ export default function NewPasswordPage() {
         // console.log('response: ', response);
 
         if (response.ok && data.success) {
-          toast.success("Password updated successfully!");
+          toast.success("Password updated successfully!", {
+        duration: Infinity,
+        position: "top-center",
+        action: {
+          label: "OK",
+          onClick: (toastId : any) => toast.dismiss(toastId),
+        },
+        closeButton: false,
+      });
           router.push("/");
         } else {
-          toast.error(data.message || "Invalid OTP or failed to update password.");
+          toast.error(data.message || "Invalid OTP or failed to update password.", {
+                  duration: Infinity,
+                  position: "top-center",
+                  action: {
+                    label: "OK",
+                    onClick: (toastId : any) => toast.dismiss(toastId),
+                  },
+                  closeButton: false,
+                });
         }
       } catch (error) {
         console.error("Error updating password:", error);
-        toast.error("Something went wrong. Please try again.");
+        toast.error("Something went wrong. Please try again.", {
+                duration: Infinity,
+                position: "top-center",
+                action: {
+                  label: "OK",
+                  onClick: (toastId : any) => toast.dismiss(toastId),
+                },
+                closeButton: false,
+              });
       }
     });
   };

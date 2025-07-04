@@ -26,7 +26,15 @@ export default function Home() {
     e.preventDefault();
 
     if (!otpValue || otpValue.length < 4) {
-      toast.error("Please enter a valid OTP.");
+      toast.error("Please enter a valid OTP.", {
+              duration: Infinity,
+              position: "top-center",
+              action: {
+                label: "OK",
+                onClick: (toastId : any) => toast.dismiss(toastId),
+              },
+              closeButton: false,
+            });
       return;
     }
     startTransition(async () => {
@@ -34,16 +42,48 @@ export default function Home() {
         const response = await sendOtpService({ otp: otpValue });
 
         if (response.data.success) {
-          toast.success(response.data.message);
+          toast.success(response.data.message, {
+        duration: Infinity,
+        position: "top-center",
+        action: {
+          label: "OK",
+          onClick: (toastId : any) => toast.dismiss(toastId),
+        },
+        closeButton: false,
+      });
           router.push(`/new-password?otp=${encodeURIComponent(otpValue)}`);
         } else {
-          toast.error(response.data.message || "Invalid OTP.");
+          toast.error(response.data.message || "Invalid OTP.", {
+                  duration: Infinity,
+                  position: "top-center",
+                  action: {
+                    label: "OK",
+                    onClick: (toastId : any) => toast.dismiss(toastId),
+                  },
+                  closeButton: false,
+                });
         }
       } catch (error) {
         if ((error as any)?.response?.data?.message) {
-          toast.error((error as any)?.response?.data?.message);
+          toast.error((error as any)?.response?.data?.message, {
+                  duration: Infinity,
+                  position: "top-center",
+                  action: {
+                    label: "OK",
+                    onClick: (toastId : any) => toast.dismiss(toastId),
+                  },
+                  closeButton: false,
+                });
         } else {
-          toast.error("An unexpected error occurred.");
+          toast.error("An unexpected error occurred.", {
+                  duration: Infinity,
+                  position: "top-center",
+                  action: {
+                    label: "OK",
+                    onClick: (toastId : any) => toast.dismiss(toastId),
+                  },
+                  closeButton: false,
+                });
         }
       }finally{
         setOtpValue(""); // Clear OTP value after successful submission

@@ -117,7 +117,15 @@ const Page = () => {
 
   const handleSave = async () => {
     if (!session?.user?.id) {
-      toast.error("User ID not found");
+      toast.error("User ID not found", {
+              duration: Infinity,
+              position: "top-center",
+              action: {
+                label: "OK",
+                onClick: (toastId : any) => toast.dismiss(toastId),
+              },
+              closeButton: false,
+            });
       return;
     }
 
@@ -141,7 +149,15 @@ const Page = () => {
       );
 
       if (response?.data?.success) {
-        toast.success("Company details updated successfully");
+        toast.success("Company details updated successfully", {
+        duration: Infinity,
+        position: "top-center",
+        action: {
+          label: "OK",
+          onClick: (toastId : any) => toast.dismiss(toastId),
+        },
+        closeButton: false,
+      });
         mutate();
         setInitialData({
           companyName: formData.companyName,
@@ -156,11 +172,27 @@ const Page = () => {
           ...(payload.password && { password: formData.password }),
         });
       } else {
-        toast.error(response?.data?.message || "Failed to update company details");
+        toast.error(response?.data?.message || "Failed to update company details", {
+                duration: Infinity,
+                position: "top-center",
+                action: {
+                  label: "OK",
+                  onClick: (toastId : any) => toast.dismiss(toastId),
+                },
+                closeButton: false,
+              });
       }
     } catch (error) {
       console.error("Error updating company details:", error);
-      toast.error("An error occurred while updating company details");
+      toast.error("An error occurred while updating company details", {
+              duration: Infinity,
+              position: "top-center",
+              action: {
+                label: "OK",
+                onClick: (toastId : any) => toast.dismiss(toastId),
+              },
+              closeButton: false,
+            });
     } finally {
       setIsLoading(false);
     }

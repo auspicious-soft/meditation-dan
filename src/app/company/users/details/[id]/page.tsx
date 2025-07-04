@@ -37,11 +37,27 @@ const Page = () => {
     try {
       const response = await deleteUser(`/company/users/${id}`);
       if (response?.data?.success) {
-        toast.success(response.data.message);
+        toast.success(response.data.message, {
+        duration: Infinity,
+        position: "top-center",
+        action: {
+          label: "OK",
+          onClick: (toastId : any) => toast.dismiss(toastId),
+        },
+        closeButton: false,
+      });
         router.push("/company/users");
       }
     } catch (error) {
-      toast.error("Failed to delete account");
+      toast.error("Failed to delete account", {
+              duration: Infinity,
+              position: "top-center",
+              action: {
+                label: "OK",
+                onClick: (toastId : any) => toast.dismiss(toastId),
+              },
+              closeButton: false,
+            });
     } finally {
       setIsDeleteLoading(false); // Stop loading
       setIsDialogOpen(false);
@@ -55,12 +71,28 @@ const Page = () => {
       const response = await deactivateUserAccount(`company/users/${id}/deactivate`);
       if (response?.data?.success) {
         mutate(); // Revalidate SWR data
-        toast.success(response.data.message);
+        toast.success(response.data.message, {
+        duration: Infinity,
+        position: "top-center",
+        action: {
+          label: "OK",
+          onClick: (toastId : any) => toast.dismiss(toastId),
+        },
+        closeButton: false,
+      });
       }
       router.back();
       console.log("response: ", response);
     } catch (error) {
-      toast.error("Failed to deactivate account");
+      toast.error("Failed to deactivate account", {
+              duration: Infinity,
+              position: "top-center",
+              action: {
+                label: "OK",
+                onClick: (toastId : any) => toast.dismiss(toastId),
+              },
+              closeButton: false,
+            });
     } finally {
       setIsDeactivateLoading(false); // Stop loading
       setIsDeactivateOpen(false);

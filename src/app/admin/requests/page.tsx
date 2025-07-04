@@ -51,11 +51,27 @@ const Page = () => {
       if (response.data.success) {
         setRequests(response.data.data);
       } else {
-        toast.error("Failed to fetch company join requests");
+        toast.error("Failed to fetch company join requests", {
+                duration: Infinity,
+                position: "top-center",
+                action: {
+                  label: "OK",
+                  onClick: (toastId : any) => toast.dismiss(toastId),
+                },
+                closeButton: false,
+              });
       }
     } catch (error) {
       console.error("Error fetching requests:", error);
-      toast.error("Failed to fetch company join requests");
+      toast.error("Failed to fetch company join requests", {
+              duration: Infinity,
+              position: "top-center",
+              action: {
+                label: "OK",
+                onClick: (toastId : any) => toast.dismiss(toastId),
+              },
+              closeButton: false,
+            });
     } finally {
       setIsLoading(false);
     }
@@ -80,14 +96,38 @@ const Page = () => {
       const payload = { status: "approve" };
       const response = await updateCompanyJoinRequest(`/admin/company-join-requests/${requestId}`, payload);
       if (response.data.success) {
-        toast.success("Request approved successfully");
+        toast.success("Request approved successfully", {
+        duration: Infinity,
+        position: "top-center",
+        action: {
+          label: "OK",
+          onClick: (toastId : any) => toast.dismiss(toastId),
+        },
+        closeButton: false,
+      });
         await fetchRequests(); // Refetch to update UI
       } else {
-        toast.error("Failed to approve request: " + (response.data.message || "Unknown error"));
+        toast.error("Failed to approve request: " + (response.data.message || "Unknown error"), {
+                duration: Infinity,
+                position: "top-center",
+                action: {
+                  label: "OK",
+                  onClick: (toastId : any) => toast.dismiss(toastId),
+                },
+                closeButton: false,
+              });
       }
     } catch (error) {
       console.error("Error approving request:", error);
-      toast.error("Failed to approve request");
+      toast.error("Failed to approve request", {
+              duration: Infinity,
+              position: "top-center",
+              action: {
+                label: "OK",
+                onClick: (toastId : any) => toast.dismiss(toastId),
+              },
+              closeButton: false,
+            });
     } finally {
       setApprovingRequestId(null); // Reset loading state
     }
@@ -101,20 +141,52 @@ const Page = () => {
       const payload = { status: "deny", description: "Request denied by admin" };
       const response = await updateCompanyJoinRequest(`/admin/company-join-requests/${selectedRequestId}`, payload);
       if (response.data.success) {
-        toast.success("Request denied successfully");
+        toast.success("Request denied successfully", {
+        duration: Infinity,
+        position: "top-center",
+        action: {
+          label: "OK",
+          onClick: (toastId : any) => toast.dismiss(toastId),
+        },
+        closeButton: false,
+      });
         setIsDialogOpen(false);
         setSelectedRequestId(null);
         setDenialReason(""); // Reset denial reason
         await fetchRequests(); // Refetch to update UI
       } else {
-        toast.error("Failed to deny request: " + (response.data.message || "Unknown error"));
+        toast.error("Failed to deny request: " + (response.data.message || "Unknown error"), {
+                duration: Infinity,
+                position: "top-center",
+                action: {
+                  label: "OK",
+                  onClick: (toastId : any) => toast.dismiss(toastId),
+                },
+                closeButton: false,
+              });
       }
     } catch (error: any) {
       console.error("Error denying request:", error);
       if (typeof error === "object" && error !== null && "response" in error && (error as any).response?.data?.message) {
-        toast.error((error as any).response.data.message);
+        toast.error((error as any).response.data.message, {
+                duration: Infinity,
+                position: "top-center",
+                action: {
+                  label: "OK",
+                  onClick: (toastId : any) => toast.dismiss(toastId),
+                },
+                closeButton: false,
+              });
       } else {
-        toast.error("Failed to deny request");
+        toast.error("Failed to deny request", {
+                duration: Infinity,
+                position: "top-center",
+                action: {
+                  label: "OK",
+                  onClick: (toastId : any) => toast.dismiss(toastId),
+                },
+                closeButton: false,
+              });
       }
     } finally {
       setIsDenying(false); // Reset loading state

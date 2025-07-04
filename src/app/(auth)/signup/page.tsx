@@ -57,15 +57,39 @@ export default function SignupPage() {
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      toast.error("Please enter a valid email.");
+      toast.error("Please enter a valid email.", {
+              duration: Infinity,
+              position: "top-center",
+              action: {
+                label: "OK",
+                onClick: (toastId : any) => toast.dismiss(toastId),
+              },
+              closeButton: false,
+            });
       return;
     }
     if (password !== confirmPassword) {
-      toast.error("Passwords do not match.");
+      toast.error("Passwords do not match.", {
+              duration: Infinity,
+              position: "top-center",
+              action: {
+                label: "OK",
+                onClick: (toastId : any) => toast.dismiss(toastId),
+              },
+              closeButton: false,
+            });
       return;
     }
     if (!password) {
-      toast.error("Please fill in all required fields.");
+      toast.error("Please fill in all required fields.", {
+              duration: Infinity,
+              position: "top-center",
+              action: {
+                label: "OK",
+                onClick: (toastId : any) => toast.dismiss(toastId),
+              },
+              closeButton: false,
+            });
       return;
     }
 
@@ -81,14 +105,38 @@ export default function SignupPage() {
         console.log("response: ", response);
 
         if (response?.success) {
-          toast.success(response.message);
+          toast.success(response.message, {
+        duration: Infinity,
+        position: "top-center",
+        action: {
+          label: "OK",
+          onClick: (toastId : any) => toast.dismiss(toastId),
+        },
+        closeButton: false,
+      });
           router.push("/request-pending");
         } else {
-          toast.error(response?.message || "Signup failed. Please try again.");
+          toast.error(response?.message || "Signup failed. Please try again.", {
+                  duration: Infinity,
+                  position: "top-center",
+                  action: {
+                    label: "OK",
+                    onClick: (toastId : any) => toast.dismiss(toastId),
+                  },
+                  closeButton: false,
+                });
         }
       } catch (error) {
         console.error("Signup action error:", error);
-        toast.error("Something went wrong! Please try again.");
+        toast.error("Something went wrong! Please try again.", {
+                duration: Infinity,
+                position: "top-center",
+                action: {
+                  label: "OK",
+                  onClick: (toastId : any) => toast.dismiss(toastId),
+                },
+                closeButton: false,
+              });
       }
     });
   };

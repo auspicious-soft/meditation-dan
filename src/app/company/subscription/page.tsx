@@ -309,11 +309,27 @@ const Page = () => {
           const stripe = await loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY as string);
           await stripe?.redirectToCheckout({ sessionId: data.data.id });
         } else {
-          toast.error("Something went wrong. Please try again later.");
+          toast.error("Something went wrong. Please try again later.", {
+                  duration: Infinity,
+                  position: "top-center",
+                  action: {
+                    label: "OK",
+                    onClick: (toastId : any) => toast.dismiss(toastId),
+                  },
+                  closeButton: false,
+                });
         }
       } catch (error) {
         console.error(error);
-        toast.error("An error occurred while processing your request.");
+        toast.error("An error occurred while processing your request.", {
+                duration: Infinity,
+                position: "top-center",
+                action: {
+                  label: "OK",
+                  onClick: (toastId : any) => toast.dismiss(toastId),
+                },
+                closeButton: false,
+              });
       } finally {
         setSelectedPlanId(null);
       }
@@ -327,14 +343,38 @@ const Page = () => {
       if (response?.data.success) {
         setShowSkeletonAfterCancel(true);
         await mutate();
-        toast.success("Subscription canceled successfully.");
+        toast.success("Subscription canceled successfully.", {
+        duration: Infinity,
+        position: "top-center",
+        action: {
+          label: "OK",
+          onClick: (toastId : any) => toast.dismiss(toastId),
+        },
+        closeButton: false,
+      });
         setIsCancelModalOpen(false);
       } else {
-        toast.error("Failed to cancel subscription. Please try again.");
+        toast.error("Failed to cancel subscription. Please try again.", {
+                duration: Infinity,
+                position: "top-center",
+                action: {
+                  label: "OK",
+                  onClick: (toastId : any) => toast.dismiss(toastId),
+                },
+                closeButton: false,
+              });
       }
     } catch (error) {
       console.error(error);
-      toast.error("An error occurred while canceling your subscription.");
+      toast.error("An error occurred while canceling your subscription.", {
+              duration: Infinity,
+              position: "top-center",
+              action: {
+                label: "OK",
+                onClick: (toastId : any) => toast.dismiss(toastId),
+              },
+              closeButton: false,
+            });
     } finally {
       setIsCanceling(false);
       setShowSkeletonAfterCancel(false);

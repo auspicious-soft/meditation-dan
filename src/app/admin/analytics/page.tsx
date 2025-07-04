@@ -74,11 +74,27 @@ const Page = () => {
         if (response.data.success) {
           setAnalyticsData(response.data.data);
         } else {
-          toast.error("Failed to fetch analytics data");
+          toast.error("Failed to fetch analytics data", {
+                  duration: Infinity,
+                  position: "top-center",
+                  action: {
+                    label: "OK",
+                    onClick: (toastId : any) => toast.dismiss(toastId),
+                  },
+                  closeButton: false,
+                });
         }
       } catch (error) {
         console.error("Error fetching analytics:", error);
-        toast.error("Failed to fetch analytics data");
+        toast.error("Failed to fetch analytics data", {
+                duration: Infinity,
+                position: "top-center",
+                action: {
+                  label: "OK",
+                  onClick: (toastId : any) => toast.dismiss(toastId),
+                },
+                closeButton: false,
+              });
       }
     };
     fetchData();
