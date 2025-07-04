@@ -21,6 +21,7 @@ const generateRandomPassword = (length = 12) => {
 
 const Page = () => {
   const { data: session } = useSession();
+  console.log('session:', session);
   const router = useRouter();
 
   // State to manage form data

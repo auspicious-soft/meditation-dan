@@ -90,11 +90,7 @@ export const loginAction = async (payload: any) => {
   try {
     const res: any = await loginService(payload);
     const user = res?.data?.data?.user;
-
-    console.log('user:', user);
-
-    const userName = user?.firstName ? user.firstName + " " + user.lastName : user.companyName; 
-    console.log('userName: ', userName);
+    const userName = user?.role==="user" ? user.firstName + " " + user.lastName : user.companyName; 
     if (res && res?.data?.success) {
       await signIn("credentials", {
         email: user.email, 

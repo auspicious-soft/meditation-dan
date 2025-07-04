@@ -168,6 +168,7 @@ const Page = () => {
         email: formData.email,
         firstName: formData.firstName,
         lastName: formData.lastName,
+        password: formData.password,
       };
 
       // You'll need to implement this service function
