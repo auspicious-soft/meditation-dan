@@ -116,7 +116,7 @@ const Page = () => {
     setDeleting(true); // Start loading for delete
     try {
       const response = await deleteCompany(`/admin/delete-company/${id}`);
-      if (response.data.success) {
+      if (response.status === 200 ) {
         toast.success("Company account deleted successfully", {
         duration: Infinity,
         position: "top-center",
@@ -130,16 +130,6 @@ const Page = () => {
         setTimeout(() => {
           window.location.href = "/admin/company-lists";
         }, 1000);
-      } else {
-        toast.error("Failed to delete company account", {
-                duration: Infinity,
-                position: "top-center",
-                action: {
-                  label: "OK",
-                  onClick: (toastId : any) => toast.dismiss(toastId),
-                },
-                closeButton: false,
-              });
       }
     } catch (error) {
       console.error("Error deleting company:", error);
