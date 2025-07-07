@@ -65,6 +65,11 @@ const data = {
       url: "/admin/faqs",
       icon: FAQIcon,
     },
+    {
+      title: "Terms",
+      url: "/admin/terms",
+      icon: FAQIcon,
+    },
     
   ],
 };

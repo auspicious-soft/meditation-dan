@@ -224,3 +224,15 @@ export const deleteMultipleUsers = async (route: string,payload:any) => {
   const axiosInstance = await getAxiosInstance();
   return axiosInstance.post(route,payload);
 };
+export const getAllCities = async (route: string,payload:any) => {
+  const axiosInstance = await getAxiosInstance()
+    return axiosInstance.get(route)
+};
+export const postTermsSettings = async (route:string ,payload: any) => {
+    const axiosInstance = await getAxiosInstance()
+    return axiosInstance.post(route, payload)
+}
+export const getTermsSettings = async (route: any) => {
+    const axiosInstance = await getAxiosInstance()
+    return axiosInstance.get(route)
+}
