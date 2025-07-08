@@ -45,14 +45,30 @@ const TermsPage = ({ name }: { name: string }) => {
       const response = await postTermsSettings("admin/settings", payload);
       
       if (response?.status === 200 || response?.status === 201) {
-        toast.success(`${name === "privacyPolicy" ? "Privacy Policy" :"Terms and Conditions"} updated successfully`);
+        toast.success(`${name === "privacyPolicy" ? "Privacy Policy" :"Terms and Conditions"} updated successfully`, {
+                      duration: Infinity,
+                      position: "top-center",
+                      action: {
+                        label: "OK",
+                        onClick: (toastId : any) => toast.dismiss(toastId),
+                      },
+                      closeButton: false,
+                    });
         mutate();
       } else {
         throw new Error(response?.data?.message || "Failed to update settings");
       }
     } catch (error) {
       console.error("Error saving settings:", error);
-      toast.error((error as any).message || "Something went wrong while saving");
+      toast.error((error as any).message || "Something went wrong while saving", {
+                    duration: Infinity,
+                    position: "top-center",
+                    action: {
+                      label: "OK",
+                      onClick: (toastId : any) => toast.dismiss(toastId),
+                    },
+                    closeButton: false,
+                  });
     } finally {
       setIsSaving(false);
     }
