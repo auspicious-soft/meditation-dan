@@ -75,7 +75,7 @@ const TermsPage = ({ name }: { name: string }) => {
   };
 
   return (
-    <div className="px-[30px] py-[30px] bg-white rounded-[20px]">
+    <div className="px-[30px] py-[30px] bg-[#1A3F70] rounded-[20px]">
       <TextEditor
         key={`editor-${name}`}
         value={description}
