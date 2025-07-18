@@ -85,7 +85,7 @@ const TermsPage = ({ name }: { name: string }) => {
         onClick={handleSave}
         disabled={isSaving}
         className={`mt-4 px-4 py-2 rounded-3xl text-white text-sm font-medium w-full ${
-          isSaving ? "bg-gray-400 cursor-not-allowed" : "bg-[#1A3F70] hover:bg-[#1A3F70]"
+          isSaving ? "bg-gray-400 cursor-not-allowed" : "bg-[#828a96] hover:bg-[#787e85]"
         }`}
       >
         {isSaving ? "Saving..." : "Save"}
