@@ -21,6 +21,8 @@ interface CompanyJoinRequest {
     _id: string;
     companyName: string;
     email: string;
+    firstName?:string;
+    lastName?:string;
     identifier?: string; // Add optional identifier property
   } | null;
   status: string;
@@ -48,6 +50,7 @@ const Page = () => {
     setIsLoading(true);
     try {
       const response = await getCompanyJoinRequest("/admin/company-join-requests");
+      console.log('response:', response);
       if (response.data.success) {
         setRequests(response.data.data);
       } else {
@@ -206,6 +209,8 @@ const Page = () => {
                   <TableRow className="text-white text-sm font-bold dm-sans border-0 border-b border-[#666666] hover:bg-transparent">
                     <TableHead className="py-4">ID</TableHead>
                     <TableHead className="py-4">Company Name</TableHead>
+                    <TableHead className="py-4">First Name</TableHead>
+                    <TableHead className="py-4">Last Name</TableHead>
                     <TableHead className="py-4">Email ID</TableHead>
                     <TableHead className="text-right py-4">Action</TableHead>
                   </TableRow>
@@ -244,6 +249,8 @@ const Page = () => {
                 <TableRow className="text-white text-sm font-bold dm-sans border-0 border-b border-[#666666] hover:bg-transparent">
                   <TableHead className="py-4">ID</TableHead>
                   <TableHead className="py-4">Company Name</TableHead>
+                  <TableHead className="py-4">First Name</TableHead>
+                  <TableHead className="py-4">Last Name</TableHead>
                   <TableHead className="py-4">Email ID</TableHead>
                   <TableHead className="text-right py-4">Action</TableHead>
                 </TableRow>
@@ -255,6 +262,12 @@ const Page = () => {
                       <TableCell className="py-4 w-1/4">{request.companyId?.identifier || "N/A"}</TableCell>
                       <TableCell className="py-4 w-1/4 whitespace-nowrap overflow-hidden overflow-ellipsis">
                         {request.companyId?.companyName || "N/A"}
+                      </TableCell>
+                      <TableCell className="py-4 w-1/4 whitespace-nowrap overflow-hidden overflow-ellipsis">
+                        {request.companyId?.firstName || "N/A"}
+                      </TableCell>
+                      <TableCell className="py-4 w-1/4 whitespace-nowrap overflow-hidden overflow-ellipsis">
+                        {request.companyId?.lastName || "N/A"}
                       </TableCell>
                       <TableCell className="py-4 w-1/4 whitespace-nowrap overflow-hidden overflow-ellipsis">
                         {request.companyId?.email || "N/A"}

@@ -23,6 +23,8 @@ interface Invoice {
   CompanyName: string;
   NameCustomer?: string;
   DueDate: string;
+  firstName?:string;
+  lastName?:string;
   Action: string;
   email?: string;
 }
@@ -41,6 +43,8 @@ interface ApiResponse {
       _id: string;
       identifier: string;
       companyName: string;
+      firstName: string;
+      lastName: string;
       email: string;
       createdAt: string;
     }[];
@@ -80,6 +84,8 @@ const DashBoard = () => {
             Id: user._id,
             identifier: user.identifier,
             CompanyName: user.companyName,
+            firstName:user.firstName,
+            lastName:user.lastName,
             NameCustomer: "N/A", // No customer name in response
             DueDate: user.createdAt, // Using createdAt as register date
             Action: "View", // Static action for button
@@ -329,6 +335,8 @@ const DashBoard = () => {
                     <TableRow className="text-white text-sm font-bold dm-sans border-0 border-b border-[#666666] hover:bg-transparent">
                       <TableHead className="w-[100px] py-4">ID</TableHead>
                       <TableHead className="py-4">Company Name</TableHead>
+                      <TableHead className="py-4">First Name</TableHead>
+                      <TableHead className="py-4">Last Name</TableHead>
                       <TableHead className="py-4">Email Id</TableHead>
                       <TableHead className="py-4">Register Date</TableHead>
                       <TableHead className="text-right py-4">Action</TableHead>
@@ -349,6 +357,8 @@ const DashBoard = () => {
                         >
                           <TableCell className="py-4">{invoice.identifier}</TableCell>
                           <TableCell className="py-4">{invoice.CompanyName}</TableCell>
+                          <TableCell className="py-4">{invoice.firstName}</TableCell>
+                          <TableCell className="py-4">{invoice.lastName}</TableCell>
                           <TableCell className="py-4">{invoice.email}</TableCell>
                           <TableCell className="py-4">
                             {new Date(invoice.DueDate).toLocaleDateString()}
