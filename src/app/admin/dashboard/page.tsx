@@ -220,6 +220,8 @@ const DashBoard = () => {
                     <TableRow className="text-white text-sm font-bold dm-sans border-0 border-b border-[#666666] hover:bg-transparent">
                       <TableHead className="w-[100px] py-4">ID</TableHead>
                       <TableHead className="py-4">Company Name</TableHead>
+                      <TableHead className="py-4">First Name</TableHead>
+                      <TableHead className="py-4">Last Name</TableHead>
                       <TableHead className="py-4">Email Id</TableHead>
                       <TableHead className="py-4">Register Date</TableHead>
                       <TableHead className="text-right py-4">Action</TableHead>
@@ -235,6 +237,12 @@ const DashBoard = () => {
                         >
                           <TableCell className="py-4">
                             <Skeleton width={80} height={16} />
+                          </TableCell>
+                          <TableCell className="py-4">
+                            <Skeleton width={150} height={16} />
+                          </TableCell>
+                          <TableCell className="py-4">
+                            <Skeleton width={150} height={16} />
                           </TableCell>
                           <TableCell className="py-4">
                             <Skeleton width={150} height={16} />
