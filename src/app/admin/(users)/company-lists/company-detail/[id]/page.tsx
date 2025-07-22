@@ -299,7 +299,7 @@ const Page = () => {
           <Button
             variant="destructive"
             className="bg-[#0B132B] hover:bg-[#0B132B] p-0 h-7 w-7 hover:cursor-pointer"
-            onClick={() => (window.location.href = "/admin/company-lists")}
+            onClick={router.back}
           >
             <ChevronLeft />
           </Button>

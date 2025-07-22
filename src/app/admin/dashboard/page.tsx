@@ -123,7 +123,7 @@ const DashBoard = () => {
   };
 
   const handleClick = (id: string) => {
-    router.push(`/admin/company-detail/${id}`);
+    router.push(`/admin/company-lists/company-detail/${id}`);
   };
 
   const handleReminderClick = async (id: string) => {
