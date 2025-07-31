@@ -8,7 +8,7 @@ import { loadStripe } from "@stripe/stripe-js";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 import { cancelSubscription } from "../../../services/company-services";
-import { Loader2 } from "lucide-react";
+import { ChevronDown, Loader2 } from "lucide-react";
 
 // Skeleton Loading Components (unchanged)
 const SkeletonCard = () => (
@@ -54,11 +54,11 @@ const SkeletonTable = () => (
   </div>
 );
 
-
 const SubscriptionModal = ({ isOpen, onClose, onContinue, planType, price, description, totalUsers }: any) => {
   const [numberOfUsers, setNumberOfUsers] = useState<number | null>(totalUsers === 0 ? 1 : totalUsers);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   useEffect(() => {
     if (totalUsers !== undefined) {
@@ -82,6 +82,7 @@ const SubscriptionModal = ({ isOpen, onClose, onContinue, planType, price, descr
   const handleClose = () => {
     setNumberOfUsers(totalUsers === 0 ? 1 : totalUsers);
     setErrorMessage(null);
+    setIsDropdownOpen(false);
     onClose();
   };
 
@@ -89,52 +90,30 @@ const SubscriptionModal = ({ isOpen, onClose, onContinue, planType, price, descr
 
   const totalAmount = numberOfUsers !== null ? (Number(price) * numberOfUsers).toFixed(2) : "0.00";
 
-  const handleNumberOfUsersChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const rawValue = e.target.value;
+  const handleNumberOfUsersChange = (value: number) => {
+    setNumberOfUsers(value);
+    setIsDropdownOpen(false);
 
-    // Handle empty input
-    if (rawValue === "") {
-      setNumberOfUsers(null);
-      setErrorMessage(null);
-      return;
-    }
-
-    // Remove leading zeros (in case of pasting)
-    const cleanedValue = rawValue.replace(/^0+/, "") || "";
-    if (cleanedValue === "") {
-      setNumberOfUsers(null);
+    // Validate the selection
+    if (value < 1) {
       setErrorMessage("Number of users cannot be less than 1.");
-      return;
-    }
-
-    const value = parseInt(cleanedValue, 10);
-    const clampedValue = isNaN(value) ? 0 : Math.max(value, 0);
-
-    setNumberOfUsers(clampedValue);
-
-    // Validate the input
-    if (clampedValue < 1) {
-      setErrorMessage("Number of users cannot be less than 1.");
-    } else if (clampedValue < totalUsers) {
+    } else if (value < totalUsers) {
       setErrorMessage(`Number of users cannot be less than the current ${totalUsers} users.`);
     } else {
       setErrorMessage(null);
     }
-
-    // Update the input field to reflect the cleaned value
-    e.target.value = cleanedValue;
   };
 
-  // Prevent typing "0" as the first digit
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    const input = e.currentTarget;
-    const currentValue = input.value;
-
-    // Block "0" when the input is empty or at the start
-    if (e.key === "0" && currentValue === "") {
-      e.preventDefault();
+  // Generate options from 1 to 250
+  const generateOptions = () => {
+    const options = [];
+    for (let i = 1; i <= 250; i++) {
+      options.push(i);
     }
+    return options;
   };
+
+  const options = generateOptions();
 
   return (
     <div className="fixed inset-0 bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 overflow-y-none">
@@ -155,15 +134,38 @@ const SubscriptionModal = ({ isOpen, onClose, onContinue, planType, price, descr
           </div>
           <div>
             <p className="self-stretch opacity-80 text-white text-base font-normal">Select number of users</p>
-            <div className="relative">
-              <input
-                type="number"
-                min="1"
-                value={numberOfUsers !== null ? numberOfUsers : ""}
-                onChange={handleNumberOfUsersChange}
-                onKeyDown={handleKeyDown} // Add onKeyDown handler
-                className="w-full mt-[15px] bg-slate-900 rounded-lg px-4 py-3.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1A3F70] appearance-none [&::-webkit-outer-spin-button]:hidden [&::-webkit-inner-spin-button]:hidden"
-              />
+            <div className="relative mt-[15px]">
+              <button
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                className="w-full bg-slate-900 rounded-lg px-4 py-3.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1A3F70] flex justify-between items-center"
+              >
+                <span>{numberOfUsers !== null ? numberOfUsers : "Select users"}</span>
+                <ChevronDown 
+                  size={16} 
+                  className={`transform transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} 
+                />
+              </button>
+              
+              {isDropdownOpen && (
+                <div className="absolute top-full left-0 right-0 mt-1 bg-slate-900 rounded-lg border border-gray-600 max-h-60 overflow-y-auto z-50">
+                  {options.map((option) => (
+                    <button
+                      key={option}
+                      onClick={() => handleNumberOfUsersChange(option)}
+                      className={`w-full px-4 py-2.5 text-left text-white text-sm hover:bg-slate-800 transition-colors ${
+                        numberOfUsers === option ? 'bg-[#1A3F70]' : ''
+                      } ${
+                        option < totalUsers ? 'opacity-50 cursor-not-allowed' : 'hover:cursor-pointer'
+                      }`}
+                      disabled={option < totalUsers}
+                    >
+                      {option}
+                      {option < totalUsers && ' (Below current users)'}
+                    </button>
+                  ))}
+                </div>
+              )}
+              
               {errorMessage && (
                 <p className="text-red-500 text-sm mt-1">{errorMessage}</p>
               )}
@@ -207,6 +209,158 @@ const SubscriptionModal = ({ isOpen, onClose, onContinue, planType, price, descr
     </div>
   );
 };
+// const SubscriptionModal = ({ isOpen, onClose, onContinue, planType, price, description, totalUsers }: any) => {
+//   const [numberOfUsers, setNumberOfUsers] = useState<number | null>(totalUsers === 0 ? 1 : totalUsers);
+//   const [isLoading, setIsLoading] = useState(false);
+//   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+//   useEffect(() => {
+//     if (totalUsers !== undefined) {
+//       const initialUsers = Math.max(totalUsers || 1, 1);
+//       setNumberOfUsers(initialUsers);
+//       setErrorMessage(null);
+//     }
+//   }, [totalUsers]);
+
+//   useEffect(() => {
+//     if (isOpen) {
+//       document.body.classList.add("no-scroll");
+//     } else {
+//       document.body.classList.remove("no-scroll");
+//     }
+//     return () => {
+//       document.body.classList.remove("no-scroll");
+//     };
+//   }, [isOpen]);
+
+//   const handleClose = () => {
+//     setNumberOfUsers(totalUsers === 0 ? 1 : totalUsers);
+//     setErrorMessage(null);
+//     onClose();
+//   };
+
+//   if (!isOpen) return null;
+
+//   const totalAmount = numberOfUsers !== null ? (Number(price) * numberOfUsers).toFixed(2) : "0.00";
+
+//   const handleNumberOfUsersChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+//     const rawValue = e.target.value;
+
+//     // Handle empty input
+//     if (rawValue === "") {
+//       setNumberOfUsers(null);
+//       setErrorMessage(null);
+//       return;
+//     }
+
+//     // Remove leading zeros (in case of pasting)
+//     const cleanedValue = rawValue.replace(/^0+/, "") || "";
+//     if (cleanedValue === "") {
+//       setNumberOfUsers(null);
+//       setErrorMessage("Number of users cannot be less than 1.");
+//       return;
+//     }
+
+//     const value = parseInt(cleanedValue, 10);
+//     const clampedValue = isNaN(value) ? 0 : Math.max(value, 0);
+
+//     setNumberOfUsers(clampedValue);
+
+//     // Validate the input
+//     if (clampedValue < 1) {
+//       setErrorMessage("Number of users cannot be less than 1.");
+//     } else if (clampedValue < totalUsers) {
+//       setErrorMessage(`Number of users cannot be less than the current ${totalUsers} users.`);
+//     } else {
+//       setErrorMessage(null);
+//     }
+
+//     // Update the input field to reflect the cleaned value
+//     e.target.value = cleanedValue;
+//   };
+
+//   // Prevent typing "0" as the first digit
+//   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+//     const input = e.currentTarget;
+//     const currentValue = input.value;
+
+//     // Block "0" when the input is empty or at the start
+//     if (e.key === "0" && currentValue === "") {
+//       e.preventDefault();
+//     }
+//   };
+
+//   return (
+//     <div className="fixed inset-0 bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 overflow-y-none">
+//       <div className="bg-[#1b2236] rounded-lg p-6 w-[50%] shadow-lg border border-gray-700">
+//         <h2 className="text-white text-xl font-semibold mb-6 text-center">Activate Your Plan</h2>
+//         <div className="space-y-4">
+//           <div className="flex justify-between items-center">
+//             <p className="opacity-80 text-white text-base font-normal font-['DM_Sans']">Type of plan</p>
+//             <div className="text-white text-2xl font-semibold">{planType}</div>
+//           </div>
+//           <div className="flex justify-between items-center">
+//             <p className="opacity-80 text-white text-base font-normal font-['DM_Sans']">Amount per user</p>
+//             <div className="text-white text-2xl font-semibold">${price}</div>
+//           </div>
+//           <div className="flex justify-between items-center">
+//             <p className="opacity-80 text-white text-base font-normal font-['DM_Sans']">Description</p>
+//             <div className="w-[50%] text-white text-sm font-normal">{description}</div>
+//           </div>
+//           <div>
+//             <p className="self-stretch opacity-80 text-white text-base font-normal">Select number of users</p>
+//             <div className="relative">
+//               <input
+//                 type="number"
+//                 min="1"
+//                 value={numberOfUsers !== null ? numberOfUsers : ""}
+//                 onChange={handleNumberOfUsersChange}
+//                 onKeyDown={handleKeyDown} // Add onKeyDown handler
+//                 className="w-full mt-[15px] bg-slate-900 rounded-lg px-4 py-3.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1A3F70] appearance-none [&::-webkit-outer-spin-button]:hidden [&::-webkit-inner-spin-button]:hidden"
+//               />
+//               {errorMessage && (
+//                 <p className="text-red-500 text-sm mt-1">{errorMessage}</p>
+//               )}
+//             </div>
+//           </div>
+//           <div className="flex justify-between items-center">
+//             <p className="opacity-80 text-white text-base font-normal">Total Amount</p>
+//             <div className="opacity-80 text-white text-base font-normal">
+//               ${price} * {numberOfUsers ?? "..."}
+//             </div>
+//           </div>
+//           <div className="flex justify-end">
+//             <hr className="w-[50%] opacity-[0.30]" />
+//           </div>
+//           <div className="self-stretch text-right text-white text-2xl font-semibold leading-10">
+//             ${totalAmount}
+//           </div>
+//         </div>
+//         <div className="w-full mt-6 flex justify-between gap-[12px]">
+//           <button
+//             onClick={handleClose}
+//             className="w-[45%] bg-[#1a3f70] text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition hover:cursor-pointer"
+//           >
+//             Cancel
+//           </button>
+//           <button
+//             onClick={() => {
+//               if (numberOfUsers !== null && !errorMessage && numberOfUsers >= totalUsers && numberOfUsers >= 1) {
+//                 setIsLoading(true);
+//                 onContinue(numberOfUsers);
+//                 setTimeout(() => setIsLoading(false), 2000);
+//               }
+//             }}
+//             className="w-full bg-[#14ab00] text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 transition flex items-center justify-center hover:cursor-pointer disabled:bg-green-700"
+//             disabled={isLoading || numberOfUsers === null || !!errorMessage}
+//           >
+//             {isLoading ? "Loading..." : "Continue"}
+//           </button>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
 const CancelSubscriptionModal = ({ isOpen, onClose, onConfirm, isLoading, userName }: { isOpen: boolean; onClose: () => void; onConfirm: () => void; isLoading: boolean, userName: string }) => {
   React.useEffect(() => {
     if (isOpen) {
