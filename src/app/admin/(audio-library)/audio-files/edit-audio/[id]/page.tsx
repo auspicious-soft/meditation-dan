@@ -814,7 +814,7 @@ const GetAudio = () => {
         <div>
           <Label className="text-gray-300 mb-3 block">Upload Song</Label>
           <div className="flex flex-wrap items-end gap-4 mb-4">
-            <Card className="w-44 h-44 flex items-center justify-center bg-[#0B132B] border-none rounded-lg relative">
+            <Card className="w-44 h-44 flex py-6 items-center justify-center bg-[#0B132B] border-none rounded-lg relative">
               {audioPreview ? (
                 <>
                   <audio
@@ -873,8 +873,8 @@ const GetAudio = () => {
                     src={imagePreview}
                     alt="Preview"
                     width={170}
-                    height={220}
-                    className="rounded-lg w-full h-full object-cover"
+                    height={250}
+                    className="rounded-lg w-full h-full object-contain"
                   />
                   <Button
                     variant="ghost"
