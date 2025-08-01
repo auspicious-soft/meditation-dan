@@ -527,7 +527,7 @@ const AddCollectionForm = () => {
       )}
 
       <p className="text-xs text-gray-500 mb-4">
-        Image Dimension: 250×200, 327×192, 172×101 Pixels
+        Image Dimension: 250×200 Pixels
       </p>
 
       <Button
