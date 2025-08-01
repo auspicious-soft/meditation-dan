@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { getAllAudiosStats, deleteAudio } from "@/services/admin-services";
+import { getAllAudiosStats, deleteAudio, getAllCollectionStats } from "@/services/admin-services";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -72,6 +72,24 @@ interface ApiResponse {
     pagination: Pagination;
   };
 }
+interface Collection {
+  _id: string;
+  name: string;
+  imageUrl: string;
+  levels: { _id: string; name: string; isActive: boolean; createdAt: string; updatedAt: string }[];
+  bestFor: { _id: string; name: string; isActive: boolean; createdAt: string; updatedAt: string };
+  description: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+interface CollectionsResponse {
+  success: boolean;
+  message: string;
+  data: {
+    collections: Collection[];
+  };
+}
 
 const AudioList = () => {
   const router = useRouter();
@@ -97,6 +115,10 @@ const AudioList = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [debouncedSearchQuery] = useDebounce(searchQuery.trim(), 500);
   const [deletingAudioId, setDeletingAudioId] = useState<string | null>(null);
+  const [loadingCollections, setLoadingCollections] = useState<boolean>(true);
+   const [collections, setCollections] = useState<Collection[]>([]);
+   const [selectedCollection, setSelectedCollection] = useState<string>('')
+   const[isCollectionOpen,setIsCollectionOpen]=useState<boolean>(false)
   const limit = 10;
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -150,7 +172,33 @@ const AudioList = () => {
         setIsLoadingBestFor(false);
       }
     };
+   const fetchCollections = async () => {
+      try {
+        setLoadingCollections(true);
+        const response = await getAllCollectionStats("/collection");
+        const data: CollectionsResponse = await response.data;
 
+        if (data.success) {
+          setCollections(data.data.collections);
+        } else {
+          throw new Error(data.message || "Failed to fetch collections");
+        }
+      } catch (error) {
+        console.error("Error fetching collections:", error);
+        toast.error("Failed to load collections", {
+                duration: Infinity,
+                position: "top-center",
+                action: {
+                  label: "OK",
+                  onClick: (toastId : any) => toast.dismiss(toastId),
+                },
+                closeButton: false,
+              });
+      } finally {
+        setLoadingCollections(false);
+      }
+    };
+    fetchCollections();
     fetchLevels();
     fetchBestForOptions();
   }, []);
@@ -178,6 +226,9 @@ const AudioList = () => {
         if (selectedBestFor.length > 0) {
           filters.bestFor = selectedBestFor.join(",");
         }
+        if (selectedCollection) {
+        filters.collectionType = selectedCollection; // Send single ID, not array
+      }
 
         if (debouncedSearchQuery) {
           filters.search = debouncedSearchQuery;
@@ -205,7 +256,7 @@ const AudioList = () => {
     return () => {
       stopCurrentAudio();
     };
-  }, [currentPage, selectedLevels, selectedBestFor, debouncedSearchQuery]);
+  }, [currentPage, selectedLevels, selectedBestFor, debouncedSearchQuery,selectedCollection]);
 
   const stopCurrentAudio = () => {
     if (audioRef.current) {
@@ -215,6 +266,13 @@ const AudioList = () => {
       setPlayingAudioId(null);
     }
   };
+  const addCollection = (collectionId:string) => {
+  setSelectedCollection(collectionId);
+};
+
+const removeCollection = () => {
+   setSelectedCollection('')
+};
 
   const getS3Url = (subPath: string) => {
     return `${process.env.NEXT_PUBLIC_AWS_BUCKET_PATH}${subPath}`;
@@ -404,7 +462,7 @@ const AudioList = () => {
       </div>
 
       {/* Filters */}
-      <div className="grid grid-cols-1 md:grid-cols-3 items-center md:gap-4 mb-2">
+      <div className="grid grid-cols-1 md:grid-cols-4 items-center md:gap-4 mb-2">
         <div>
           <Popover open={isLevelsOpen} onOpenChange={setIsLevelsOpen}>
             <PopoverTrigger asChild>
@@ -468,6 +526,62 @@ const AudioList = () => {
             </PopoverContent>
           </Popover>
         </div>
+
+        <div>
+  <Popover open={isCollectionOpen} onOpenChange={setIsCollectionOpen}>
+    <PopoverTrigger asChild>
+      <Button
+        variant="outline"
+        className="my-2 w-full bg-[#0B132B] hover:bg-[#0B132B] min-h-12 border-none text-white justify-between"
+      >
+        <div className="flex items-center w-full overflow-x-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800 p-1" style={{ maxHeight: '40px' }}>
+          {loadingCollections ? (
+            <Loader2 size={24} className="animate-spin text-white" />
+          ) : selectedCollection ? (
+            <span
+              className="bg-[#1B2236] text-white px-2 py-1 rounded-md flex items-center mr-2 whitespace-nowrap"
+            >
+              {collections.find(c => c._id === selectedCollection)?.name || selectedCollection}
+              <span
+                className="h-4 w-4 ml-1 flex items-center justify-center cursor-pointer text-gray-400 hover:text-white"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  removeCollection();
+                }}
+              >
+                <X size={12} />
+              </span>
+            </span>
+          ) : (
+            <span className="text-gray-400">Select Collection</span>
+          )}
+        </div>
+        <ChevronDown className="h-4 w-4" />
+      </Button>
+    </PopoverTrigger>
+    <PopoverContent className="bg-[#0B132B] border-gray-700 text-white p-0">
+      {loadingCollections ? (
+        <div className="p-2">
+          <Loader2 size={24} className="animate-spin text-white" />
+        </div>
+      ) : collections.length === 0 ? (
+        <div className="p-2 text-gray-500">No collections available</div>
+      ) : (
+        collections.map((collection) => (
+          <div
+            key={collection._id}
+            className={`p-2 hover:bg-[#1B2236] cursor-pointer ${
+              selectedCollection === collection._id ? "bg-[#1B2236]" : ""
+            }`}
+            onClick={() => addCollection(collection._id)}
+          >
+            {collection.name}
+          </div>
+        ))
+      )}
+    </PopoverContent>
+  </Popover>
+</div>
 
         <div>
           <Popover open={isBestForOpen} onOpenChange={setIsBestForOpen}>
