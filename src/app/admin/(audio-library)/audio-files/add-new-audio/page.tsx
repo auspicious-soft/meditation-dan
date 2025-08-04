@@ -347,7 +347,7 @@ const AddNewAudio = () => {
 
         const audioFileName = `${audio.name}`;
         const { signedUrl, key } = await generateSignedUrlForAudios(
-          songName,
+          "Audio",
           new Date().toISOString(),
           audioFileName,
           audio.type

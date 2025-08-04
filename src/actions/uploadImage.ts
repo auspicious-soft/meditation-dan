@@ -19,7 +19,7 @@ export async function uploadCompressedImage(formData: FormData) {
     .toBuffer();
 
   const { signedUrl, key } = await generateSignedUrlForAudioImage(
-    songName,
+    "Audio",
     new Date().toISOString(),
     imageFileName,
     "image/jpeg"
